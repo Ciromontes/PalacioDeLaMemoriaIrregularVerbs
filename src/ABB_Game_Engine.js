@@ -298,7 +298,7 @@ function buildContextQuestionsForGroup(group) {
   });
 }
 
-export default function ABBGameEngine({ onExit }) {
+export default function ABBGameEngine({ onExit, onViewGallery }) {
   const [stage, setStage] = useState('menu');
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
@@ -603,7 +603,18 @@ export default function ABBGameEngine({ onExit }) {
             <div className="bg-slate-900/50 p-5 rounded-xl border border-slate-700 mb-6">
               <p className="text-purple-200 font-bold mb-2">Cómo practicar (orden recomendado)</p>
               <ol className="text-slate-200 list-decimal list-inside space-y-2">
-                <li>Visita el palacio mental del grupo (imágenes absurdas).</li>
+                <li>
+                  Visita el palacio mental del grupo (imágenes absurdas).{' '}
+                  {typeof onViewGallery === 'function' && (
+                    <button
+                      type="button"
+                      onClick={onViewGallery}
+                      className="underline font-bold text-purple-200 hover:text-white"
+                    >
+                      Ir al Recorrido Mental
+                    </button>
+                  )}
+                </li>
                 <li>Repite 2 veces: <span className="font-mono">base - past - participle</span>.</li>
                 <li>Haz la práctica: Reconocimiento → Escritura → Intrusos → Contexto real.</li>
               </ol>

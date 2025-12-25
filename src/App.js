@@ -11,6 +11,7 @@ import {
 import AAAGameEngine from './AAA_Game_Engine';
 import ABAGameEngine from './ABA_Game_Engine';
 import ABBGameEngine from './ABB_Game_Engine';
+import ABCGameEngine, { groupsABC, storiesABC } from './ABC_Game_Engine';
 import { verbsABA } from './ABA_Game_Engine';
 import { groupsABB } from './ABB_Game_Engine';
 
@@ -210,7 +211,7 @@ const App = () => {
           { id: 1, name: "Palacio de los Espejos", pattern: "AAA", color: "bg-blue-600", desc: "Verbos que nunca cambian" },
           { id: 2, name: "Palacio Boomerang / Palacio del Yo-Yo", pattern: "ABA", color: "bg-green-600", desc: "Cambian en pasado, regresan en participio" },
           { id: 3, name: "Palacio de los Gemelos", pattern: "ABB", color: "bg-purple-600", desc: "Pasado y participio idénticos" },
-          { id: 4, name: "Palacio del Camaleón", pattern: "ABC", color: "bg-red-600", desc: "Cada verbo se transforma", locked: true },
+          { id: 4, name: "Palacio del Camaleón", pattern: "ABC", color: "bg-red-600", desc: "Cada verbo se transforma" },
         ].map((floor) => (
           <div
             key={floor.id}
@@ -242,7 +243,11 @@ const App = () => {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white p-8 rounded-3xl shadow-lg border-2 border-slate-200">
             <h2 className="text-3xl font-bold mb-2 text-slate-800">Recorrido Mental: Piso {selectedFloor}</h2>
-            <p className="text-slate-500 mb-8 italic">Visualiza estas escenas antes de comenzar el desafío.</p>
+            <p className="text-slate-500 mb-8 italic">
+              Visualiza estas escenas antes de comenzar el desafío.
+              {selectedFloor === 3 && ' Al final de la lista encontrarás el enlace para empezar a practicar.'}
+              {selectedFloor === 4 && ' Recomendación: lee primero la historia enlazada y repite en voz alta los sonidos de cada transformación (base → past → participle). Cada vez que pronuncias la transformación, activas conexiones mentales que te ayudan a recordar más rápido.'}
+            </p>
 
             {(selectedFloor === 2 || selectedFloor === 3) && (
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-6 text-slate-700">
@@ -313,6 +318,49 @@ const App = () => {
               </div>
             )}
 
+            {selectedFloor === 4 && (
+              <div className="space-y-6">
+                {groupsABC.map((g) => (
+                  <div key={g.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                    <h3 className="text-lg font-bold text-slate-800 mb-3">{g.title}</h3>
+                    <div className="text-slate-600 mb-3">{g.hint}</div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="text-xs uppercase tracking-widest text-slate-500">
+                            <th className="py-3 px-3 border-b">Presente</th>
+                            <th className="py-3 px-3 border-b">Pasado</th>
+                            <th className="py-3 px-3 border-b">Participio</th>
+                            <th className="py-3 px-3 border-b">Español</th>
+                            <th className="py-3 px-3 border-b">Imagen Absurda</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[...g.verbs].sort((a, b) => a.base.localeCompare(b.base)).map((v) => (
+                            <tr key={`${g.id}-${v.base}`} className="align-top">
+                              <td className="py-3 px-3 border-b font-black text-red-700">{capitalize(v.base)}</td>
+                              <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.past)}</td>
+                              <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.participle)}</td>
+                              <td className="py-3 px-3 border-b font-semibold text-slate-700">{v.es}</td>
+                              <td className="py-3 px-3 border-b text-slate-700">{v.image}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="mt-4 bg-white border border-slate-200 rounded-xl p-4">
+                      <p className="font-bold text-slate-800 mb-2">Historia enlazada</p>
+                      <p className="text-slate-700 whitespace-pre-line">{storiesABC[g.storyId]}</p>
+                      {(g.storyId === 'story3') && (
+                        <p className="text-slate-500 text-sm mt-2 italic">(Esta historia conecta los Grupos 3, 4 y 5.)</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {selectedFloor !== 2 && selectedFloor !== 3 && (
               <div className="grid gap-6">
                 {(mentalImages[`floor${selectedFloor}`] || []).map((img, i) => (
@@ -329,6 +377,7 @@ const App = () => {
                 if (selectedFloor === 1) setScene('GAME_AAA');
                 else if (selectedFloor === 2) setScene('GAME_ABA');
                 else if (selectedFloor === 3) setScene('GAME_ABB');
+                else if (selectedFloor === 4) setScene('GAME_ABC');
                 else setScene('MAP');
               }}
               className="mt-10 w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
@@ -355,7 +404,23 @@ const App = () => {
         <ABAGameEngine onExit={() => setScene('MAP')} />
       )}
       {scene === 'GAME_ABB' && (
-        <ABBGameEngine onExit={() => setScene('MAP')} />
+        <ABBGameEngine
+          onExit={() => setScene('MAP')}
+          onViewGallery={() => {
+            setSelectedFloor(3);
+            setScene('GALLERY');
+          }}
+        />
+      )}
+
+      {scene === 'GAME_ABC' && (
+        <ABCGameEngine
+          onExit={() => setScene('MAP')}
+          onViewGallery={() => {
+            setSelectedFloor(4);
+            setScene('GALLERY');
+          }}
+        />
       )}
     </div>
   );
