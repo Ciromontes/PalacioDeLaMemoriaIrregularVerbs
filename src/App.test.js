@@ -3,6 +3,7 @@ import App from './App';
 
 test('renders main menu title', () => {
   render(<App />);
-  expect(screen.getByText(/EL PALACIO DE LOS ESPEJOS/i)).toBeInTheDocument();
+  const titleElement = screen.getByText(/EL PALACIO DE LOS VERBOS IRREGULARES/i);
+  expect(titleElement).toBeInTheDocument();
   expect(screen.getByRole('button', { name: /Entrar al Palacio/i })).toBeInTheDocument();
 });

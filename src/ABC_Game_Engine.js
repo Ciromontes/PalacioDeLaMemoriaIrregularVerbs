@@ -1,0 +1,1058 @@
+import React, { useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  Brain,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Lightbulb,
+  RefreshCw,
+  Sparkles,
+  Trophy,
+  X,
+} from 'lucide-react';
+
+// PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
+// Regla: Las 3 formas son distintas.
+// Estrategia: Memoriza el sonido de cada transformación (base → past → participle).
+
+export const groupsABC = [
+  {
+    id: 'g1_iau',
+    title: 'Grupo 1: I–A–U (El canto de las vocales)',
+    hint: 'Patrón vocálico i → a → u. Muy musical: repite el cambio en voz alta.',
+    storyId: 'story1',
+    verbs: [
+      { base: 'begin', past: 'began', participle: 'begun', es: 'Empezar', image: 'Una carrera: disparo de salida, corredores, meta.' },
+      { base: 'drink', past: 'drank', participle: 'drunk', es: 'Beber', image: 'Una botella bebe de un vaso.' },
+      { base: 'ring', past: 'rang', participle: 'rung', es: 'Sonar', image: 'Un teléfono gigante baila al sonar.' },
+      { base: 'shrink', past: 'shrank', participle: 'shrunk', es: 'Encoger', image: 'Un gigante se vuelve enano al tocar un botón.' },
+      { base: 'sing', past: 'sang', participle: 'sung', es: 'Cantar', image: 'Un micrófono canta ópera solo.' },
+      { base: 'sink', past: 'sank', participle: 'sunk', es: 'Hundir', image: 'Un barco de papel se hunde en gelatina.' },
+      { base: 'stink', past: 'stank', participle: 'stunk', es: 'Apestar', image: 'Un zorrillo con perfume francés.' },
+      { base: 'swim', past: 'swam', participle: 'swum', es: 'Nadar', image: 'Un pez nada en el aire fuera de la pecera.' },
+    ],
+  },
+  {
+    id: 'g2a_nfinal_1',
+    title: 'Grupo 2 (Parte 1): N final (La transformación final) — Bite → Go',
+    hint: 'El participio termina en -n (bitten, broken, chosen...).',
+    storyId: 'story2a',
+    verbs: [
+      { base: 'bite', past: 'bit', participle: 'bitten', es: 'Morder', image: 'Una dentadura postiza muerde una manzana de metal.' },
+      { base: 'break', past: 'broke', participle: 'broken', es: 'Romper', image: 'Un vaso se rompe y se convierte en arena.' },
+      { base: 'choose', past: 'chose', participle: 'chosen', es: 'Elegir', image: 'Una mano gigante señala "tú" desde el cielo.' },
+      { base: 'drive', past: 'drove', participle: 'driven', es: 'Conducir', image: 'Un coche futurista se conduce solo con luces inteligentes.' },
+      { base: 'eat', past: 'ate', participle: 'eaten', es: 'Comer', image: 'Una hamburguesa se come a sí misma.' },
+      { base: 'fall', past: 'fell', participle: 'fallen', es: 'Caer', image: 'Una pluma cae y rompe el suelo como si fuera pesada.' },
+      { base: 'fly', past: 'flew', participle: 'flown', es: 'Volar', image: 'Pingüinos con propulsores vuelan en formación.' },
+      { base: 'forbid', past: 'forbade', participle: 'forbidden', es: 'Prohibir', image: 'Un robot policía pone cinta amarilla de "NO PASAR".' },
+      { base: 'forget', past: 'forgot', participle: 'forgotten', es: 'Olvidar', image: 'Una nube borra la cara de una estatua.' },
+      { base: 'forgive', past: 'forgave', participle: 'forgiven', es: 'Perdonar', image: 'Dos tanques de guerra se perdonan y se abrazan.' },
+      { base: 'freeze', past: 'froze', participle: 'frozen', es: 'Congelar', image: 'Un lanzallamas congela disparando hielo azul sobre el río.' },
+      { base: 'give', past: 'gave', participle: 'given', es: 'Dar', image: 'Un río de luz da regalos flotantes que llegan solos a las manos.' },
+      { base: 'go', past: 'went', participle: 'gone', es: 'Ir', image: 'Un cohete despega y desaparece en un agujero negro.' },
+    ],
+  },
+  {
+    id: 'g2b_nfinal_2',
+    title: 'Grupo 2 (Parte 2): N final (La transformación final) — Grow → Write',
+    hint: 'Participios en -n y escenas conectadas (grown, known, written...).',
+    storyId: 'story2b',
+    verbs: [
+      { base: 'grow', past: 'grew', participle: 'grown', es: 'Crecer', image: 'Una planta crece tan rápido que rompe el techo.' },
+      { base: 'hide', past: 'hid', participle: 'hidden', es: 'Esconderse', image: 'Un camaleón cambia de color y desaparece.' },
+      { base: 'know', past: 'knew', participle: 'known', es: 'Saber', image: 'Un libro gigante abre sus páginas y responde preguntas solo.' },
+      { base: 'lie', past: 'lay', participle: 'lain', es: 'Yacer/Tumbarse', image: 'Una estatua se acuesta a dormir una siesta.' },
+      { base: 'ride', past: 'rode', participle: 'ridden', es: 'Montar', image: 'Un vaquero monta un tiranosaurio rex.' },
+      { base: 'rise', past: 'rose', participle: 'risen', es: 'Levantarse', image: 'El sol sale de noche y es azul.' },
+      { base: 'see', past: 'saw', participle: 'seen', es: 'Ver', image: 'Un telescopio con ruedas pasea por la calle y señala cosas con un láser.' },
+      { base: 'show', past: 'showed', participle: 'shown', es: 'Mostrar', image: 'Un pavo real despliega una pantalla de cine en su cola.' },
+      { base: 'tear', past: 'tore', participle: 'torn', es: 'Rasgar', image: 'Un papel se rasga y grita.' },
+      { base: 'wake', past: 'woke', participle: 'woken', es: 'Despertar', image: 'Un reloj despertador te tira un balde de agua.' },
+      { base: 'wear', past: 'wore', participle: 'worn', es: 'Llevar puesto', image: 'Un maniquí se pone 10 abrigos a la vez.' },
+      { base: 'write', past: 'wrote', participle: 'written', es: 'Escribir', image: 'Una pluma escribe sola en el aire con tinta de neón.' },
+    ],
+  },
+  {
+    id: 'g3_oeo',
+    title: 'Grupo 3: O–E–O (Cambio con “o” central)',
+    hint: 'Spoke / spoken, stole / stolen: escucha el “o” en el cambio.',
+    storyId: 'story3',
+    verbs: [
+      { base: 'speak', past: 'spoke', participle: 'spoken', es: 'Hablar', image: 'Un loro da un discurso presidencial.' },
+      { base: 'steal', past: 'stole', participle: 'stolen', es: 'Robar', image: 'Un ladrón invisible se lleva la luna.' },
+    ],
+  },
+  {
+    id: 'g4_ow_ew_own',
+    title: 'Grupo 4: -ow → -ew → -own (Transformación en vuelo)',
+    hint: 'Ow → ew → own (throw–threw–thrown).',
+    storyId: 'story3',
+    verbs: [
+      { base: 'throw', past: 'threw', participle: 'thrown', es: 'Lanzar', image: 'Un brazo mecánico lanza pelotas de béisbol al espacio.' },
+      { base: 'grow', past: 'grew', participle: 'grown', es: 'Crecer', image: 'Una planta crece tan rápido que rompe el techo.' },
+      { base: 'know', past: 'knew', participle: 'known', es: 'Saber', image: 'Un libro gigante abre sus páginas y responde preguntas solo.' },
+    ],
+  },
+  {
+    id: 'g5_ake_ook_aken',
+    title: 'Grupo 5: -ake → -ook → -aken (Los agitadores)',
+    hint: 'Ake → ook → aken (take–took–taken).',
+    storyId: 'story3',
+    verbs: [
+      { base: 'shake', past: 'shook', participle: 'shaken', es: 'Agitar', image: 'Una licuadora gigante agita un edificio entero.' },
+      { base: 'take', past: 'took', participle: 'taken', es: 'Tomar', image: 'Una garra de máquina de peluches toma un coche.' },
+    ],
+  },
+];
+
+export const storiesABC = {
+  story1:
+    'El usuario entra al laboratorio y escucha un disparo de salida: la carrera empieza (begin–began–begun). De repente, una botella gigante bebe de un vaso (drink–drank–drunk). Un teléfono gigante suena y baila (ring–rang–rung). Un gigante toca un botón y se encoge hasta volverse enano (shrink–shrank–shrunk). En el centro, un micrófono canta ópera solo (sing–sang–sung). Un barco de papel se hunde en gelatina (sink–sank–sunk). El aire se llena de un olor extraño: un zorrillo con perfume francés apesta (stink–stank–stunk). Finalmente, un pez nada en el aire fuera de la pecera (swim–swam–swum).',
+  story2a:
+    'El usuario entra a la sala y ve cómo una dentadura postiza muerde una manzana de metal (bite–bit–bitten). A su lado, un vaso cercano se rompe y se convierte en arena (break–broke–broken). Del techo baja una mano gigante que lo elige a él (choose–chose–chosen). En la esquina aparece un coche futurista que se conduce solo con luces inteligentes (drive–drove–driven), y el usuario decide subirse.\nDe repente, en el asiento del copiloto hay una hamburguesa que se come a sí misma (eat–ate–eaten). Una pluma cae sobre el parabrisas y lo rompe como si fuera pesada (fall–fell–fallen). Por el vidrio roto, desde los puestos traseros, salen pingüinos con propulsores que vuelan en formación (fly–flew–flown).\nEl coche avanza y un robot policía aparece frente a él, prohíbe el paso colocando cinta amarilla (forbid–forbade–forbidden). El usuario mira por el retrovisor y ve una nube que olvida y borra la cara de una estatua (forget–forgot–forgotten). En esas mismas nubes, dos tanques de guerra se perdonan y se abrazan (forgive–forgave–forgiven).\nEl auto lo lleva hacia un río, y el usuario usa un lanzallamas que congela el agua disparando hielo azul (freeze–froze–frozen). El río congelado da regalos flotantes que llegan solos a sus manos (give–gave–given). Finalmente, el coche se transforma en un cohete que va y desaparece en un agujero negro (go–went–gone).',
+  story2b:
+    'El usuario avanza por la sala y observa cómo una planta crece tan rápido que rompe el techo (grow–grew–grown). Entre las ramas aparece un camaleón que se esconde cambiando de color y mimetizándose en el árbol (hide–hid–hidden). Intrigado por lo que sucede, el usuario se acerca a un libro gigante que sabe y le responde todas las preguntas (know–knew–known).\nMás adelante, encuentra una estatua que yace acostada tomando una siesta (lie–lay–lain). Por una ventana, alcanza a ver a un vaquero que monta un tiranosaurio rex rugiente (ride–rode–ridden). De repente, un sol azul se levanta en plena noche, bostezando mientras ilumina la sala (rise–rose–risen).\nEl usuario sigue caminando y se topa con un telescopio con ruedas que ve todo y señala con un láser (see–saw–seen). El láser apunta hacia un pavo real que despliega su cola y muestra una pantalla de cine brillante, acompañada de un sonido al abrir sus plumas (show–showed–shown). En la pantalla aparece un papel que se rasga y grita como si tuviera vida (tear–tore–torn).\nDe pronto, suena un reloj despertador y el usuario despierta porque le han tirado un balde de agua (wake–woke–woken). Confundido, nota que está sudando porque lleva puesto diez abrigos a la vez (wear–wore–worn). Finalmente, toma una pluma mágica que escribe sola en el aire con tinta de neón, registrando todo este sueño increible (write–wrote–written).',
+  story3:
+    'En la última sala del laboratorio, un loro habla dando un discurso presidencial (speak–spoke–spoken). De repente, un ladrón invisible roba la luna (steal–stole–stolen). Un brazo mecánico lanza pelotas de béisbol al espacio (throw–threw–thrown). A su lado, una planta crece tan rápido que rompe el techo (grow–grew–grown). Un libro gigante sabe y revela secretos (know–knew–known). En el centro, una licuadora gigante agita un edificio entero (shake–shook–shaken). Finalmente, una garra de máquina de peluches toma un coche (take–took–taken).',
+};
+
+function buildLetterPattern(word) {
+  const w = (word ?? '').trim();
+  if (w.length <= 1) return w;
+  if (w.length === 2) return `${w[0]} ${w[1]}`;
+  const middle = Array.from({ length: w.length - 2 }, () => '_').join(' ');
+  return `${w[0]} ${middle} ${w[w.length - 1]}`;
+}
+
+const intruders = [
+  { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
+  { base: 'cut', past: 'cut', participle: 'cut', es: 'cortar', pattern: 'AAA' },
+  { base: 'come', past: 'came', participle: 'come', es: 'venir', pattern: 'ABA' },
+  { base: 'run', past: 'ran', participle: 'run', es: 'correr', pattern: 'ABA' },
+  { base: 'build', past: 'built', participle: 'built', es: 'construir', pattern: 'ABB' },
+  { base: 'meet', past: 'met', participle: 'met', es: 'conocer', pattern: 'ABB' },
+];
+
+function shuffle(array) {
+  return [...array].sort(() => Math.random() - 0.5);
+}
+
+function fillBlank(sentence, word) {
+  return sentence.replace('___', word);
+}
+
+function getContextTemplates() {
+  // Oraciones profesionales/educativas.
+  // Importante: el español debe ser natural y NO debe insertar el verbo en inglés.
+  return {
+    begin: {
+      past: { en: 'Yesterday the course ___ with a short diagnostic test.', esFull: 'Ayer el curso comenzó con una prueba diagnóstica breve.' },
+      perf: { en: 'This week the project has ___ with clear goals and roles.', esFull: 'Esta semana el proyecto ha comenzado con objetivos y roles claros.' },
+    },
+    drink: {
+      past: { en: 'Yesterday I ___ water during the break.', esFull: 'Ayer bebí agua durante el descanso.' },
+      perf: { en: 'Today I have ___ enough water to stay focused.', esFull: 'Hoy he bebido suficiente agua para mantenerme concentrado.' },
+    },
+    ring: {
+      past: { en: 'Yesterday the phone ___ during the meeting.', esFull: 'Ayer el teléfono sonó durante la reunión.' },
+      perf: { en: 'This morning my phone has ___ three times already.', esFull: 'Esta mañana mi teléfono ha sonado tres veces.' },
+    },
+    shrink: {
+      past: { en: 'Yesterday the fabric ___ after the first wash.', esFull: 'Ayer la tela encogió después del primer lavado.' },
+      perf: { en: 'This month the budget has ___ due to new constraints.', esFull: 'Este mes el presupuesto se ha reducido debido a nuevas restricciones.' },
+    },
+    sing: {
+      past: { en: 'Yesterday the choir ___ at the end of the ceremony.', esFull: 'Ayer el coro cantó al final de la ceremonia.' },
+      perf: { en: 'This semester the group has ___ in several events.', esFull: 'Este semestre el grupo ha cantado en varios eventos.' },
+    },
+    sink: {
+      past: { en: 'Yesterday the boat ___ after taking on water.', esFull: 'Ayer el barco se hundió después de entrarle agua.' },
+      perf: { en: 'This year several small boats have ___ in the storm season.', esFull: 'Este año varias embarcaciones pequeñas se han hundido en la temporada de tormentas.' },
+    },
+    stink: {
+      past: { en: 'Yesterday the trash ___ because the bag tore.', esFull: 'Ayer la basura apestó porque la bolsa se rompió.' },
+      perf: { en: 'This week the hallway has ___ due to a plumbing issue.', esFull: 'Esta semana el pasillo ha olido mal por un problema de plomería.' },
+    },
+    swim: {
+      past: { en: 'Yesterday I ___ for thirty minutes after work.', esFull: 'Ayer nadé treinta minutos después del trabajo.' },
+      perf: { en: 'This month I have ___ regularly to improve my stamina.', esFull: 'Este mes he nadado con regularidad para mejorar mi resistencia.' },
+    },
+
+    bite: {
+      past: { en: 'Yesterday a dog ___ my shoe near the entrance.', esFull: 'Ayer un perro mordió mi zapato cerca de la entrada.' },
+      perf: { en: 'This week a mosquito has ___ me twice at night.', esFull: 'Esta semana un mosquito me ha picado dos veces por la noche.' },
+    },
+    break: {
+      past: { en: 'Yesterday the glass ___ during transport.', esFull: 'Ayer el vaso se rompió durante el transporte.' },
+      perf: { en: 'This quarter the team has ___ the process into clear steps.', esFull: 'Este trimestre el equipo ha desglosado el proceso en pasos claros.' },
+    },
+    choose: {
+      past: { en: 'Yesterday we ___ a vendor after comparing proposals.', esFull: 'Ayer elegimos a un proveedor después de comparar propuestas.' },
+      perf: { en: 'This week we have ___ a simpler approach for the project.', esFull: 'Esta semana hemos elegido un enfoque más simple para el proyecto.' },
+    },
+    drive: {
+      past: { en: 'Yesterday I ___ to the client site for a workshop.', esFull: 'Ayer conduje hasta las instalaciones del cliente para un taller.' },
+      perf: { en: 'This month I have ___ to multiple sites for training.', esFull: 'Este mes he conducido a varios lugares por capacitación.' },
+    },
+    eat: {
+      past: { en: 'Yesterday we ___ lunch between sessions.', esFull: 'Ayer comimos almuerzo entre sesiones.' },
+      perf: { en: 'Today I have ___ a balanced meal to keep my energy steady.', esFull: 'Hoy he comido una comida equilibrada para mantener mi energía estable.' },
+    },
+    fall: {
+      past: { en: 'Yesterday the temperature ___ sharply in the evening.', esFull: 'Ayer la temperatura cayó bruscamente por la tarde.' },
+      perf: { en: 'This week sales have ___ after the holiday peak.', esFull: 'Esta semana las ventas han bajado después del pico navideño.' },
+    },
+    fly: {
+      past: { en: 'Yesterday I ___ to another city for a conference.', esFull: 'Ayer volé a otra ciudad para una conferencia.' },
+      perf: { en: 'This year I have ___ several times for work.', esFull: 'Este año he volado varias veces por trabajo.' },
+    },
+    forbid: {
+      past: { en: 'Yesterday the instructor ___ phones during the exam.', esFull: 'Ayer el instructor prohibió los teléfonos durante el examen.' },
+      perf: { en: 'This term the school has ___ late submissions without approval.', esFull: 'Este periodo la institución ha prohibido entregas tardías sin autorización.' },
+    },
+    forget: {
+      past: { en: 'Yesterday I ___ my access card at home.', esFull: 'Ayer olvidé mi tarjeta de acceso en casa.' },
+      perf: { en: 'This month I have ___ fewer tasks by using reminders.', esFull: 'Este mes he olvidado menos tareas gracias a los recordatorios.' },
+    },
+    forgive: {
+      past: { en: 'Yesterday I ___ a minor mistake and moved on.', esFull: 'Ayer perdoné un error menor y seguí adelante.' },
+      perf: { en: 'This year the team has ___ disagreements to keep collaboration strong.', esFull: 'Este año el equipo ha perdonado desacuerdos para mantener una buena colaboración.' },
+    },
+    freeze: {
+      past: { en: 'Yesterday the screen ___ during the presentation.', esFull: 'Ayer la pantalla se congeló durante la presentación.' },
+      perf: { en: 'This week the app has ___ twice and we investigated the cause.', esFull: 'Esta semana la aplicación se ha quedado congelada dos veces y revisamos la causa.' },
+    },
+    give: {
+      past: { en: 'Yesterday the coach ___ clear feedback after practice.', esFull: 'Ayer el entrenador dio retroalimentación clara después de la práctica.' },
+      perf: { en: 'This week the mentor has ___ useful advice to new staff.', esFull: 'Esta semana el mentor ha dado consejos útiles al personal nuevo.' },
+    },
+    go: {
+      past: { en: 'Yesterday we ___ to the lab for a demonstration.', esFull: 'Ayer fuimos al laboratorio para una demostración.' },
+      perf: { en: 'This month I have ___ to several meetings with the team.', esFull: 'Este mes he ido a varias reuniones con el equipo.' },
+    },
+
+    grow: {
+      past: { en: 'Yesterday the company ___ after launching the new service.', esFull: 'Ayer la empresa creció tras lanzar el nuevo servicio.' },
+      perf: { en: 'This year the team has ___ in confidence and skills.', esFull: 'Este año el equipo ha crecido en confianza y habilidades.' },
+    },
+    hide: {
+      past: { en: 'Yesterday we ___ the backup key in a secure place.', esFull: 'Ayer escondimos la llave de respaldo en un lugar seguro.' },
+      perf: { en: 'This week the team has ___ sensitive data to protect privacy.', esFull: 'Esta semana el equipo ha ocultado datos sensibles para proteger la privacidad.' },
+    },
+    know: {
+      past: { en: 'Yesterday I ___ the answer after reviewing the notes.', esFull: 'Ayer supe la respuesta después de repasar las notas.' },
+      perf: { en: 'This week I have ___ the topic better after practice.', esFull: 'Esta semana he entendido mejor el tema gracias a la práctica.' },
+    },
+    lie: {
+      past: { en: 'Yesterday the document ___ on the desk all day.', esFull: 'Ayer el documento yació sobre el escritorio todo el día.' },
+      perf: { en: 'This week the device has ___ unused in storage.', esFull: 'Esta semana el dispositivo ha permanecido guardado sin usarse.' },
+    },
+    ride: {
+      past: { en: 'Yesterday I ___ the bus to the training center.', esFull: 'Ayer tomé el autobús hasta el centro de capacitación.' },
+      perf: { en: 'This month I have ___ the subway to avoid traffic.', esFull: 'Este mes he usado el metro para evitar el tráfico.' },
+    },
+    rise: {
+      past: { en: 'Yesterday prices ___ after the announcement.', esFull: 'Ayer los precios subieron después del anuncio.' },
+      perf: { en: 'This year costs have ___ due to inflation.', esFull: 'Este año los costos han aumentado por la inflación.' },
+    },
+    see: {
+      past: { en: 'Yesterday I ___ the error immediately during testing.', esFull: 'Ayer vi el error de inmediato durante las pruebas.' },
+      perf: { en: 'This week we have ___ improvements in the results.', esFull: 'Esta semana hemos visto mejoras en los resultados.' },
+    },
+    show: {
+      past: { en: 'Yesterday the trainer ___ the correct steps on the screen.', esFull: 'Ayer el instructor mostró los pasos correctos en la pantalla.' },
+      perf: { en: 'This month the team has ___ progress in every session.', esFull: 'Este mes el equipo ha mostrado avances en cada sesión.' },
+    },
+    tear: {
+      past: { en: 'Yesterday the paper ___ when I removed the label.', esFull: 'Ayer el papel se rasgó cuando quité la etiqueta.' },
+      perf: { en: 'This week the old banner has ___ in several places.', esFull: 'Esta semana la pancarta vieja se ha rasgado en varias partes.' },
+    },
+    wake: {
+      past: { en: 'Yesterday I ___ early to prepare for the exam.', esFull: 'Ayer me desperté temprano para prepararme para el examen.' },
+      perf: { en: 'This week I have ___ earlier to study consistently.', esFull: 'Esta semana me he despertado más temprano para estudiar con constancia.' },
+    },
+    wear: {
+      past: { en: 'Yesterday I ___ formal clothes for the presentation.', esFull: 'Ayer llevé ropa formal para la presentación.' },
+      perf: { en: 'This month I have ___ safety gear during all site visits.', esFull: 'Este mes he usado equipo de seguridad en todas las visitas.' },
+    },
+    write: {
+      past: { en: 'Yesterday I ___ a short summary after the meeting.', esFull: 'Ayer escribí un resumen breve después de la reunión.' },
+      perf: { en: 'This week I have ___ three reports for the project.', esFull: 'Esta semana he escrito tres informes para el proyecto.' },
+    },
+
+    speak: {
+      past: { en: 'Yesterday the speaker ___ clearly during the workshop.', esFull: 'Ayer el ponente habló con claridad durante el taller.' },
+      perf: { en: 'This month I have ___ with the team about priorities.', esFull: 'Este mes he hablado con el equipo sobre prioridades.' },
+    },
+    steal: {
+      past: { en: 'Yesterday someone ___ a laptop from the office.', esFull: 'Ayer alguien robó una laptop de la oficina.' },
+      perf: { en: 'This year thieves have ___ several devices in the area.', esFull: 'Este año han robado varios dispositivos en la zona.' },
+    },
+
+    throw: {
+      past: { en: 'Yesterday the player ___ the ball too far.', esFull: 'Ayer el jugador lanzó la pelota demasiado lejos.' },
+      perf: { en: 'This week I have ___ away outdated documents securely.', esFull: 'Esta semana he tirado documentos antiguos de forma segura.' },
+    },
+
+    shake: {
+      past: { en: 'Yesterday the building ___ during the earthquake drill.', esFull: 'Ayer el edificio se sacudió durante el simulacro de sismo.' },
+      perf: { en: 'This week the news has ___ everyone’s confidence a bit.', esFull: 'Esta semana las noticias han sacudido un poco la confianza de todos.' },
+    },
+    take: {
+      past: { en: 'Yesterday I ___ notes during the training.', esFull: 'Ayer tomé apuntes durante la capacitación.' },
+      perf: { en: 'This week I have ___ a short course on safety.', esFull: 'Esta semana he tomado un curso corto de seguridad.' },
+    },
+  };
+}
+
+function buildContextQuestionsForGroup(group) {
+  const templates = getContextTemplates();
+
+  return group.verbs.flatMap((verb) => {
+    const tpl = templates[verb.base];
+
+    const pastEn = tpl?.past?.en ?? 'Yesterday I ___ the task.';
+    const pastEsFull = tpl?.past?.esFull ?? 'Ayer realicé la tarea.';
+    const perfEn = tpl?.perf?.en ?? 'This week I have ___ the task.';
+    const perfEsFull = tpl?.perf?.esFull ?? 'Esta semana he realizado la tarea.';
+
+    return [
+      {
+        verb,
+        kind: 'past',
+        esFull: pastEsFull,
+        en: pastEn,
+        answer: verb.past,
+        label: 'Past Simple (ABC)',
+        note: `Past Simple (ABC): ${verb.base} → ${verb.past}`,
+      },
+      {
+        verb,
+        kind: 'perf',
+        esFull: perfEsFull,
+        en: perfEn,
+        answer: verb.participle,
+        label: 'Present Perfect (ABC)',
+        note: `Present Perfect (ABC): has/have ${verb.participle}`,
+      },
+    ];
+  });
+}
+
+export default function ABCGameEngine({ onExit, onViewGallery }) {
+  const [stage, setStage] = useState('menu');
+  const [selectedGroupId, setSelectedGroupId] = useState(null);
+
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [totalAnswered, setTotalAnswered] = useState(0);
+  const [waitingForNext, setWaitingForNext] = useState(false);
+  const [feedback, setFeedback] = useState('');
+
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showHint, setShowHint] = useState(false);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [selectedIntruders, setSelectedIntruders] = useState([]);
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
+
+  const [questions, setQuestions] = useState([]);
+
+  const [palaceTitle, setPalaceTitle] = useState('');
+  const [palaceList, setPalaceList] = useState([]);
+  const [palaceView, setPalaceView] = useState(0);
+
+  const selectedGroup = useMemo(() => groupsABC.find((g) => g.id === selectedGroupId) ?? null, [selectedGroupId]);
+
+  const resetRoundState = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setTotalAnswered(0);
+    setWaitingForNext(false);
+    setFeedback('');
+    setUserAnswer('');
+    setShowHint(false);
+    setSelectedAnswer(null);
+    setSelectedIntruders([]);
+    setHintLevel4(0);
+  };
+
+  const openPalaceAll = () => {
+    const all = groupsABC.flatMap((g) => g.verbs);
+    setPalaceTitle('Galería Mental (ABC) — Todos los grupos');
+    setPalaceList(all);
+    setPalaceView(0);
+    setStage('palace');
+  };
+
+  const openPalaceGroup = (group) => {
+    setPalaceTitle(`Galería Mental (ABC) — ${group.title}`);
+    setPalaceList(group.verbs);
+    setPalaceView(0);
+    setStage('palace');
+  };
+
+  const startGroup = (groupId) => {
+    setSelectedGroupId(groupId);
+    resetRoundState();
+    setStage('group_intro');
+  };
+
+  const initLevel = (level) => {
+    if (!selectedGroup) return;
+    resetRoundState();
+    setStage(level);
+
+    if (level === 'level1') {
+      const selected = shuffle(selectedGroup.verbs);
+      const levelQs = selected.map((verb) => {
+        const wrongOptions = shuffle(selectedGroup.verbs.filter((v) => v.base !== verb.base)).slice(0, 3);
+        const options = shuffle([...wrongOptions.map((v) => v.es), verb.es]);
+        return { verb, correct: verb.es, options };
+      });
+      setQuestions(levelQs);
+    }
+
+    if (level === 'level2') {
+      setQuestions(shuffle(selectedGroup.verbs));
+    }
+
+    if (level === 'level3') {
+      const rounds = [];
+      const roundsCount = Math.max(3, Math.min(6, Math.ceil(selectedGroup.verbs.length / 4)));
+      for (let i = 0; i < roundsCount; i++) {
+        const abcCards = selectedGroup.verbs.map((v) => ({ ...v, pattern: 'ABC' }));
+        const picks = shuffle([...abcCards, ...intruders]).slice(0, 6);
+        const intr = picks.filter((v) => v.pattern !== 'ABC').map((v) => v.base);
+        rounds.push({ verbs: picks, intruders: intr });
+      }
+      setQuestions(rounds);
+    }
+
+    if (level === 'level4') {
+      const all = buildContextQuestionsForGroup(selectedGroup);
+      setQuestions(shuffle(all));
+    }
+  };
+
+  const handleNext = () => {
+    setFeedback('');
+    setWaitingForNext(false);
+    setUserAnswer('');
+    setShowHint(false);
+    setSelectedAnswer(null);
+    setSelectedIntruders([]);
+    setHintLevel4(0);
+
+    if (currentQuestion < questions.length - 1) setCurrentQuestion((prev) => prev + 1);
+    else setStage('results');
+  };
+
+  const handlePrevious = () => {
+    if (currentQuestion > 0) {
+      setCurrentQuestion((prev) => prev - 1);
+      setFeedback('');
+      setWaitingForNext(false);
+      setUserAnswer('');
+      setShowHint(false);
+      setSelectedAnswer(null);
+      setSelectedIntruders([]);
+      setHintLevel4(0);
+    }
+  };
+
+  const checkAnswerLevel1 = (answer) => {
+    const q = questions[currentQuestion];
+    const isCorrect = answer === q.correct;
+    setSelectedAnswer(answer);
+    setTotalAnswered((prev) => prev + 1);
+
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      setFeedback(`✅ ¡Correcto! ${q.verb.base} = ${q.correct}. (ABC)`);
+    } else {
+      setFeedback(`❌ No. ${q.verb.base} significa "${q.correct}".\nImagen absurda: ${q.verb.image}`);
+    }
+    setWaitingForNext(true);
+  };
+
+  const checkLevel2Answer = () => {
+    const q = questions[currentQuestion];
+    const isCorrect = userAnswer.toLowerCase().trim() === q.base;
+    setTotalAnswered((prev) => prev + 1);
+
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      setFeedback(`✅ Bien. ${q.base} - ${q.past} - ${q.participle} (ABC)`);
+    } else {
+      setFeedback(`❌ Era "${q.base}".\nFormas: ${q.base} - ${q.past} - ${q.participle}`);
+    }
+    setWaitingForNext(true);
+  };
+
+  const toggleIntruder = (verbBase) => {
+    if (waitingForNext) return;
+    setSelectedIntruders((prev) =>
+      prev.includes(verbBase) ? prev.filter((v) => v !== verbBase) : [...prev, verbBase]
+    );
+  };
+
+  const checkIntruders = () => {
+    const q = questions[currentQuestion];
+    const correct = [...q.intruders].sort();
+    const user = [...selectedIntruders].sort();
+    const isCorrect = JSON.stringify(correct) === JSON.stringify(user);
+
+    setTotalAnswered((prev) => prev + 1);
+
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      setFeedback('✅ Perfecto. Identificaste los que NO son ABC.');
+    } else {
+      const missing = correct.filter((x) => !user.includes(x));
+      setFeedback(`❌ Te faltó marcar: ${missing.join(', ')}.`);
+    }
+    setWaitingForNext(true);
+  };
+
+  const checkLevel4Answer = () => {
+    const q = questions[currentQuestion];
+    const isCorrect = userAnswer.toLowerCase().trim() === q.answer;
+    setTotalAnswered((prev) => prev + 1);
+
+    const enFull = fillBlank(q.en, q.answer);
+    const esFull = q.esFull;
+
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      setFeedback(`✅ Correcto. ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+    } else {
+      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+    }
+    setWaitingForNext(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-4 md:p-8 font-sans">
+      <div className="max-w-5xl mx-auto">
+        {typeof onExit === 'function' && (
+          <div className="mb-4">
+            <button
+              onClick={onExit}
+              className="inline-flex items-center gap-2 text-slate-200 hover:text-white bg-slate-800/60 hover:bg-slate-700/60 transition px-4 py-2 rounded-lg border border-slate-700"
+            >
+              <ArrowLeft size={18} /> Volver al Mapa
+            </button>
+          </div>
+        )}
+
+        <div className="text-center mb-6">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3 text-red-300">
+            <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-amber-300" />
+            Piso 4: Laboratorio de Metamorfosis / Camaleón
+          </h1>
+          <p className="text-slate-300 text-lg">Patrón ABC: Las 3 formas son distintas</p>
+          <p className="text-slate-500 text-sm mt-2">Tip: di en voz alta el cambio de sonido: base → past → participle</p>
+        </div>
+
+        {stage !== 'menu' && stage !== 'group_intro' && stage !== 'palace' && stage !== 'results' && (
+          <div className="mb-6 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
+            <div className="flex justify-between text-sm mb-2 font-mono text-red-200">
+              <span>Progreso: {currentQuestion + 1} / {questions.length}</span>
+              <span>Aciertos: {score}</span>
+            </div>
+            <div className="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-red-500 to-amber-400 h-full transition-all duration-500 ease-out"
+                style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {stage === 'menu' && (
+          <div className="grid gap-6">
+            <div className="bg-slate-800/80 backdrop-blur-sm p-6 rounded-2xl border border-slate-700 text-center">
+              <p className="text-xl mb-3 text-red-200">Regla ABC</p>
+              <div className="bg-slate-900/50 p-4 rounded-lg inline-block text-left">
+                <p className="font-bold text-amber-300 mb-1">Estructura:</p>
+                <p className="font-mono text-slate-200">Base (A) → Past (B) → Participle (C)</p>
+                <p className="text-sm text-slate-400 mt-2 italic">"En ABC, cada forma se transforma."</p>
+              </div>
+              <p className="text-slate-400 mt-4 text-sm">
+                Recomendación: primero visita el palacio mental y repite en voz alta: <span className="font-mono">base - past - participle</span>.
+              </p>
+            </div>
+
+            <button
+              onClick={openPalaceAll}
+              className="group bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 p-6 rounded-2xl transition-all transform hover:scale-[1.02] shadow-xl flex items-center justify-between"
+            >
+              <div className="flex items-center gap-4">
+                <div className="bg-white/20 p-3 rounded-full"><Eye className="w-6 h-6" /></div>
+                <div className="text-left">
+                  <h3 className="text-xl font-bold">1. Visitar el Palacio Mental</h3>
+                  <p className="text-amber-100 text-sm">Recorre las escenas absurdas de todos los grupos.</p>
+                </div>
+              </div>
+              <ChevronRight className="w-6 h-6 opacity-50 group-hover:opacity-100" />
+            </button>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {groupsABC.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => startGroup(g.id)}
+                  className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-red-400"
+                >
+                  <div className="text-red-200 font-bold mb-2">Entrenamiento</div>
+                  <div className="text-white font-bold text-lg">{g.title}</div>
+                  <div className="text-slate-300 text-sm mt-1">{g.hint}</div>
+                  <div className="text-slate-400 text-xs mt-2">Verbos: {g.verbs.length}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {stage === 'palace' && palaceList[palaceView] && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">{palaceTitle}</h2>
+              <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700">
+              <div className="text-xl font-black text-amber-300 mb-2">
+                {palaceList[palaceView].base} — {palaceList[palaceView].past} — {palaceList[palaceView].participle}
+              </div>
+              <div className="text-slate-200 font-semibold mb-3">{palaceList[palaceView].es}</div>
+              <div className="text-slate-300">{palaceList[palaceView].image}</div>
+            </div>
+
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={() => setPalaceView((v) => Math.max(0, v - 1))}
+                disabled={palaceView === 0}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                <ChevronLeft size={18} /> Anterior
+              </button>
+              <div className="text-slate-300 text-sm font-mono">
+                {palaceView + 1} / {palaceList.length}
+              </div>
+              <button
+                onClick={() => setPalaceView((v) => Math.min(palaceList.length - 1, v + 1))}
+                disabled={palaceView === palaceList.length - 1}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <button
+                onClick={() => setStage('menu')}
+                className="w-full bg-slate-700 hover:bg-slate-600 px-6 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={20} /> Volver al menú del Piso 4
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'group_intro' && selectedGroup && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">{selectedGroup.title}</h2>
+              <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <div className="bg-slate-900/50 p-5 rounded-xl border border-slate-700 mb-6">
+              <p className="text-amber-300 font-bold mb-2">Explicación técnica (rápida)</p>
+              <ul className="text-slate-200 space-y-2">
+                <li><span className="font-mono">ABC</span>: presente, pasado y participio son diferentes.</li>
+                <li>En <span className="font-mono">Past Simple</span> usas la forma <span className="font-mono">Past</span>.</li>
+                <li>En <span className="font-mono">Present Perfect</span> usas <span className="font-mono">have/has</span> + <span className="font-mono">Participle</span>.</li>
+              </ul>
+              <p className="text-slate-400 text-sm mt-3">Estrategia del grupo: {selectedGroup.hint}</p>
+            </div>
+
+            <div className="bg-slate-900/50 p-5 rounded-xl border border-slate-700 mb-6">
+              <p className="text-red-200 font-bold mb-2">Cómo practicar (orden recomendado)</p>
+              <ol className="text-slate-200 list-decimal list-inside space-y-2">
+                <li>
+                  Visita el palacio mental del grupo (imágenes absurdas).{' '}
+                  {typeof onViewGallery === 'function' && (
+                    <button
+                      type="button"
+                      onClick={onViewGallery}
+                      className="underline font-bold text-amber-200 hover:text-white"
+                    >
+                      Ir al Recorrido Mental
+                    </button>
+                  )}
+                </li>
+                <li>Repite 2 veces en voz alta: <span className="font-mono">base - past - participle</span>.</li>
+                <li>Haz la práctica: Reconocimiento → Escritura → Intrusos → Contexto real.</li>
+              </ol>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <button
+                onClick={() => openPalaceGroup(selectedGroup)}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 px-6 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
+              >
+                <Eye size={20} /> Ver palacio del grupo
+              </button>
+              <button
+                onClick={() => initLevel('level1')}
+                className="flex-1 bg-amber-600 hover:bg-amber-500 px-6 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
+              >
+                <ChevronRight size={20} /> Empezar entrenamiento
+              </button>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 mt-6">
+              <button onClick={() => initLevel('level1')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-amber-400">
+                <div className="flex items-center gap-3 mb-2 text-amber-200"><Brain className="w-5 h-5" /> Nivel 1</div>
+                <h3 className="font-bold text-lg">Reconocimiento</h3>
+                <p className="text-xs text-slate-400">Significado del verbo</p>
+              </button>
+
+              <button onClick={() => initLevel('level2')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-red-400">
+                <div className="flex items-center gap-3 mb-2 text-red-200"><Lightbulb className="w-5 h-5" /> Nivel 2</div>
+                <h3 className="font-bold text-lg">Escritura</h3>
+                <p className="text-xs text-slate-400">Escribe la forma base</p>
+              </button>
+
+              <button onClick={() => initLevel('level3')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-orange-400">
+                <div className="flex items-center gap-3 mb-2 text-orange-200"><X className="w-5 h-5" /> Nivel 3</div>
+                <h3 className="font-bold text-lg">Intrusos</h3>
+                <p className="text-xs text-slate-400">Marca los que NO son ABC</p>
+              </button>
+
+              <button onClick={() => initLevel('level4')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-emerald-400">
+                <div className="flex items-center gap-3 mb-2 text-emerald-200"><Check className="w-5 h-5" /> Nivel 4</div>
+                <h3 className="font-bold text-lg">Contexto real</h3>
+                <p className="text-xs text-slate-400">Completa con Past o Participle</p>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'level1' && questions[currentQuestion] && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">Nivel 1: Reconocimiento</h2>
+              <button onClick={() => setStage('group_intro')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 mb-6">
+              <p className="text-slate-300 mb-2">¿Qué significa este verbo?</p>
+              <div className="text-4xl font-black text-white">{questions[currentQuestion].verb.base}</div>
+              <div className="text-slate-500 mt-2 text-sm">Imagen absurda (para tu historia): {questions[currentQuestion].verb.image}</div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {questions[currentQuestion].options.map((opt) => {
+                const isSelected = selectedAnswer === opt;
+                const isCorrect = opt === questions[currentQuestion].correct;
+                const showResult = waitingForNext;
+                return (
+                  <button
+                    key={opt}
+                    disabled={waitingForNext}
+                    onClick={() => checkAnswerLevel1(opt)}
+                    className={`p-4 rounded-xl text-left font-bold transition border ${
+                      showResult
+                        ? isCorrect
+                          ? 'bg-emerald-600/60 border-emerald-400'
+                          : isSelected
+                            ? 'bg-red-600/60 border-red-400'
+                            : 'bg-slate-700 border-slate-600'
+                        : 'bg-slate-700 hover:bg-slate-600 border-slate-600'
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+
+            {feedback && (
+              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
+                {feedback}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                <ChevronLeft size={18} /> Anterior
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!waitingForNext}
+                className="bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'level2' && questions[currentQuestion] && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">Nivel 2: Escritura</h2>
+              <button onClick={() => setStage('group_intro')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 mb-6">
+              <p className="text-slate-300 mb-2">Escribe la forma base (presente):</p>
+              <div className="text-2xl font-black text-amber-300">
+                {questions[currentQuestion].past} — {questions[currentQuestion].participle}
+              </div>
+              <div className="text-slate-500 mt-2 text-sm">Ayuda: significado: {questions[currentQuestion].es}</div>
+            </div>
+
+            <div className="flex gap-3">
+              <input
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                disabled={waitingForNext}
+                className="flex-1 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono"
+                placeholder="Escribe aquí..."
+              />
+              <button
+                onClick={checkLevel2Answer}
+                disabled={waitingForNext}
+                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 px-5 py-3 rounded-xl font-bold"
+              >
+                Verificar
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowHint((v) => !v)}
+              disabled={waitingForNext}
+              className="mt-4 text-sm underline text-slate-300 hover:text-white"
+            >
+              {showHint ? 'Ocultar pista' : 'Pista'}
+            </button>
+            {showHint && (
+              <div className="mt-2 text-slate-200">Primera letra: <span className="font-mono font-bold">{questions[currentQuestion].base[0]}</span></div>
+            )}
+
+            {feedback && (
+              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
+                {feedback}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                <ChevronLeft size={18} /> Anterior
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!waitingForNext}
+                className="bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'level3' && questions[currentQuestion] && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">Nivel 3: Intrusos</h2>
+              <button onClick={() => setStage('group_intro')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <p className="text-slate-300 mb-4">Marca los verbos que <span className="font-bold">NO</span> pertenecen a este patrón/grupo (NO ABC):</p>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              {questions[currentQuestion].verbs.map((v) => {
+                const selected = selectedIntruders.includes(v.base);
+                return (
+                  <button
+                    key={v.base}
+                    disabled={waitingForNext}
+                    onClick={() => toggleIntruder(v.base)}
+                    className={`p-4 rounded-xl text-left transition border ${
+                      selected ? 'bg-red-700/60 border-red-400' : 'bg-slate-700 hover:bg-slate-600 border-slate-600'
+                    }`}
+                  >
+                    <div className="font-black text-white text-lg">{v.base}</div>
+                    <div className="text-slate-300 text-sm font-mono">{v.past} — {v.participle}</div>
+                    <div className="text-slate-400 text-xs mt-1">({v.pattern})</div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-5 flex gap-3">
+              <button
+                onClick={checkIntruders}
+                disabled={waitingForNext}
+                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 px-6 py-3 rounded-xl font-bold"
+              >
+                Verificar
+              </button>
+              <button
+                onClick={() => setSelectedIntruders([])}
+                disabled={waitingForNext}
+                className="bg-slate-700 hover:bg-slate-600 disabled:opacity-40 px-6 py-3 rounded-xl font-bold flex items-center gap-2"
+              >
+                <RefreshCw size={18} /> Limpiar
+              </button>
+            </div>
+
+            {feedback && (
+              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
+                {feedback}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                <ChevronLeft size={18} /> Anterior
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!waitingForNext}
+                className="bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'level4' && questions[currentQuestion] && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-amber-200">Nivel 4: Contexto real</h2>
+              <button onClick={() => setStage('group_intro')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+            </div>
+
+            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 mb-6">
+              <div className="text-slate-300 text-sm mb-2">{questions[currentQuestion].label}</div>
+              <div className="text-slate-200 text-lg font-semibold mb-3">ES: {questions[currentQuestion].esFull}</div>
+              <div className="text-white text-lg">EN: {questions[currentQuestion].en}</div>
+            </div>
+
+            <div className="flex gap-3">
+              <input
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                disabled={waitingForNext}
+                className="flex-1 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white font-mono"
+                placeholder="Escribe la palabra correcta..."
+              />
+              <button
+                onClick={checkLevel4Answer}
+                disabled={waitingForNext}
+                className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 px-5 py-3 rounded-xl font-bold"
+              >
+                Verificar
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setHintLevel4((v) => Math.min(2, v + 1))}
+                disabled={waitingForNext || hintLevel4 >= 2}
+                className="text-sm underline text-slate-300 hover:text-white disabled:opacity-40"
+              >
+                Pedir pista
+              </button>
+              {hintLevel4 > 0 && (
+                <div className="mt-2 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-100">
+                  <div className="text-sm text-slate-300">Pistas:</div>
+                  {hintLevel4 >= 1 && (
+                    <div>
+                      Primera letra: <span className="font-mono font-bold">{questions[currentQuestion].answer[0]}</span>
+                    </div>
+                  )}
+                  {hintLevel4 >= 2 && (
+                    <div>
+                      Última letra + patrón: <span className="font-mono font-bold">{buildLetterPattern(questions[currentQuestion].answer)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {feedback && (
+              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
+                {feedback}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-6">
+              <button
+                onClick={handlePrevious}
+                disabled={currentQuestion === 0}
+                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+              >
+                <ChevronLeft size={18} /> Anterior
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={!waitingForNext}
+                className="bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
+              >
+                Siguiente <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {stage === 'results' && (
+          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl text-center">
+            <div className="flex items-center justify-center gap-3 text-amber-300 mb-3">
+              <Trophy className="w-8 h-8" />
+              <h2 className="text-3xl font-black">Resultados</h2>
+            </div>
+            <p className="text-slate-200 text-lg">Aciertos: <span className="font-black">{score}</span> / {totalAnswered}</p>
+            <p className="text-slate-400 mt-2">Vuelve al grupo para seguir practicando los sonidos.</p>
+
+            <div className="mt-6 grid md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setStage('group_intro')}
+                className="bg-slate-700 hover:bg-slate-600 px-6 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
+              >
+                <ArrowLeft size={20} /> Volver al grupo
+              </button>
+              <button
+                onClick={() => { resetRoundState(); setStage('menu'); }}
+                className="bg-amber-600 hover:bg-amber-500 px-6 py-4 rounded-xl font-bold transition flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={20} /> Elegir otro grupo
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

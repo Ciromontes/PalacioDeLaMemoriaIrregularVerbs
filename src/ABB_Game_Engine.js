@@ -17,7 +17,7 @@ import {
 // Regla: El Pasado y el Participio son idénticos.
 // Estrategia: Agrúpalos por sonido final para recordarlos mejor.
 
-const groups = [
+export const groupsABB = [
   {
     id: 'g1',
     title: 'Grupo 1: Los Explosivos (Terminan en T)',
@@ -85,6 +85,14 @@ const groups = [
   },
 ];
 
+function buildLetterPattern(word) {
+  const w = (word ?? '').trim();
+  if (w.length <= 1) return w;
+  if (w.length === 2) return `${w[0]} ${w[1]}`;
+  const middle = Array.from({ length: w.length - 2 }, () => '_').join(' ');
+  return `${w[0]} ${middle} ${w[w.length - 1]}`;
+}
+
 const intruders = [
   { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
   { base: 'come', past: 'came', participle: 'come', es: 'venir', pattern: 'ABA' },
@@ -102,155 +110,156 @@ function fillBlank(sentence, word) {
 }
 
 function getContextTemplates() {
-  // Oraciones profesionales/educativas. En ES se inserta el verbo EN (el que practicas) para mantener un formato consistente.
+  // Oraciones profesionales/educativas.
+  // Importante: el español debe ser natural y NO debe insertar el verbo en inglés.
   return {
     bend: {
-      past: { en: 'Yesterday the technician ___ a metal bracket during assembly.', es: 'Ayer el técnico ___ un soporte metálico durante el ensamblaje.' },
-      perf: { en: 'This week the technician has ___ the bracket to fit the design.', es: 'Esta semana el técnico ha ___ el soporte para que encaje en el diseño.' },
+      past: { en: 'Yesterday the technician ___ a metal bracket during assembly.', esFull: 'Ayer el técnico dobló un soporte metálico durante el ensamblaje.' },
+      perf: { en: 'This week the technician has ___ the bracket to fit the design.', esFull: 'Esta semana el técnico ha doblado el soporte para que encaje en el diseño.' },
     },
     build: {
-      past: { en: 'Yesterday the team ___ a prototype for the project.', es: 'Ayer el equipo ___ un prototipo para el proyecto.' },
-      perf: { en: 'This week the team has ___ a small demo for stakeholders.', es: 'Esta semana el equipo ha ___ una demo pequeña para los interesados.' },
+      past: { en: 'Yesterday the team ___ a prototype for the project.', esFull: 'Ayer el equipo construyó un prototipo para el proyecto.' },
+      perf: { en: 'This week the team has ___ a small demo for stakeholders.', esFull: 'Esta semana el equipo ha construido una demo pequeña para los interesados.' },
     },
     burn: {
-      past: { en: 'Yesterday the lab ___ a test sample during the demo.', es: 'Ayer el laboratorio ___ una muestra de prueba durante la demostración.' },
-      perf: { en: 'This month the lab has ___ several samples to validate the process.', es: 'Este mes el laboratorio ha ___ varias muestras para validar el proceso.' },
+      past: { en: 'Yesterday the lab ___ a test sample during the demo.', esFull: 'Ayer el laboratorio quemó una muestra de prueba durante la demostración.' },
+      perf: { en: 'This month the lab has ___ several samples to validate the process.', esFull: 'Este mes el laboratorio ha quemado varias muestras para validar el proceso.' },
     },
     creep: {
-      past: { en: 'Yesterday a small error ___ into the spreadsheet.', es: 'Ayer un pequeño error ___ en la hoja de cálculo.' },
-      perf: { en: 'This week a few issues have ___ into the report and we corrected them.', es: 'Esta semana algunos problemas han ___ en el informe y los corregimos.' },
+      past: { en: 'Yesterday a small error ___ into the spreadsheet.', esFull: 'Ayer se coló un pequeño error en la hoja de cálculo.' },
+      perf: { en: 'This week a few issues have ___ into the report and we corrected them.', esFull: 'Esta semana se han colado algunos problemas en el informe y los corregimos.' },
     },
     deal: {
-      past: { en: 'Yesterday I ___ with a customer request politely.', es: 'Ayer yo ___ con una solicitud del cliente con calma.' },
-      perf: { en: 'This week I have ___ with several support tickets.', es: 'Esta semana yo he ___ con varios tickets de soporte.' },
+      past: { en: 'Yesterday I ___ with a customer request politely.', esFull: 'Ayer gestioné una solicitud del cliente con cortesía.' },
+      perf: { en: 'This week I have ___ with several support tickets.', esFull: 'Esta semana he gestionado varios tickets de soporte.' },
     },
     dream: {
-      past: { en: 'Yesterday I ___ about improving my study routine.', es: 'Ayer yo ___ con mejorar mi rutina de estudio.' },
-      perf: { en: 'This month I have ___ about a more efficient workflow.', es: 'Este mes yo he ___ con un flujo de trabajo más eficiente.' },
+      past: { en: 'Yesterday I ___ about improving my study routine.', esFull: 'Ayer soñé con mejorar mi rutina de estudio.' },
+      perf: { en: 'This month I have ___ about a more efficient workflow.', esFull: 'Este mes he soñado con un flujo de trabajo más eficiente.' },
     },
     feel: {
-      past: { en: 'Yesterday I ___ confident during the presentation.', es: 'Ayer yo ___ confianza durante la presentación.' },
-      perf: { en: 'This week I have ___ more comfortable speaking in meetings.', es: 'Esta semana yo me he ___ más cómodo hablando en reuniones.' },
+      past: { en: 'Yesterday I ___ confident during the presentation.', esFull: 'Ayer me sentí seguro durante la presentación.' },
+      perf: { en: 'This week I have ___ more comfortable speaking in meetings.', esFull: 'Esta semana me he sentido más cómodo hablando en reuniones.' },
     },
     keep: {
-      past: { en: 'Yesterday we ___ the documentation updated.', es: 'Ayer nosotros ___ la documentación actualizada.' },
-      perf: { en: 'This quarter we have ___ our notes organized for training.', es: 'Este trimestre nosotros hemos ___ nuestras notas organizadas para la capacitación.' },
+      past: { en: 'Yesterday we ___ the documentation updated.', esFull: 'Ayer mantuvimos la documentación actualizada.' },
+      perf: { en: 'This quarter we have ___ our notes organized for training.', esFull: 'Este trimestre hemos mantenido nuestras notas organizadas para la capacitación.' },
     },
     leave: {
-      past: { en: 'Yesterday I ___ the meeting early to attend a class.', es: 'Ayer yo ___ la reunión temprano para asistir a una clase.' },
-      perf: { en: 'This month I have ___ the office on time more often.', es: 'Este mes yo he ___ la oficina a tiempo con más frecuencia.' },
+      past: { en: 'Yesterday I ___ the meeting early to attend a class.', esFull: 'Ayer salí de la reunión temprano para asistir a una clase.' },
+      perf: { en: 'This month I have ___ the office on time more often.', esFull: 'Este mes he salido de la oficina a tiempo con más frecuencia.' },
     },
     lend: {
-      past: { en: 'Yesterday a colleague ___ me a charger for the workshop.', es: 'Ayer un colega me ___ un cargador para el taller.' },
-      perf: { en: 'This week the team has ___ equipment to new members.', es: 'Esta semana el equipo ha ___ equipo a los nuevos integrantes.' },
+      past: { en: 'Yesterday a colleague ___ me a charger for the workshop.', esFull: 'Ayer un colega me prestó un cargador para el taller.' },
+      perf: { en: 'This week the team has ___ equipment to new members.', esFull: 'Esta semana el equipo ha prestado equipo a los nuevos integrantes.' },
     },
     light: {
-      past: { en: 'Yesterday we ___ the training room for the session.', es: 'Ayer nosotros ___ la sala de capacitación para la sesión.' },
-      perf: { en: 'This week we have ___ the hallway to improve safety.', es: 'Esta semana nosotros hemos ___ el pasillo para mejorar la seguridad.' },
+      past: { en: 'Yesterday we ___ the training room for the session.', esFull: 'Ayer iluminamos la sala de capacitación para la sesión.' },
+      perf: { en: 'This week we have ___ the hallway to improve safety.', esFull: 'Esta semana hemos iluminado el pasillo para mejorar la seguridad.' },
     },
     lose: {
-      past: { en: 'Yesterday the team ___ a file and recovered it from backups.', es: 'Ayer el equipo ___ un archivo y lo recuperó de copias de seguridad.' },
-      perf: { en: 'This quarter the team has ___ fewer documents thanks to a checklist.', es: 'Este trimestre el equipo ha ___ menos documentos gracias a un checklist.' },
+      past: { en: 'Yesterday the team ___ a file and recovered it from backups.', esFull: 'Ayer el equipo perdió un archivo y lo recuperó de copias de seguridad.' },
+      perf: { en: 'This quarter the team has ___ fewer documents thanks to a checklist.', esFull: 'Este trimestre el equipo ha perdido menos documentos gracias a un checklist.' },
     },
     mean: {
-      past: { en: 'Yesterday the instructor explained what the term ___ in the report.', es: 'Ayer el instructor explicó lo que el término ___ en el informe.' },
-      perf: { en: 'This week the glossary has ___ a lot for new staff.', es: 'Esta semana el glosario ha ___ mucho para el personal nuevo.' },
+      past: { en: 'Yesterday the instructor explained what the term ___ in the report.', esFull: 'Ayer el instructor explicó lo que significaba el término en el informe.' },
+      perf: { en: 'This week the glossary has ___ a lot for new staff.', esFull: 'Esta semana el glosario ha significado mucho para el personal nuevo.' },
     },
     meet: {
-      past: { en: 'Yesterday we ___ the new manager for a short introduction.', es: 'Ayer nosotros ___ al nuevo gerente para una breve presentación.' },
-      perf: { en: 'This month we have ___ with the client twice.', es: 'Este mes nosotros hemos ___ con el cliente dos veces.' },
+      past: { en: 'Yesterday we ___ the new manager for a short introduction.', esFull: 'Ayer conocimos al nuevo gerente en una breve presentación.' },
+      perf: { en: 'This month we have ___ with the client twice.', esFull: 'Este mes nos hemos reunido con el cliente dos veces.' },
     },
     send: {
-      past: { en: 'Yesterday we ___ the report before the deadline.', es: 'Ayer nosotros ___ el informe antes de la fecha límite.' },
-      perf: { en: 'This week we have ___ two follow-up emails.', es: 'Esta semana nosotros hemos ___ dos correos de seguimiento.' },
+      past: { en: 'Yesterday we ___ the report before the deadline.', esFull: 'Ayer enviamos el informe antes de la fecha límite.' },
+      perf: { en: 'This week we have ___ two follow-up emails.', esFull: 'Esta semana hemos enviado dos correos de seguimiento.' },
     },
     shoot: {
-      past: { en: 'Yesterday the marketing team ___ product photos for the catalog.', es: 'Ayer el equipo de marketing ___ fotos del producto para el catálogo.' },
-      perf: { en: 'This quarter the team has ___ several photos for a new campaign.', es: 'Este trimestre el equipo ha ___ varias fotos para una nueva campaña.' },
+      past: { en: 'Yesterday the marketing team ___ product photos for the catalog.', esFull: 'Ayer el equipo de marketing tomó fotos del producto para el catálogo.' },
+      perf: { en: 'This quarter the team has ___ several photos for a new campaign.', esFull: 'Este trimestre el equipo ha tomado varias fotos para una nueva campaña.' },
     },
     sit: {
-      past: { en: 'Yesterday I ___ near the front during the seminar.', es: 'Ayer yo ___ cerca del frente durante el seminario.' },
-      perf: { en: 'This week I have ___ with the same study group.', es: 'Esta semana yo he ___ con el mismo grupo de estudio.' },
+      past: { en: 'Yesterday I ___ near the front during the seminar.', esFull: 'Ayer me senté cerca del frente durante el seminario.' },
+      perf: { en: 'This week I have ___ with the same study group.', esFull: 'Esta semana me he sentado con el mismo grupo de estudio.' },
     },
     sleep: {
-      past: { en: 'Yesterday I ___ early to be ready for training.', es: 'Ayer yo ___ temprano para estar listo para la capacitación.' },
-      perf: { en: 'This month I have ___ better by following a routine.', es: 'Este mes yo he ___ mejor siguiendo una rutina.' },
+      past: { en: 'Yesterday I ___ early to be ready for training.', esFull: 'Ayer dormí temprano para estar listo para la capacitación.' },
+      perf: { en: 'This month I have ___ better by following a routine.', esFull: 'Este mes he dormido mejor siguiendo una rutina.' },
     },
     spend: {
-      past: { en: 'Yesterday the team ___ time reviewing the checklist.', es: 'Ayer el equipo ___ tiempo revisando el checklist.' },
-      perf: { en: 'This week the team has ___ extra time on quality control.', es: 'Esta semana el equipo ha ___ tiempo extra en control de calidad.' },
+      past: { en: 'Yesterday the team ___ time reviewing the checklist.', esFull: 'Ayer el equipo dedicó tiempo a revisar el checklist.' },
+      perf: { en: 'This week the team has ___ extra time on quality control.', esFull: 'Esta semana el equipo ha dedicado tiempo extra al control de calidad.' },
     },
     sweep: {
-      past: { en: 'Yesterday the cleaning robot ___ the office floor.', es: 'Ayer el robot de limpieza ___ el piso de la oficina.' },
-      perf: { en: 'This week the staff has ___ the workspace every day.', es: 'Esta semana el personal ha ___ el espacio de trabajo cada día.' },
+      past: { en: 'Yesterday the cleaning robot ___ the office floor.', esFull: 'Ayer el robot de limpieza barrió el piso de la oficina.' },
+      perf: { en: 'This week the staff has ___ the workspace every day.', esFull: 'Esta semana el personal ha barrido el espacio de trabajo cada día.' },
     },
     weep: {
-      past: { en: 'Yesterday I ___ a little after finishing a difficult course.', es: 'Ayer yo ___ un poco después de terminar un curso difícil.' },
-      perf: { en: 'This year I have ___ less by managing stress better.', es: 'Este año yo he ___ menos al manejar mejor el estrés.' },
+      past: { en: 'Yesterday I ___ a little after finishing a difficult course.', esFull: 'Ayer lloré un poco después de terminar un curso difícil.' },
+      perf: { en: 'This year I have ___ less by managing stress better.', esFull: 'Este año he llorado menos al manejar mejor el estrés.' },
     },
     bring: {
-      past: { en: 'Yesterday I ___ the signed documents to the meeting.', es: 'Ayer yo ___ los documentos firmados a la reunión.' },
-      perf: { en: 'This week I have ___ all the materials for training.', es: 'Esta semana yo he ___ todos los materiales para la capacitación.' },
+      past: { en: 'Yesterday I ___ the signed documents to the meeting.', esFull: 'Ayer traje los documentos firmados a la reunión.' },
+      perf: { en: 'This week I have ___ all the materials for training.', esFull: 'Esta semana he traído todos los materiales para la capacitación.' },
     },
     buy: {
-      past: { en: 'Yesterday we ___ new equipment for the office.', es: 'Ayer nosotros ___ equipo nuevo para la oficina.' },
-      perf: { en: 'This quarter we have ___ licenses for the team.', es: 'Este trimestre nosotros hemos ___ licencias para el equipo.' },
+      past: { en: 'Yesterday we ___ new equipment for the office.', esFull: 'Ayer compramos equipo nuevo para la oficina.' },
+      perf: { en: 'This quarter we have ___ licenses for the team.', esFull: 'Este trimestre hemos comprado licencias para el equipo.' },
     },
     catch: {
-      past: { en: 'Yesterday the system ___ an error during testing.', es: 'Ayer el sistema ___ un error durante las pruebas.' },
-      perf: { en: 'This week the monitoring tool has ___ several issues.', es: 'Esta semana la herramienta de monitoreo ha ___ varios problemas.' },
+      past: { en: 'Yesterday the system ___ an error during testing.', esFull: 'Ayer el sistema detectó un error durante las pruebas.' },
+      perf: { en: 'This week the monitoring tool has ___ several issues.', esFull: 'Esta semana la herramienta de monitoreo ha detectado varios problemas.' },
     },
     fight: {
-      past: { en: 'Yesterday the team ___ for a better solution respectfully.', es: 'Ayer el equipo ___ por una mejor solución con respeto.' },
-      perf: { en: 'This month the team has ___ to keep the schedule on track.', es: 'Este mes el equipo ha ___ para mantener el cronograma.' },
+      past: { en: 'Yesterday the team ___ for a better solution respectfully.', esFull: 'Ayer el equipo luchó por una mejor solución con respeto.' },
+      perf: { en: 'This month the team has ___ to keep the schedule on track.', esFull: 'Este mes el equipo ha luchado para mantener el cronograma.' },
     },
     seek: {
-      past: { en: 'Yesterday we ___ feedback from the instructor.', es: 'Ayer nosotros ___ retroalimentación del instructor.' },
-      perf: { en: 'This week we have ___ clearer requirements.', es: 'Esta semana nosotros hemos ___ requisitos más claros.' },
+      past: { en: 'Yesterday we ___ feedback from the instructor.', esFull: 'Ayer buscamos retroalimentación del instructor.' },
+      perf: { en: 'This week we have ___ clearer requirements.', esFull: 'Esta semana hemos buscado requisitos más claros.' },
     },
     teach: {
-      past: { en: 'Yesterday I ___ a short lesson to new staff.', es: 'Ayer yo ___ una lección corta al personal nuevo.' },
-      perf: { en: 'This month I have ___ the same topic in two sessions.', es: 'Este mes yo he ___ el mismo tema en dos sesiones.' },
+      past: { en: 'Yesterday I ___ a short lesson to new staff.', esFull: 'Ayer enseñé una lección corta al personal nuevo.' },
+      perf: { en: 'This month I have ___ the same topic in two sessions.', esFull: 'Este mes he enseñado el mismo tema en dos sesiones.' },
     },
     think: {
-      past: { en: 'Yesterday I ___ about the plan before the meeting.', es: 'Ayer yo ___ sobre el plan antes de la reunión.' },
-      perf: { en: 'This week I have ___ more carefully about my goals.', es: 'Esta semana yo he ___ con más cuidado sobre mis metas.' },
+      past: { en: 'Yesterday I ___ about the plan before the meeting.', esFull: 'Ayer pensé en el plan antes de la reunión.' },
+      perf: { en: 'This week I have ___ more carefully about my goals.', esFull: 'Esta semana he pensado con más cuidado sobre mis metas.' },
     },
     lay: {
-      past: { en: 'Yesterday the instructor ___ out the steps on the board.', es: 'Ayer el instructor ___ los pasos en la pizarra.' },
-      perf: { en: 'This week the instructor has ___ out a clear study plan.', es: 'Esta semana el instructor ha ___ un plan de estudio claro.' },
+      past: { en: 'Yesterday the instructor ___ out the steps on the board.', esFull: 'Ayer el instructor expuso los pasos en la pizarra.' },
+      perf: { en: 'This week the instructor has ___ out a clear study plan.', esFull: 'Esta semana el instructor ha expuesto un plan de estudio claro.' },
     },
     pay: {
-      past: { en: 'Yesterday we ___ the invoice after verification.', es: 'Ayer nosotros ___ la factura después de la verificación.' },
-      perf: { en: 'This month we have ___ for the new course.', es: 'Este mes nosotros hemos ___ por el nuevo curso.' },
+      past: { en: 'Yesterday we ___ the invoice after verification.', esFull: 'Ayer pagamos la factura después de la verificación.' },
+      perf: { en: 'This month we have ___ for the new course.', esFull: 'Este mes hemos pagado por el nuevo curso.' },
     },
     say: {
-      past: { en: 'Yesterday I ___ the key points clearly.', es: 'Ayer yo ___ los puntos clave con claridad.' },
-      perf: { en: 'This week I have ___ the same message in two meetings.', es: 'Esta semana yo he ___ el mismo mensaje en dos reuniones.' },
+      past: { en: 'Yesterday I ___ the key points clearly.', esFull: 'Ayer dije los puntos clave con claridad.' },
+      perf: { en: 'This week I have ___ the same message in two meetings.', esFull: 'Esta semana he dicho el mismo mensaje en dos reuniones.' },
     },
     dig: {
-      past: { en: 'Yesterday the team ___ into the data to find the root cause.', es: 'Ayer el equipo ___ en los datos para encontrar la causa raíz.' },
-      perf: { en: 'This week the analysts have ___ into the report in detail.', es: 'Esta semana los analistas han ___ en el informe a detalle.' },
+      past: { en: 'Yesterday the team ___ into the data to find the root cause.', esFull: 'Ayer el equipo profundizó en los datos para encontrar la causa raíz.' },
+      perf: { en: 'This week the analysts have ___ into the report in detail.', esFull: 'Esta semana los analistas han profundizado en el informe a detalle.' },
     },
     stick: {
-      past: { en: 'Yesterday the note ___ to my monitor as a reminder.', es: 'Ayer la nota ___ a mi monitor como recordatorio.' },
-      perf: { en: 'This week the labels have ___ well on the folders.', es: 'Esta semana las etiquetas han ___ bien en las carpetas.' },
+      past: { en: 'Yesterday the note ___ to my monitor as a reminder.', esFull: 'Ayer la nota se quedó pegada a mi monitor como recordatorio.' },
+      perf: { en: 'This week the labels have ___ well on the folders.', esFull: 'Esta semana las etiquetas se han pegado bien en las carpetas.' },
     },
     sting: {
-      past: { en: 'Yesterday the feedback ___ at first, but it helped me improve.', es: 'Ayer la retroalimentación ___ al inicio, pero me ayudó a mejorar.' },
-      perf: { en: 'This month the comments have ___ a bit, but we learned from them.', es: 'Este mes los comentarios han ___ un poco, pero aprendimos de ellos.' },
+      past: { en: 'Yesterday the feedback ___ at first, but it helped me improve.', esFull: 'Ayer la retroalimentación dolió al inicio, pero me ayudó a mejorar.' },
+      perf: { en: 'This month the comments have ___ a bit, but we learned from them.', esFull: 'Este mes los comentarios han dolido un poco, pero aprendimos de ellos.' },
     },
     strike: {
-      past: { en: 'Yesterday a power issue ___ during the session and we continued calmly.', es: 'Ayer un problema de energía ___ durante la sesión y continuamos con calma.' },
-      perf: { en: 'This quarter outages have ___ twice during training.', es: 'Este trimestre los cortes han ___ dos veces durante la capacitación.' },
+      past: { en: 'Yesterday a power issue ___ during the session and we continued calmly.', esFull: 'Ayer un problema de energía golpeó la sesión y continuamos con calma.' },
+      perf: { en: 'This quarter outages have ___ twice during training.', esFull: 'Este trimestre los cortes han golpeado dos veces durante la capacitación.' },
     },
     swing: {
-      past: { en: 'Yesterday sales ___ up and down during the campaign.', es: 'Ayer las ventas ___ arriba y abajo durante la campaña.' },
-      perf: { en: 'This month the metrics have ___ a lot, so we reviewed the data.', es: 'Este mes las métricas han ___ mucho, así que revisamos los datos.' },
+      past: { en: 'Yesterday sales ___ up and down during the campaign.', esFull: 'Ayer las ventas oscilaron arriba y abajo durante la campaña.' },
+      perf: { en: 'This month the metrics have ___ a lot, so we reviewed the data.', esFull: 'Este mes las métricas han oscilado mucho, así que revisamos los datos.' },
     },
     hang: {
-      past: { en: 'Yesterday we ___ the schedule on the wall for everyone.', es: 'Ayer nosotros ___ el cronograma en la pared para todos.' },
-      perf: { en: 'This week we have ___ reminders near the entrance.', es: 'Esta semana nosotros hemos ___ recordatorios cerca de la entrada.' },
+      past: { en: 'Yesterday we ___ the schedule on the wall for everyone.', esFull: 'Ayer colgamos el cronograma en la pared para todos.' },
+      perf: { en: 'This week we have ___ reminders near the entrance.', esFull: 'Esta semana hemos colgado recordatorios cerca de la entrada.' },
     },
   };
 }
@@ -262,25 +271,27 @@ function buildContextQuestionsForGroup(group) {
     const tpl = templates[verb.base];
 
     const pastEn = tpl?.past?.en ?? `Yesterday I ___ the task related to "${verb.base}".`;
-    const pastEs = tpl?.past?.es ?? `Ayer yo ___ la tarea relacionada con "${verb.base}".`;
+    const pastEsFull = tpl?.past?.esFull ?? `Ayer realicé una tarea relacionada con "${verb.base}".`;
     const perfEn = tpl?.perf?.en ?? `This week I have ___ the task related to "${verb.base}".`;
-    const perfEs = tpl?.perf?.es ?? `Esta semana yo he ___ la tarea relacionada con "${verb.base}".`;
+    const perfEsFull = tpl?.perf?.esFull ?? `Esta semana he realizado una tarea relacionada con "${verb.base}".`;
 
     return [
       {
         verb,
         kind: 'past',
-        es: pastEs,
+        esFull: pastEsFull,
         en: pastEn,
         answer: verb.past,
+        label: 'Past Simple (ABB)',
         note: `Past Simple (ABB): ${verb.base} → ${verb.past}`,
       },
       {
         verb,
         kind: 'perf',
-        es: perfEs,
+        esFull: perfEsFull,
         en: perfEn,
         answer: verb.participle,
+        label: 'Present Perfect (ABB)',
         note: `Present Perfect (ABB): has/have ${verb.participle}`,
       },
     ];
@@ -301,6 +312,7 @@ export default function ABBGameEngine({ onExit }) {
   const [showHint, setShowHint] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
 
   const [questions, setQuestions] = useState([]);
 
@@ -311,7 +323,7 @@ export default function ABBGameEngine({ onExit }) {
   const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
 
   const selectedGroup = useMemo(
-    () => groups.find((g) => g.id === selectedGroupId) ?? null,
+    () => groupsABB.find((g) => g.id === selectedGroupId) ?? null,
     [selectedGroupId]
   );
 
@@ -330,10 +342,11 @@ export default function ABBGameEngine({ onExit }) {
     setShowHint(false);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
+    setHintLevel4(0);
   };
 
   const openPalaceAll = () => {
-    const all = groups.flatMap((g) => g.verbs.map((v) => ({ ...v, groupTitle: g.title })));
+    const all = groupsABB.flatMap((g) => g.verbs.map((v) => ({ ...v, groupTitle: g.title })));
     setPalaceTitle('Galería Mental (ABB) — Todos los grupos');
     setPalaceList(all);
     setPalaceView(0);
@@ -397,6 +410,7 @@ export default function ABBGameEngine({ onExit }) {
     setShowHint(false);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
+    setHintLevel4(0);
 
     if (currentQuestion < questions.length - 1) setCurrentQuestion((prev) => prev + 1);
     else setStage('results');
@@ -411,6 +425,7 @@ export default function ABBGameEngine({ onExit }) {
       setShowHint(false);
       setSelectedAnswer(null);
       setSelectedIntruders([]);
+      setHintLevel4(0);
     }
   };
 
@@ -474,13 +489,13 @@ export default function ABBGameEngine({ onExit }) {
     setTotalAnswered((prev) => prev + 1);
 
     const enFull = fillBlank(q.en, q.answer);
-    const esFull = fillBlank(q.es, q.answer);
+    const esFull = q.esFull;
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
-      setFeedback(`✅ Correcto. ${q.note}\nVerbo (EN): ${q.answer}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setFeedback(`✅ Correcto. ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
     } else {
-      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\nVerbo (EN): ${q.answer}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
     }
     setWaitingForNext(true);
   };
@@ -502,7 +517,7 @@ export default function ABBGameEngine({ onExit }) {
         <div className="text-center mb-6">
           <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3 text-purple-300">
             <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-amber-300" />
-            Piso 3: La Oficina de los Gemelos
+            Piso 3: Palacio de los Gemelos
           </h1>
           <p className="text-slate-300 text-lg">Patrón ABB: Pasado = Participio</p>
           <p className="text-slate-500 text-sm mt-2">Estrategia: agrupa por sonido final</p>
@@ -552,7 +567,7 @@ export default function ABBGameEngine({ onExit }) {
             </button>
 
             <div className="grid md:grid-cols-2 gap-4">
-              {groups.map((g) => (
+              {groupsABB.map((g) => (
                 <button
                   key={g.id}
                   onClick={() => startGroup(g.id)}
@@ -808,11 +823,7 @@ export default function ABBGameEngine({ onExit }) {
 
             <div className="bg-slate-900 p-6 rounded-xl mb-6 space-y-3">
               <p className="text-xl md:text-2xl leading-relaxed text-purple-100 text-center">
-                {questions[currentQuestion].es.split('___')[0]}
-                <span className="inline-block border-b-2 border-purple-400 min-w-[120px] text-amber-300 font-bold px-2">
-                  {userAnswer || '...'}
-                </span>
-                {questions[currentQuestion].es.split('___')[1]}
+                {questions[currentQuestion].esFull}
               </p>
               <p className="text-xl md:text-2xl leading-relaxed text-slate-200 text-center">
                 {questions[currentQuestion].en.split('___')[0]}
@@ -821,7 +832,7 @@ export default function ABBGameEngine({ onExit }) {
                 </span>
                 {questions[currentQuestion].en.split('___')[1]}
               </p>
-              <p className="text-sm text-slate-400 text-center italic">{questions[currentQuestion].note}</p>
+              <p className="text-sm text-slate-400 text-center italic">{questions[currentQuestion].label}</p>
             </div>
 
             <input
@@ -833,6 +844,30 @@ export default function ABBGameEngine({ onExit }) {
               disabled={waitingForNext}
               className="w-full bg-slate-700 p-4 rounded-xl text-center text-xl mb-4 outline-none focus:ring-2 ring-amber-500"
             />
+
+            {!waitingForNext && (
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <button
+                  onClick={() => setHintLevel4((prev) => Math.min(2, prev + 1))}
+                  className="text-slate-300 hover:text-white text-sm underline"
+                >
+                  Pedir pista
+                </button>
+                {hintLevel4 > 0 && (
+                  <div className="text-sm text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 text-center whitespace-pre-line">
+                    {(() => {
+                      const ans = (questions[currentQuestion].answer ?? '').trim();
+                      const first = ans ? ans[0] : '';
+                      const last = ans ? ans[ans.length - 1] : '';
+                      const pattern = buildLetterPattern(ans);
+
+                      if (hintLevel4 === 1) return `Pista: el verbo empieza con ${first}`;
+                      return `Pista: el verbo termina con ${last}\n${pattern}`;
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!waitingForNext && (
               <button

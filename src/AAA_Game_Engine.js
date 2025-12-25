@@ -254,9 +254,9 @@ export default function AAA_Game_Engine({ onExit }) {
         )}
 
         <div className="text-center mb-6">
-          <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3 text-blue-400">
+            <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3 text-blue-400">
             <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-yellow-300" />
-            Piso 1: La Sala de los Espejos
+              Piso 1: Palacio de los Espejos
           </h1>
           <p className="text-slate-400 text-lg">Donde los verbos nunca cambian (AAA) - 28 Verbos</p>
         </div>

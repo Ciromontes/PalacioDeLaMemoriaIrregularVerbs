@@ -5,12 +5,20 @@ import { ArrowLeft, Brain, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, Ref
 // Regla: El pasado cambia, pero el participio vuelve al origen.
 // Imagen mental: Todo va y viene, como un yo-yo o un boomerang.
 
-const verbsABA = [
+export const verbsABA = [
   { base: 'become', past: 'became', participle: 'become', es: 'Convertirse', image: 'Una oruga se vuelve mariposa metálica y luego oruga otra vez.' },
   { base: 'come', past: 'came', participle: 'come', es: 'Venir', image: 'Un perro corre hacia ti, camina hacia atrás y corre hacia ti de nuevo.' },
   { base: 'run', past: 'ran', participle: 'run', es: 'Correr', image: 'Un atleta corre, se congela en hielo y vuelve a correr fuego.' },
   { base: 'overcome', past: 'overcame', participle: 'overcome', es: 'Superar', image: 'Un saltador salta un edificio, cae y vuelve a saltarlo.' }
 ];
+
+function buildLetterPattern(word) {
+  const w = (word ?? '').trim();
+  if (w.length <= 1) return w;
+  if (w.length === 2) return `${w[0]} ${w[1]}`;
+  const middle = Array.from({ length: w.length - 2 }, () => '_').join(' ');
+  return `${w[0]} ${middle} ${w[w.length - 1]}`;
+}
 
 const intruders = [
   // No-ABA (mezcla de AAA/ABB/ABC) para el nivel de intrusos
@@ -106,6 +114,8 @@ export default function ABAGameEngine({ onExit }) {
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
 
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
+
   const [questions, setQuestions] = useState([]);
 
   const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
@@ -126,6 +136,7 @@ export default function ABAGameEngine({ onExit }) {
     setShowHint(false);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
+    setHintLevel4(0);
 
     if (level === 'level1') {
       const selected = shuffle(verbsABA);
@@ -164,6 +175,7 @@ export default function ABAGameEngine({ onExit }) {
     setShowHint(false);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
+    setHintLevel4(0);
 
     if (currentQuestion < questions.length - 1) setCurrentQuestion(prev => prev + 1);
     else setStage('results');
@@ -178,6 +190,7 @@ export default function ABAGameEngine({ onExit }) {
       setShowHint(false);
       setSelectedAnswer(null);
       setSelectedIntruders([]);
+      setHintLevel4(0);
     }
   };
 
@@ -264,7 +277,7 @@ export default function ABAGameEngine({ onExit }) {
         <div className="text-center mb-6">
           <h1 className="text-3xl md:text-5xl font-bold mb-2 flex items-center justify-center gap-3 text-green-300">
             <Sparkles className="w-8 h-8 md:w-10 md:h-10 text-amber-300" />
-            Piso 2: Gimnasio Boomerang
+            Piso 2: Palacio Boomerang / Palacio del Yo-Yo
           </h1>
           <p className="text-slate-300 text-lg">Patrón ABA: Presente = Participio | Pasado distinto</p>
           <p className="text-slate-500 text-sm mt-2">Ejemplo: come - came - come</p>
@@ -503,11 +516,7 @@ export default function ABAGameEngine({ onExit }) {
 
             <div className="bg-slate-900 p-6 rounded-xl mb-6 space-y-3">
               <p className="text-xl md:text-2xl leading-relaxed text-green-100 text-center">
-                {questions[currentQuestion].es.split('___')[0]}
-                <span className="inline-block border-b-2 border-green-400 min-w-[120px] text-amber-300 font-bold px-2">
-                  {userAnswer || '...'}
-                </span>
-                {questions[currentQuestion].es.split('___')[1]}
+                {questions[currentQuestion].esFull}
               </p>
               <p className="text-xl md:text-2xl leading-relaxed text-slate-200 text-center">
                 {questions[currentQuestion].en.split('___')[0]}
@@ -516,7 +525,6 @@ export default function ABAGameEngine({ onExit }) {
                 </span>
                 {questions[currentQuestion].en.split('___')[1]}
               </p>
-              <p className="text-sm text-slate-400 text-center italic">{questions[currentQuestion].note}</p>
             </div>
 
             <input
@@ -528,6 +536,30 @@ export default function ABAGameEngine({ onExit }) {
               disabled={waitingForNext}
               className="w-full bg-slate-700 p-4 rounded-xl text-center text-xl mb-4 outline-none focus:ring-2 ring-amber-500"
             />
+
+            {!waitingForNext && (
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <button
+                  onClick={() => setHintLevel4((prev) => Math.min(2, prev + 1))}
+                  className="text-slate-300 hover:text-white text-sm underline"
+                >
+                  Pedir pista
+                </button>
+                {hintLevel4 > 0 && (
+                  <div className="text-sm text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 text-center whitespace-pre-line">
+                    {(() => {
+                      const ans = (questions[currentQuestion].answer ?? '').trim();
+                      const first = ans ? ans[0] : '';
+                      const last = ans ? ans[ans.length - 1] : '';
+                      const pattern = buildLetterPattern(ans);
+
+                      if (hintLevel4 === 1) return `Pista: el verbo empieza con ${first}`;
+                      return `Pista: el verbo termina con ${last}\n${pattern}`;
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
 
             {!waitingForNext && (
               <button
