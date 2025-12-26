@@ -12,8 +12,73 @@ import AAAGameEngine from './AAA_Game_Engine';
 import ABAGameEngine from './ABA_Game_Engine';
 import ABBGameEngine from './ABB_Game_Engine';
 import ABCGameEngine, { groupsABC, storiesABC } from './ABC_Game_Engine';
-import { verbsABA } from './ABA_Game_Engine';
 import { groupsABB } from './ABB_Game_Engine';
+
+const ActionWord = ({ children }) => (
+  <span className="font-black italic text-xl">{children}</span>
+);
+
+const floor1VerbsAAA = [
+  { base: 'bet', past: 'bet', participle: 'bet', es: 'Apostar', image: 'Un perro gigante apuesta huesos de oro en una mesa de póker.' },
+  { base: 'bid', past: 'bid', participle: 'bid', es: 'Pujar/(subasta) Ofrecer', image: 'Un subastador con megáfono ofrece montañas de zapatos gigantes en una feria.' },
+  { base: 'broadcast', past: 'broadcast', participle: 'broadcast', es: 'Transmitir', image: 'Una radio parlante gigante transmite noticias a las nubes.' },
+  { base: 'burst', past: 'burst', participle: 'burst', es: 'Estallar', image: 'Globos de acero estallan soltando confeti infinito.' },
+  { base: 'cast', past: 'cast', participle: 'cast', es: 'Lanzar (papel)', image: 'Un director de cine lanza guiones a actores robots.' },
+  { base: 'cost', past: 'cost', participle: 'cost', es: 'Costar', image: 'Una etiqueta de precio gigante te persigue por el pasillo.' },
+  { base: 'cut', past: 'cut', participle: 'cut', es: 'Cortar', image: 'Un árbol se corta a sí mismo con ramas en forma de tijeras.' },
+  { base: 'fit', past: 'fit', participle: 'fit', es: 'Encajar', image: 'Un elefante intenta encajar en una caja de fósforos y entra perfecto.' },
+  { base: 'forecast', past: 'forecast', participle: 'forecast', es: 'Pronosticar', image: 'Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente.' },
+  { base: 'hit', past: 'hit', participle: 'hit', es: 'Golpear', image: 'Un guante de boxeo con alas golpea una campana.' },
+  { base: 'hurt', past: 'hurt', participle: 'hurt', es: 'Herir/Doler', image: 'Un robot se corta la mano y sale aceite' },
+  { base: 'input', past: 'input', participle: 'input', es: 'Introducir', image: 'Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números.' },
+  { base: 'knit', past: 'knit', participle: 'knit', es: 'Tejer', image: 'Dos ovejas tejen la herida del robot  con su lana y agujas láser.' },
+  { base: 'let', past: 'let', participle: 'let', es: 'Permitir', image: 'Un semáforo con cara sonriente te deja pasar.' },
+  { base: 'output', past: 'output', participle: 'output', es: 'Producir/Salir', image: 'Una impresora industrial produce globos de colores que salen volando en formación.' },
+  { base: 'put', past: 'put', participle: 'put', es: 'Poner', image: 'Un brazo robótico pone sombreros en cabezas de estatuas.' },
+  { base: 'quit', past: 'quit', participle: 'quit', es: 'Renunciar', image: 'Un empleado tira papeles al aire y sale volando en un cohete.' },
+  { base: 'read', past: 'read', participle: 'read', es: 'Leer', image: "Un libro rojo gigante te lee a ti en voz alta. (Suena 'red' en pasado)." },
+  { base: 'rid', past: 'rid', participle: 'rid', es: 'Librar', image: 'Un perro enorme sacude su pelaje y se libera de todas las pulgas que lo molestaban.' },
+  { base: 'set', past: 'set', participle: 'set', es: 'Colocar/Fijar', image: 'Un camarero antigravedad coloca una mesa en el techo (al revés).' },
+  { base: 'shed', past: 'shed', participle: 'shed', es: 'Desprender', image: 'Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas.' },
+  { base: 'shut', past: 'shut', participle: 'shut', es: 'Cerrar', image: 'Una puerta con boca grita "¡Silencio!" y se cierra sola.' },
+  { base: 'slit', past: 'slit', participle: 'slit', es: 'Rajar', image: 'Un ninja corta un papel tan fino que no se ve.' },
+  { base: 'spread', past: 'spread', participle: 'spread', es: 'Esparcir', image: 'Un cuchillo unta mantequilla en el suelo de toda la sala.' },
+  { base: 'sweat', past: 'sweat', participle: 'sweat', es: 'Sudar', image: 'Una fuente de agua con forma de persona corriendo y sudando.' },
+  { base: 'thrust', past: 'thrust', participle: 'thrust', es: 'Empujar', image: 'Un motor a reacción empuja un carrito de supermercado a velocidad luz.' },
+  { base: 'upset', past: 'upset', participle: 'upset', es: 'Molestar', image: 'Un helado enorme se derrite encima de un escritorio y fastidia (molesta) a los papeles.' },
+  { base: 'wet', past: 'wet', participle: 'wet', es: 'Mojar', image: 'Una nube personal llueve solo sobre una silla.' },
+];
+
+const floor2VerbsABA = [
+  { base: 'become', past: 'became', participle: 'become', es: 'Convertirse', image: 'Una oruga se vuelve mariposa metálica y luego oruga otra vez.' },
+  { base: 'come', past: 'came', participle: 'come', es: 'Venir', image: 'Un perro corre hacia ti, camina hacia atrás y corre hacia ti de nuevo.' },
+  { base: 'run', past: 'ran', participle: 'run', es: 'Correr', image: 'Un atleta corre, se congela en hielo y vuelve a correr fuego.' },
+  { base: 'overcome', past: 'overcame', participle: 'overcome', es: 'Superar', image: 'Un saltador salta un edificio, cae y vuelve a saltarlo.' },
+];
+
+function renderStoryWithHighlights(story, keywords) {
+  if (!story) return null;
+  if (!keywords?.length) return <span>{story}</span>;
+
+  const escaped = keywords
+    .filter(Boolean)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .sort((a, b) => b.length - a.length);
+
+  const rx = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+  const parts = [];
+  let last = 0;
+  let match;
+  while ((match = rx.exec(story)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (start > last) parts.push(story.slice(last, start));
+    parts.push(<ActionWord key={`${start}-${end}`}>{match[0]}</ActionWord>);
+    last = end;
+  }
+  if (last < story.length) parts.push(story.slice(last));
+  return <>{parts}</>;
+}
 
 // --- DATOS DE LAS IMÁGENES MENTALES (Según tus PDFs) ---
 const mentalImages = {
@@ -259,30 +324,91 @@ const App = () => {
               </div>
             )}
 
-            {selectedFloor === 2 && (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="text-xs uppercase tracking-widest text-slate-500">
-                      <th className="py-3 px-3 border-b">Presente</th>
-                      <th className="py-3 px-3 border-b">Pasado</th>
-                      <th className="py-3 px-3 border-b">Participio</th>
-                      <th className="py-3 px-3 border-b">Español</th>
-                      <th className="py-3 px-3 border-b">Imagen Absurda</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...verbsABA].sort((a, b) => a.base.localeCompare(b.base)).map((v) => (
-                      <tr key={v.base} className="align-top">
-                        <td className="py-3 px-3 border-b font-black text-amber-700">{capitalize(v.base)}</td>
-                        <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.past)}</td>
-                        <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.participle)}</td>
-                        <td className="py-3 px-3 border-b font-semibold text-slate-700">{v.es}</td>
-                        <td className="py-3 px-3 border-b text-slate-700">{v.image}</td>
+            {selectedFloor === 1 && (
+              <div className="space-y-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="text-xs uppercase tracking-widest text-slate-500">
+                        <th className="py-3 px-3 border-b">Presente</th>
+                        <th className="py-3 px-3 border-b">Pasado</th>
+                        <th className="py-3 px-3 border-b">Participio</th>
+                        <th className="py-3 px-3 border-b">Español</th>
+                        <th className="py-3 px-3 border-b">Imagen Increíble</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {[...floor1VerbsAAA].sort((a, b) => a.base.localeCompare(b.base)).map((v) => (
+                        <tr key={v.base} className="align-top">
+                          <td className="py-3 px-3 border-b font-black text-blue-700">{capitalize(v.base)}</td>
+                          <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.past)}</td>
+                          <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.participle)}</td>
+                          <td className="py-3 px-3 border-b font-semibold text-slate-700">{v.es}</td>
+                          <td className="py-3 px-3 border-b text-slate-700">{v.image}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                  <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 1</p>
+                  <p className="text-slate-700 whitespace-pre-line">
+                    El usuario entra a la sala y se encuentra en medio de un casino gigante, donde todo brilla y se refleja en espejos infinitos. Un perro gigante, con gafas de póker, <ActionWord>APUESTA</ActionWord> huesos de oro en una mesa de cristal <ActionWord>(bet–bet–bet). </ActionWord>Al lado, un subastador con megáfono <ActionWord>SUBASTA</ActionWord> montañas de zapatos gigantes a un público invisible <ActionWord>(bid–bid–bid)</ActionWord>. De repente, una radio parlante gigante <ActionWord>TRANSMITE</ActionWord> noticias directamente a las nubes, que responden con truenos de risas (broadcast–broadcast–broadcast).
+                    {'\n'}El usuario avanza y globos de acero <ActionWord>ESTALLAN</ActionWord> a su alrededor, soltando confeti que nunca termina de caer (burst–burst–burst). En el escenario, un director de cine <ActionWord>LANZA</ActionWord> guiones a actores robots, que los atrapan al vuelo y empiezan a actuar al instante (cast–cast–cast). Pero el ambiente se pone tenso cuando una etiqueta de precio gigante cobra vida y <ActionWord>CUESTA</ActionWord> cada objeto que toca, persiguiendo al usuario por el pasillo (cost–cost–cost).
+                    {'\n'}Para escapar, el usuario corre hacia un bosque de cristal, donde un árbol <ActionWord>SE CORTA</ActionWord> a sí mismo con ramas en forma de tijeras, creando un camino (cut–cut–cut). Allí, un elefante rosa <ActionWord>ENCAJA</ActionWord> en una caja de fósforos y, contra todo pronóstico, lo logra (fit–fit–fit). En el cielo, un meteorólogo gigante <ActionWord>PRONOSTICA</ActionWord> nubes y rayos con un marcador fluorescente, dibujando el clima del palacio (forecast–forecast–forecast).
+                    {'\n'}De pronto, un guante de boxeo con alas <ActionWord>GOLPEA</ActionWord> una campana tan fuerte que la sala tiembla (hit–hit–hit). El usuario ve a un robot que se corta la mano y <ActionWord>DUELE</ActionWord> mientras sale aceite (hurt–hurt–hurt). Un teclado enorme <ActionWord>INTRODUCE</ActionWord> datos al sistema, masticando tarjetas perforadas y escupiendo números (input–input–input).
+                  </p>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                  <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 2</p>
+                  <p className="text-slate-700 whitespace-pre-line">
+                    El usuario llega a una fábrica dentro de la sala, donde todo se produce y transforma. Dos ovejas con agujas láser <ActionWord>TEJEN</ActionWord> la herida del robot, reparándolo al instante (knit–knit–knit). Un semáforo con cara sonriente <ActionWord>PERMITE</ActionWord> pasar a la siguiente sección (let–let–let).
+                    {'\n'}Al fondo, una impresora industrial <ActionWord>PRODUCE</ActionWord> globos de colores que salen volando en formación, como un ejército alegre (output–output–output). Un brazo robótico <ActionWord>PONE</ActionWord> sombreros en las cabezas de estatuas, que cobran vida y empiezan a bailar (put–put–put). De repente, un empleado cansado <ActionWord>RENUNCIA</ActionWord> a su trabajo, tirando papeles al aire y saliendo volando en un cohete (quit–quit–quit).
+                    {'\n'}El usuario se detiene frente a un libro rojo gigante que lo mira fijamente y <ActionWord>LEE</ActionWord> en voz alta, como si supiera sus pensamientos (read–read–read). Cerca, un perro enorme sacude su pelaje y <ActionWord>SE LIBRA</ActionWord> de todas las pulgas, que salen volando como estrellas (rid–rid–rid).
+                    {'\n'}En el techo, un camarero con botas antigravedad <ActionWord>COLOCA</ActionWord> una mesa al revés, desafiando las leyes de la física (set–set–set). Un árbol mecánico se sacude y <ActionWord>DESPRENDE</ActionWord> hojas de metal que suenan como campanas, creando una melodía extraña (shed–shed–shed).
+                    {'\n'}El usuario sigue avanzando y una puerta con boca grita "¡Silencio!" y <ActionWord>SE CIERRA</ActionWord> de golpe, dejando todo en oscuridad por un segundo (shut–shut–shut). Un ninja aparece de la nada y <ActionWord>RAJA</ActionWord> un papel tan fino que casi no se ve, pero el corte brilla como un rayo (slit–slit–slit).
+                    {'\n'}De pronto, un cuchillo gigante <ActionWord>ESPARCE</ActionWord> mantequilla en el suelo, haciendo que todos resbalen y rían (spread–spread–spread). Una fuente con forma de persona corriendo <ActionWord>SUDA</ActionWord> agua sin parar, creando un charco que refleja el techo (sweat–sweat–sweat).
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {selectedFloor === 2 && (
+              <div className="space-y-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="text-xs uppercase tracking-widest text-slate-500">
+                        <th className="py-3 px-3 border-b">Presente</th>
+                        <th className="py-3 px-3 border-b">Pasado</th>
+                        <th className="py-3 px-3 border-b">Participio</th>
+                        <th className="py-3 px-3 border-b">Español</th>
+                        <th className="py-3 px-3 border-b">Imagen Increíble</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...floor2VerbsABA].sort((a, b) => a.base.localeCompare(b.base)).map((v) => (
+                        <tr key={v.base} className="align-top">
+                          <td className="py-3 px-3 border-b font-black text-emerald-700">{capitalize(v.base)}</td>
+                          <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.past)}</td>
+                          <td className="py-3 px-3 border-b font-mono text-slate-700">{capitalize(v.participle)}</td>
+                          <td className="py-3 px-3 border-b font-semibold text-slate-700">{v.es}</td>
+                          <td className="py-3 px-3 border-b text-slate-700">{v.image}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl p-5">
+                  <p className="font-bold text-slate-900 mb-2">🌟 Historia del Piso 2 (ABA)</p>
+                  <p className="text-slate-700 whitespace-pre-line">
+                    El usuario entra y ve: Una oruga se <ActionWord>CONVIERTE</ActionWord> en mariposa metálica… y vuelve a ser oruga (become–became–become). Un perro <ActionWord>VIENE</ActionWord> corriendo, retrocede caminando… y vuelve a toda velocidad (come–came–come). Un atleta <ActionWord>CORRE</ActionWord>, se congela en hielo… y vuelve a correr en llamas (run–ran–run). Un saltador <ActionWord>SUPERA</ActionWord> el edificio, cae… y lo vuelve a superar con más fuerza (overcome–overcame–overcome).
+                    {'\n'}"Aquí todo regresa para intentarlo de nuevo."
+                  </p>
+                </div>
               </div>
             )}
 
@@ -351,7 +477,17 @@ const App = () => {
 
                     <div className="mt-4 bg-white border border-slate-200 rounded-xl p-4">
                       <p className="font-bold text-slate-800 mb-2">Historia enlazada</p>
-                      <p className="text-slate-700 whitespace-pre-line">{storiesABC[g.storyId]}</p>
+                      <p className="text-slate-700 whitespace-pre-line">
+                        {renderStoryWithHighlights(storiesABC[g.storyId], [
+                          // Historia 1 (IAU)
+                          'empieza', 'bebe', 'suena', 'baila', 'encoge', 'canta', 'hunde', 'apesta', 'nada',
+                          // Historias 2a / 2b (N final)
+                          'muerde', 'rompe', 'elige', 'conduce', 'come', 'cae', 'vuelan', 'prohíbe', 'olvida', 'perdonan', 'congela', 'da', 'va',
+                          'crece', 'esconde', 'sabe', 'yace', 'monta', 'levanta', 've', 'muestra', 'rasga', 'despierta', 'lleva', 'escribe',
+                          // Historia 3 (grupos 3,4,5)
+                          'habla', 'roba', 'lanza', 'agita', 'toma',
+                        ])}
+                      </p>
                       {(g.storyId === 'story3') && (
                         <p className="text-slate-500 text-sm mt-2 italic">(Esta historia conecta los Grupos 3, 4 y 5.)</p>
                       )}
