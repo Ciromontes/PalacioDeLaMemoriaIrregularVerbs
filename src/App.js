@@ -14,8 +14,8 @@ import ABBGameEngine from './ABB_Game_Engine';
 import ABCGameEngine, { groupsABC, storiesABC } from './ABC_Game_Engine';
 import { groupsABB } from './ABB_Game_Engine';
 
-const ActionWord = ({ children }) => (
-  <span className="font-black italic text-xl">{children}</span>
+const ActionWord = ({ children, toneClass = 'text-slate-900' }) => (
+  <span className={`font-black italic text-lg md:text-xl ${toneClass}`}>{children}</span>
 );
 
 const floor1VerbsAAA = [
@@ -56,7 +56,7 @@ const floor2VerbsABA = [
   { base: 'overcome', past: 'overcame', participle: 'overcome', es: 'Superar', image: 'Un saltador salta un edificio, cae y vuelve a saltarlo.' },
 ];
 
-function renderStoryWithHighlights(story, keywords) {
+function renderStoryWithHighlights(story, keywords, toneClass = 'text-slate-900') {
   if (!story) return null;
   if (!keywords?.length) return <span>{story}</span>;
 
@@ -65,7 +65,12 @@ function renderStoryWithHighlights(story, keywords) {
     .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .sort((a, b) => b.length - a.length);
 
-  const rx = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+  const tripletPattern = String.raw`\([A-Za-z]+(?:[-–—][A-Za-z]+){2}\)`;
+  const keywordsPattern = escaped.length ? String.raw`\\b(${escaped.join('|')})\\b` : null;
+  const rx = new RegExp(
+    keywordsPattern ? `(${tripletPattern})|${keywordsPattern}` : `(${tripletPattern})`,
+    'gi'
+  );
   const parts = [];
   let last = 0;
   let match;
@@ -73,7 +78,11 @@ function renderStoryWithHighlights(story, keywords) {
     const start = match.index;
     const end = start + match[0].length;
     if (start > last) parts.push(story.slice(last, start));
-    parts.push(<ActionWord key={`${start}-${end}`}>{match[0]}</ActionWord>);
+    parts.push(
+      <ActionWord key={`${start}-${end}`} toneClass={toneClass}>
+        {match[0]}
+      </ActionWord>
+    );
     last = end;
   }
   if (last < story.length) parts.push(story.slice(last));
@@ -354,22 +363,22 @@ const App = () => {
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 1</p>
                   <p className="text-slate-700 whitespace-pre-line">
-                    El usuario entra a la sala y se encuentra en medio de un casino gigante, donde todo brilla y se refleja en espejos infinitos. Un perro gigante, con gafas de póker, <ActionWord>APUESTA</ActionWord> huesos de oro en una mesa de cristal <ActionWord>(bet–bet–bet). </ActionWord>Al lado, un subastador con megáfono <ActionWord>SUBASTA</ActionWord> montañas de zapatos gigantes a un público invisible <ActionWord>(bid–bid–bid)</ActionWord>. De repente, una radio parlante gigante <ActionWord>TRANSMITE</ActionWord> noticias directamente a las nubes, que responden con truenos de risas (broadcast–broadcast–broadcast).
-                    {'\n'}El usuario avanza y globos de acero <ActionWord>ESTALLAN</ActionWord> a su alrededor, soltando confeti que nunca termina de caer (burst–burst–burst). En el escenario, un director de cine <ActionWord>LANZA</ActionWord> guiones a actores robots, que los atrapan al vuelo y empiezan a actuar al instante (cast–cast–cast). Pero el ambiente se pone tenso cuando una etiqueta de precio gigante cobra vida y <ActionWord>CUESTA</ActionWord> cada objeto que toca, persiguiendo al usuario por el pasillo (cost–cost–cost).
-                    {'\n'}Para escapar, el usuario corre hacia un bosque de cristal, donde un árbol <ActionWord>SE CORTA</ActionWord> a sí mismo con ramas en forma de tijeras, creando un camino (cut–cut–cut). Allí, un elefante rosa <ActionWord>ENCAJA</ActionWord> en una caja de fósforos y, contra todo pronóstico, lo logra (fit–fit–fit). En el cielo, un meteorólogo gigante <ActionWord>PRONOSTICA</ActionWord> nubes y rayos con un marcador fluorescente, dibujando el clima del palacio (forecast–forecast–forecast).
-                    {'\n'}De pronto, un guante de boxeo con alas <ActionWord>GOLPEA</ActionWord> una campana tan fuerte que la sala tiembla (hit–hit–hit). El usuario ve a un robot que se corta la mano y <ActionWord>DUELE</ActionWord> mientras sale aceite (hurt–hurt–hurt). Un teclado enorme <ActionWord>INTRODUCE</ActionWord> datos al sistema, masticando tarjetas perforadas y escupiendo números (input–input–input).
+                    El usuario entra a la sala y se encuentra en medio de un casino gigante, donde todo brilla y se refleja en espejos infinitos. Un perro gigante, con gafas de póker, <ActionWord toneClass="text-blue-700">APUESTA</ActionWord> huesos de oro en una mesa de cristal <ActionWord toneClass="text-blue-700">(bet–bet–bet). </ActionWord>Al lado, un subastador con megáfono <ActionWord toneClass="text-blue-700">SUBASTA</ActionWord> montañas de zapatos gigantes a un público invisible <ActionWord toneClass="text-blue-700">(bid–bid–bid)</ActionWord>. De repente, una radio parlante gigante <ActionWord toneClass="text-blue-700">TRANSMITE</ActionWord> noticias directamente a las nubes, que responden con truenos de risas <ActionWord toneClass="text-blue-700">(broadcast–broadcast–broadcast)</ActionWord>.
+                    {'\n'}El usuario avanza y globos de acero <ActionWord toneClass="text-blue-700">ESTALLAN</ActionWord> a su alrededor, soltando confeti que nunca termina de caer <ActionWord toneClass="text-blue-700">(burst–burst–burst)</ActionWord>. En el escenario, un director de cine <ActionWord toneClass="text-blue-700">LANZA</ActionWord> guiones a actores robots, que los atrapan al vuelo y empiezan a actuar al instante <ActionWord toneClass="text-blue-700">(cast–cast–cast)</ActionWord>. Pero el ambiente se pone tenso cuando una etiqueta de precio gigante cobra vida y <ActionWord toneClass="text-blue-700">CUESTA</ActionWord> cada objeto que toca, persiguiendo al usuario por el pasillo <ActionWord toneClass="text-blue-700">(cost–cost–cost)</ActionWord>.
+                    {'\n'}Para escapar, el usuario corre hacia un bosque de cristal, donde un árbol <ActionWord toneClass="text-blue-700">SE CORTA</ActionWord> a sí mismo con ramas en forma de tijeras, creando un camino <ActionWord toneClass="text-blue-700">(cut–cut–cut)</ActionWord>. Allí, un elefante rosa <ActionWord toneClass="text-blue-700">ENCAJA</ActionWord> en una caja de fósforos y, contra todo pronóstico, lo logra <ActionWord toneClass="text-blue-700">(fit–fit–fit)</ActionWord>. En el cielo, un meteorólogo gigante <ActionWord toneClass="text-blue-700">PRONOSTICA</ActionWord> nubes y rayos con un marcador fluorescente, dibujando el clima del palacio <ActionWord toneClass="text-blue-700">(forecast–forecast–forecast)</ActionWord>.
+                    {'\n'}De pronto, un guante de boxeo con alas <ActionWord toneClass="text-blue-700">GOLPEA</ActionWord> una campana tan fuerte que la sala tiembla <ActionWord toneClass="text-blue-700">(hit–hit–hit)</ActionWord>. El usuario ve a un robot que se corta la mano y <ActionWord toneClass="text-blue-700">DUELE</ActionWord> mientras sale aceite <ActionWord toneClass="text-blue-700">(hurt–hurt–hurt)</ActionWord>. Un teclado enorme <ActionWord toneClass="text-blue-700">INTRODUCE</ActionWord> datos al sistema, masticando tarjetas perforadas y escupiendo números <ActionWord toneClass="text-blue-700">(input–input–input)</ActionWord>.
                   </p>
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 2</p>
                   <p className="text-slate-700 whitespace-pre-line">
-                    El usuario llega a una fábrica dentro de la sala, donde todo se produce y transforma. Dos ovejas con agujas láser <ActionWord>TEJEN</ActionWord> la herida del robot, reparándolo al instante (knit–knit–knit). Un semáforo con cara sonriente <ActionWord>PERMITE</ActionWord> pasar a la siguiente sección (let–let–let).
-                    {'\n'}Al fondo, una impresora industrial <ActionWord>PRODUCE</ActionWord> globos de colores que salen volando en formación, como un ejército alegre (output–output–output). Un brazo robótico <ActionWord>PONE</ActionWord> sombreros en las cabezas de estatuas, que cobran vida y empiezan a bailar (put–put–put). De repente, un empleado cansado <ActionWord>RENUNCIA</ActionWord> a su trabajo, tirando papeles al aire y saliendo volando en un cohete (quit–quit–quit).
-                    {'\n'}El usuario se detiene frente a un libro rojo gigante que lo mira fijamente y <ActionWord>LEE</ActionWord> en voz alta, como si supiera sus pensamientos (read–read–read). Cerca, un perro enorme sacude su pelaje y <ActionWord>SE LIBRA</ActionWord> de todas las pulgas, que salen volando como estrellas (rid–rid–rid).
-                    {'\n'}En el techo, un camarero con botas antigravedad <ActionWord>COLOCA</ActionWord> una mesa al revés, desafiando las leyes de la física (set–set–set). Un árbol mecánico se sacude y <ActionWord>DESPRENDE</ActionWord> hojas de metal que suenan como campanas, creando una melodía extraña (shed–shed–shed).
-                    {'\n'}El usuario sigue avanzando y una puerta con boca grita "¡Silencio!" y <ActionWord>SE CIERRA</ActionWord> de golpe, dejando todo en oscuridad por un segundo (shut–shut–shut). Un ninja aparece de la nada y <ActionWord>RAJA</ActionWord> un papel tan fino que casi no se ve, pero el corte brilla como un rayo (slit–slit–slit).
-                    {'\n'}De pronto, un cuchillo gigante <ActionWord>ESPARCE</ActionWord> mantequilla en el suelo, haciendo que todos resbalen y rían (spread–spread–spread). Una fuente con forma de persona corriendo <ActionWord>SUDA</ActionWord> agua sin parar, creando un charco que refleja el techo (sweat–sweat–sweat).
+                    El usuario llega a una fábrica dentro de la sala, donde todo se produce y transforma. Dos ovejas con agujas láser <ActionWord toneClass="text-blue-700">TEJEN</ActionWord> la herida del robot, reparándolo al instante <ActionWord toneClass="text-blue-700">(knit–knit–knit)</ActionWord>. Un semáforo con cara sonriente <ActionWord toneClass="text-blue-700">PERMITE</ActionWord> pasar a la siguiente sección <ActionWord toneClass="text-blue-700">(let–let–let)</ActionWord>.
+                    {'\n'}Al fondo, una impresora industrial <ActionWord toneClass="text-blue-700">PRODUCE</ActionWord> globos de colores que salen volando en formación, como un ejército alegre <ActionWord toneClass="text-blue-700">(output–output–output)</ActionWord>. Un brazo robótico <ActionWord toneClass="text-blue-700">PONE</ActionWord> sombreros en las cabezas de estatuas, que cobran vida y empiezan a bailar <ActionWord toneClass="text-blue-700">(put–put–put)</ActionWord>. De repente, un empleado cansado <ActionWord toneClass="text-blue-700">RENUNCIA</ActionWord> a su trabajo, tirando papeles al aire y saliendo volando en un cohete <ActionWord toneClass="text-blue-700">(quit–quit–quit)</ActionWord>.
+                    {'\n'}El usuario se detiene frente a un libro rojo gigante que lo mira fijamente y <ActionWord toneClass="text-blue-700">LEE</ActionWord> en voz alta, como si supiera sus pensamientos <ActionWord toneClass="text-blue-700">(read–read–read)</ActionWord>. Cerca, un perro enorme sacude su pelaje y <ActionWord toneClass="text-blue-700">SE LIBRA</ActionWord> de todas las pulgas, que salen volando como estrellas <ActionWord toneClass="text-blue-700">(rid–rid–rid)</ActionWord>.
+                    {'\n'}En el techo, un camarero con botas antigravedad <ActionWord toneClass="text-blue-700">COLOCA</ActionWord> una mesa al revés, desafiando las leyes de la física <ActionWord toneClass="text-blue-700">(set–set–set)</ActionWord>. Un árbol mecánico se sacude y <ActionWord toneClass="text-blue-700">DESPRENDE</ActionWord> hojas de metal que suenan como campanas, creando una melodía extraña <ActionWord toneClass="text-blue-700">(shed–shed–shed)</ActionWord>.
+                    {'\n'}El usuario sigue avanzando y una puerta con boca grita "¡Silencio!" y <ActionWord toneClass="text-blue-700">SE CIERRA</ActionWord> de golpe, dejando todo en oscuridad por un segundo <ActionWord toneClass="text-blue-700">(shut–shut–shut)</ActionWord>. Un ninja aparece de la nada y <ActionWord toneClass="text-blue-700">RAJA</ActionWord> un papel tan fino que casi no se ve, pero el corte brilla como un rayo <ActionWord toneClass="text-blue-700">(slit–slit–slit)</ActionWord>.
+                    {'\n'}De pronto, un cuchillo gigante <ActionWord toneClass="text-blue-700">ESPARCE</ActionWord> mantequilla en el suelo, haciendo que todos resbalen y rían <ActionWord toneClass="text-blue-700">(spread–spread–spread)</ActionWord>. Una fuente con forma de persona corriendo <ActionWord toneClass="text-blue-700">SUDA</ActionWord> agua sin parar, creando un charco que refleja el techo <ActionWord toneClass="text-blue-700">(sweat–sweat–sweat)</ActionWord>.
                   </p>
                 </div>
               </div>
@@ -405,7 +414,7 @@ const App = () => {
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">🌟 Historia del Piso 2 (ABA)</p>
                   <p className="text-slate-700 whitespace-pre-line">
-                    El usuario entra y ve: Una oruga se <ActionWord>CONVIERTE</ActionWord> en mariposa metálica… y vuelve a ser oruga (become–became–become). Un perro <ActionWord>VIENE</ActionWord> corriendo, retrocede caminando… y vuelve a toda velocidad (come–came–come). Un atleta <ActionWord>CORRE</ActionWord>, se congela en hielo… y vuelve a correr en llamas (run–ran–run). Un saltador <ActionWord>SUPERA</ActionWord> el edificio, cae… y lo vuelve a superar con más fuerza (overcome–overcame–overcome).
+                    El usuario entra y ve: Una oruga se <ActionWord toneClass="text-emerald-700">CONVIERTE</ActionWord> en mariposa metálica… y vuelve a ser oruga <ActionWord toneClass="text-emerald-700">(become–became–become)</ActionWord>. Un perro <ActionWord toneClass="text-emerald-700">VIENE</ActionWord> corriendo, retrocede caminando… y vuelve a toda velocidad <ActionWord toneClass="text-emerald-700">(come–came–come)</ActionWord>. Un atleta <ActionWord toneClass="text-emerald-700">CORRE</ActionWord>, se congela en hielo… y vuelve a correr en llamas <ActionWord toneClass="text-emerald-700">(run–ran–run)</ActionWord>. Un saltador <ActionWord toneClass="text-emerald-700">SUPERA</ActionWord> el edificio, cae… y lo vuelve a superar con más fuerza <ActionWord toneClass="text-emerald-700">(overcome–overcame–overcome)</ActionWord>.
                     {'\n'}"Aquí todo regresa para intentarlo de nuevo."
                   </p>
                 </div>
@@ -478,7 +487,9 @@ const App = () => {
                     <div className="mt-4 bg-white border border-slate-200 rounded-xl p-4">
                       <p className="font-bold text-slate-800 mb-2">Historia enlazada</p>
                       <p className="text-slate-700 whitespace-pre-line">
-                        {renderStoryWithHighlights(storiesABC[g.storyId], [
+                        {renderStoryWithHighlights(
+                          storiesABC[g.storyId],
+                          [
                           // Historia 1 (IAU)
                           'empieza', 'bebe', 'suena', 'baila', 'encoge', 'canta', 'hunde', 'apesta', 'nada',
                           // Historias 2a / 2b (N final)
@@ -486,7 +497,9 @@ const App = () => {
                           'crece', 'esconde', 'sabe', 'yace', 'monta', 'levanta', 've', 'muestra', 'rasga', 'despierta', 'lleva', 'escribe',
                           // Historia 3 (grupos 3,4,5)
                           'habla', 'roba', 'lanza', 'agita', 'toma',
-                        ])}
+                          ],
+                          'text-red-700'
+                        )}
                       </p>
                       {(g.storyId === 'story3') && (
                         <p className="text-slate-500 text-sm mt-2 italic">(Esta historia conecta los Grupos 3, 4 y 5.)</p>
