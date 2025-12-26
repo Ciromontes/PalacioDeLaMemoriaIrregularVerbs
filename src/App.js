@@ -18,6 +18,44 @@ const ActionWord = ({ children, toneClass = 'text-slate-900' }) => (
   <span className={`font-black italic text-lg md:text-xl ${toneClass}`}>{children}</span>
 );
 
+const VERB_TONE_PALETTE = [
+  'text-blue-700',
+  'text-red-700',
+  'text-emerald-700',
+  'text-purple-700',
+  'text-amber-700',
+  'text-indigo-700',
+  'text-cyan-700',
+  'text-teal-700',
+  'text-orange-700',
+  'text-pink-700',
+  'text-fuchsia-700',
+  'text-sky-700',
+  'text-lime-700',
+  'text-violet-700',
+];
+
+const SPECIAL_VERB_TONES = {
+  put: 'text-blue-700',
+  slit: 'text-red-700',
+};
+
+function hashStringToIndex(input, mod) {
+  const s = String(input ?? '').toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < s.length; i += 1) {
+    hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  }
+  return mod ? hash % mod : hash;
+}
+
+function toneForVerbBase(base) {
+  const key = String(base ?? '').trim().toLowerCase();
+  if (!key) return 'text-slate-900';
+  if (SPECIAL_VERB_TONES[key]) return SPECIAL_VERB_TONES[key];
+  return VERB_TONE_PALETTE[hashStringToIndex(key, VERB_TONE_PALETTE.length)];
+}
+
 const floor1VerbsAAA = [
   { base: 'bet', past: 'bet', participle: 'bet', es: 'Apostar', image: 'Un perro gigante apuesta huesos de oro en una mesa de póker.' },
   { base: 'bid', past: 'bid', participle: 'bid', es: 'Pujar/(subasta) Ofrecer', image: 'Un subastador con megáfono ofrece montañas de zapatos gigantes en una feria.' },
@@ -56,38 +94,109 @@ const floor2VerbsABA = [
   { base: 'overcome', past: 'overcame', participle: 'overcome', es: 'Superar', image: 'Un saltador salta un edificio, cae y vuelve a saltarlo.' },
 ];
 
-function renderStoryWithHighlights(story, keywords, toneClass = 'text-slate-900') {
+function renderStoryWithVerbHighlights(story, spanishActionToBase = {}) {
   if (!story) return null;
-  if (!keywords?.length) return <span>{story}</span>;
 
-  const escaped = keywords
+  const actionKeys = Object.keys(spanishActionToBase || {});
+  const escapedActions = actionKeys
     .filter(Boolean)
     .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .sort((a, b) => b.length - a.length);
 
   const tripletPattern = String.raw`\([A-Za-z]+(?:[-–—][A-Za-z]+){2}\)`;
-  const keywordsPattern = escaped.length ? String.raw`\\b(${escaped.join('|')})\\b` : null;
+
+  const actionPattern = escapedActions.length
+    ? String.raw`(?<![\p{L}])(${escapedActions.join('|')})(?![\p{L}])`
+    : null;
+
   const rx = new RegExp(
-    keywordsPattern ? `(${tripletPattern})|${keywordsPattern}` : `(${tripletPattern})`,
-    'gi'
+    actionPattern ? `(${tripletPattern})|${actionPattern}` : `(${tripletPattern})`,
+    'giu'
   );
+
   const parts = [];
   let last = 0;
   let match;
+
   while ((match = rx.exec(story)) !== null) {
     const start = match.index;
     const end = start + match[0].length;
     if (start > last) parts.push(story.slice(last, start));
+
+    const matchedText = match[0];
+
+    // If it looks like a triplet, pick tone from its base.
+    if (matchedText.startsWith('(') && matchedText.endsWith(')')) {
+      const inner = matchedText.slice(1, -1);
+      const base = inner.split(/[-–—]/)[0]?.trim();
+      parts.push(
+        <ActionWord key={`${start}-${end}`} toneClass={toneForVerbBase(base)}>
+          {matchedText}
+        </ActionWord>
+      );
+      last = end;
+      continue;
+    }
+
+    const lower = matchedText.toLocaleLowerCase();
+    const base = spanishActionToBase?.[lower];
     parts.push(
-      <ActionWord key={`${start}-${end}`} toneClass={toneClass}>
-        {match[0]}
+      <ActionWord key={`${start}-${end}`} toneClass={toneForVerbBase(base)}>
+        {matchedText}
       </ActionWord>
     );
     last = end;
   }
+
   if (last < story.length) parts.push(story.slice(last));
   return <>{parts}</>;
 }
+
+const STORIES_ABC_ACTION_TO_BASE = {
+  // story1
+  empieza: 'begin',
+  bebe: 'drink',
+  suena: 'ring',
+  baila: 'ring',
+  encoge: 'shrink',
+  canta: 'sing',
+  hunde: 'sink',
+  apesta: 'stink',
+  nada: 'swim',
+  // story2a
+  muerde: 'bite',
+  rompe: 'break',
+  elige: 'choose',
+  conduce: 'drive',
+  come: 'eat',
+  cae: 'fall',
+  vuelan: 'fly',
+  'prohíbe': 'forbid',
+  olvida: 'forget',
+  perdonan: 'forgive',
+  congela: 'freeze',
+  da: 'give',
+  va: 'go',
+  // story2b
+  crece: 'grow',
+  esconde: 'hide',
+  sabe: 'know',
+  yace: 'lie',
+  monta: 'ride',
+  levanta: 'rise',
+  ve: 'see',
+  muestra: 'show',
+  rasga: 'tear',
+  despierta: 'wake',
+  lleva: 'wear',
+  escribe: 'write',
+  // story3
+  habla: 'speak',
+  roba: 'steal',
+  lanza: 'throw',
+  agita: 'shake',
+  toma: 'take',
+};
 
 // --- DATOS DE LAS IMÁGENES MENTALES (Según tus PDFs) ---
 const mentalImages = {
@@ -362,23 +471,80 @@ const App = () => {
 
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 1</p>
-                  <p className="text-slate-700 whitespace-pre-line">
-                    El usuario entra a la sala y se encuentra en medio de un casino gigante, donde todo brilla y se refleja en espejos infinitos. Un perro gigante, con gafas de póker, <ActionWord toneClass="text-blue-700">APUESTA</ActionWord> huesos de oro en una mesa de cristal <ActionWord toneClass="text-blue-700">(bet–bet–bet). </ActionWord>Al lado, un subastador con megáfono <ActionWord toneClass="text-blue-700">SUBASTA</ActionWord> montañas de zapatos gigantes a un público invisible <ActionWord toneClass="text-blue-700">(bid–bid–bid)</ActionWord>. De repente, una radio parlante gigante <ActionWord toneClass="text-blue-700">TRANSMITE</ActionWord> noticias directamente a las nubes, que responden con truenos de risas <ActionWord toneClass="text-blue-700">(broadcast–broadcast–broadcast)</ActionWord>.
-                    {'\n'}El usuario avanza y globos de acero <ActionWord toneClass="text-blue-700">ESTALLAN</ActionWord> a su alrededor, soltando confeti que nunca termina de caer <ActionWord toneClass="text-blue-700">(burst–burst–burst)</ActionWord>. En el escenario, un director de cine <ActionWord toneClass="text-blue-700">LANZA</ActionWord> guiones a actores robots, que los atrapan al vuelo y empiezan a actuar al instante <ActionWord toneClass="text-blue-700">(cast–cast–cast)</ActionWord>. Pero el ambiente se pone tenso cuando una etiqueta de precio gigante cobra vida y <ActionWord toneClass="text-blue-700">CUESTA</ActionWord> cada objeto que toca, persiguiendo al usuario por el pasillo <ActionWord toneClass="text-blue-700">(cost–cost–cost)</ActionWord>.
-                    {'\n'}Para escapar, el usuario corre hacia un bosque de cristal, donde un árbol <ActionWord toneClass="text-blue-700">SE CORTA</ActionWord> a sí mismo con ramas en forma de tijeras, creando un camino <ActionWord toneClass="text-blue-700">(cut–cut–cut)</ActionWord>. Allí, un elefante rosa <ActionWord toneClass="text-blue-700">ENCAJA</ActionWord> en una caja de fósforos y, contra todo pronóstico, lo logra <ActionWord toneClass="text-blue-700">(fit–fit–fit)</ActionWord>. En el cielo, un meteorólogo gigante <ActionWord toneClass="text-blue-700">PRONOSTICA</ActionWord> nubes y rayos con un marcador fluorescente, dibujando el clima del palacio <ActionWord toneClass="text-blue-700">(forecast–forecast–forecast)</ActionWord>.
-                    {'\n'}De pronto, un guante de boxeo con alas <ActionWord toneClass="text-blue-700">GOLPEA</ActionWord> una campana tan fuerte que la sala tiembla <ActionWord toneClass="text-blue-700">(hit–hit–hit)</ActionWord>. El usuario ve a un robot que se corta la mano y <ActionWord toneClass="text-blue-700">DUELE</ActionWord> mientras sale aceite <ActionWord toneClass="text-blue-700">(hurt–hurt–hurt)</ActionWord>. Un teclado enorme <ActionWord toneClass="text-blue-700">INTRODUCE</ActionWord> datos al sistema, masticando tarjetas perforadas y escupiendo números <ActionWord toneClass="text-blue-700">(input–input–input)</ActionWord>.
+                  <p className="text-slate-800 text-lg leading-8 whitespace-pre-line">
+                    Tema: El Gran Juego de las Acciones Repetidas
+                    {'\n'}El usuario entra al palacio de los espejos de repente ve un perro gigante que{' '}
+                    <ActionWord toneClass={toneForVerbBase('bet')}>APUESTA</ActionWord> huesos de oro en una mesa de cristal{' '}
+                    <ActionWord toneClass={toneForVerbBase('bet')}>(bet–bet–bet)</ActionWord>. Al lado, alguien con un megáfono{' '}
+                    <ActionWord toneClass={toneForVerbBase('bid')}>SUBASTA</ActionWord> montañas de zapatos gigantes{' '}
+                    <ActionWord toneClass={toneForVerbBase('bid')}>(bid–bid–bid)</ActionWord>. De repente, una radio parlante gigante{' '}
+                    <ActionWord toneClass={toneForVerbBase('broadcast')}>TRANSMITE</ActionWord> noticias directamente a las nubes,{' '}
+                    <ActionWord toneClass={toneForVerbBase('broadcast')}>(broadcast–broadcast–broadcast)</ActionWord>.
+                    {'\n'}El usuario avanza y ve globos de acero{' '}
+                    <ActionWord toneClass={toneForVerbBase('burst')}>ESTALLAN</ActionWord> a su alrededor, soltando confetis infinitos{' '}
+                    <ActionWord toneClass={toneForVerbBase('burst')}>(burst–burst–burst)</ActionWord>. En el escenario, un director de cine{' '}
+                    <ActionWord toneClass={toneForVerbBase('cast')}>LANZA</ActionWord> guiones a actores robots, que los atrapan al vuelo y empiezan a actuar al instante{' '}
+                    <ActionWord toneClass={toneForVerbBase('cast')}>(cast–cast–cast)</ActionWord>. Pero el ambiente se pone tenso cuando una etiqueta de precio gigante cobra vida empieza a perseguirlo por el pasillo recordándole el costo del entrada,{' '}
+                    <ActionWord toneClass={toneForVerbBase('cost')}>(cost–cost–cost)</ActionWord>.
+                    {'\n'}Para escapar, el usuario corre hacia un bosque de cristal, donde un árbol{' '}
+                    <ActionWord toneClass={toneForVerbBase('cut')}>SE CORTA</ActionWord> a sí mismo con ramas en forma de tijeras{' '}
+                    <ActionWord toneClass={toneForVerbBase('cut')}>(cut–cut–cut)</ActionWord>. Al lado, un elefante rosa intenta{' '}
+                    <ActionWord toneClass={toneForVerbBase('fit')}>ENCAJAR</ActionWord> en una caja de fósforos y, contra todo pronóstico, lo logra{' '}
+                    <ActionWord toneClass={toneForVerbBase('fit')}>(fit–fit–fit)</ActionWord>. En el cielo, un meteorólogo gigante{' '}
+                    <ActionWord toneClass={toneForVerbBase('forecast')}>PRONOSTICA</ActionWord> nubes y rayos con un marcador fluorescente,{' '}
+                    <ActionWord toneClass={toneForVerbBase('forecast')}>(forecast–forecast–forecast)</ActionWord>.
+                    {'\n'}De pronto, un guante de boxeo con alas{' '}
+                    <ActionWord toneClass={toneForVerbBase('hit')}>GOLPEA</ActionWord> una campana tan fuerte que la sala tiembla{' '}
+                    <ActionWord toneClass={toneForVerbBase('hit')}>(hit–hit–hit)</ActionWord>. El usuario ve a un robot que se corta y le sale aceite de la herida la mano y le{' '}
+                    <ActionWord toneClass={toneForVerbBase('hurt')}>DUELE</ActionWord> muchísimo{' '}
+                    <ActionWord toneClass={toneForVerbBase('hurt')}>(hurt–hurt–hurt)</ActionWord>. Un teclado enorme{' '}
+                    <ActionWord toneClass={toneForVerbBase('input')}>INTRODUCE</ActionWord> datos al sistema, masticando tarjetas perforadas y escupiendo números{' '}
+                    <ActionWord toneClass={toneForVerbBase('input')}>(input–input–input)</ActionWord>.
                   </p>
                 </div>
 
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">PISO 1: LA SALA DE LOS ESPEJOS – Parte 2</p>
-                  <p className="text-slate-700 whitespace-pre-line">
-                    El usuario llega a una fábrica dentro de la sala, donde todo se produce y transforma. Dos ovejas con agujas láser <ActionWord toneClass="text-blue-700">TEJEN</ActionWord> la herida del robot, reparándolo al instante <ActionWord toneClass="text-blue-700">(knit–knit–knit)</ActionWord>. Un semáforo con cara sonriente <ActionWord toneClass="text-blue-700">PERMITE</ActionWord> pasar a la siguiente sección <ActionWord toneClass="text-blue-700">(let–let–let)</ActionWord>.
-                    {'\n'}Al fondo, una impresora industrial <ActionWord toneClass="text-blue-700">PRODUCE</ActionWord> globos de colores que salen volando en formación, como un ejército alegre <ActionWord toneClass="text-blue-700">(output–output–output)</ActionWord>. Un brazo robótico <ActionWord toneClass="text-blue-700">PONE</ActionWord> sombreros en las cabezas de estatuas, que cobran vida y empiezan a bailar <ActionWord toneClass="text-blue-700">(put–put–put)</ActionWord>. De repente, un empleado cansado <ActionWord toneClass="text-blue-700">RENUNCIA</ActionWord> a su trabajo, tirando papeles al aire y saliendo volando en un cohete <ActionWord toneClass="text-blue-700">(quit–quit–quit)</ActionWord>.
-                    {'\n'}El usuario se detiene frente a un libro rojo gigante que lo mira fijamente y <ActionWord toneClass="text-blue-700">LEE</ActionWord> en voz alta, como si supiera sus pensamientos <ActionWord toneClass="text-blue-700">(read–read–read)</ActionWord>. Cerca, un perro enorme sacude su pelaje y <ActionWord toneClass="text-blue-700">SE LIBRA</ActionWord> de todas las pulgas, que salen volando como estrellas <ActionWord toneClass="text-blue-700">(rid–rid–rid)</ActionWord>.
-                    {'\n'}En el techo, un camarero con botas antigravedad <ActionWord toneClass="text-blue-700">COLOCA</ActionWord> una mesa al revés, desafiando las leyes de la física <ActionWord toneClass="text-blue-700">(set–set–set)</ActionWord>. Un árbol mecánico se sacude y <ActionWord toneClass="text-blue-700">DESPRENDE</ActionWord> hojas de metal que suenan como campanas, creando una melodía extraña <ActionWord toneClass="text-blue-700">(shed–shed–shed)</ActionWord>.
-                    {'\n'}El usuario sigue avanzando y una puerta con boca grita "¡Silencio!" y <ActionWord toneClass="text-blue-700">SE CIERRA</ActionWord> de golpe, dejando todo en oscuridad por un segundo <ActionWord toneClass="text-blue-700">(shut–shut–shut)</ActionWord>. Un ninja aparece de la nada y <ActionWord toneClass="text-blue-700">RAJA</ActionWord> un papel tan fino que casi no se ve, pero el corte brilla como un rayo <ActionWord toneClass="text-blue-700">(slit–slit–slit)</ActionWord>.
-                    {'\n'}De pronto, un cuchillo gigante <ActionWord toneClass="text-blue-700">ESPARCE</ActionWord> mantequilla en el suelo, haciendo que todos resbalen y rían <ActionWord toneClass="text-blue-700">(spread–spread–spread)</ActionWord>. Una fuente con forma de persona corriendo <ActionWord toneClass="text-blue-700">SUDA</ActionWord> agua sin parar, creando un charco que refleja el techo <ActionWord toneClass="text-blue-700">(sweat–sweat–sweat)</ActionWord>.
+                  <p className="text-slate-800 text-lg leading-8 whitespace-pre-line">
+                    Tema: La Fábrica de lo Imposible
+                    {'\n'}El usuario llega a una fábrica dentro de la sala, donde todo se produce y transforma. Dos ovejas con agujas láser{' '}
+                    <ActionWord toneClass={toneForVerbBase('knit')}>TEJEN</ActionWord> la herida del robot, reparándolo al instante{' '}
+                    <ActionWord toneClass={toneForVerbBase('knit')}>(knit–knit–knit)</ActionWord>. Un semáforo con cara sonriente le{' '}
+                    <ActionWord toneClass={toneForVerbBase('let')}>PERMITE</ActionWord> pasar a la siguiente sección{' '}
+                    <ActionWord toneClass={toneForVerbBase('let')}>(let–let–let)</ActionWord>.
+                    {'\n'}Al fondo, una impresora industrial{' '}
+                    <ActionWord toneClass={toneForVerbBase('output')}>PRODUCE</ActionWord> globos de colores que salen volando en formación, como un ejército alegre{' '}
+                    <ActionWord toneClass={toneForVerbBase('output')}>(output–output–output)</ActionWord>. Un brazo robótico{' '}
+                    <ActionWord toneClass={toneForVerbBase('put')}>PONE</ActionWord> sombreros en las cabezas de estatuas,{' '}
+                    <ActionWord toneClass={toneForVerbBase('put')}>(put–put–put)</ActionWord>. De repente, un empleado cansado{' '}
+                    <ActionWord toneClass={toneForVerbBase('quit')}>RENUNCIA</ActionWord> a su trabajo, tirando papeles al aire y saliendo volando en un cohete{' '}
+                    <ActionWord toneClass={toneForVerbBase('quit')}>(quit–quit–quit)</ActionWord>.
+                    {'\n'}El usuario se detiene frente a un libro rojo gigante que empieza a{' '}
+                    <ActionWord toneClass={toneForVerbBase('read')}>LEER</ActionWord> en voz alta sus pensamientos{' '}
+                    <ActionWord toneClass={toneForVerbBase('read')}>(read–read–read)</ActionWord>. Cerca, un perro enorme sacude su pelaje y{' '}
+                    <ActionWord toneClass={toneForVerbBase('rid')}>SE LIBRA</ActionWord> de todas las pulgas, que salen volando como estrellas{' '}
+                    <ActionWord toneClass={toneForVerbBase('rid')}>(rid–rid–rid)</ActionWord>.
+                    {'\n'}Un camarero antigravedad coloca una mesa en el techo (al revés){' '}
+                    <ActionWord toneClass={toneForVerbBase('set')}>(set–set–set)</ActionWord>. Un árbol mecánico se sacude y{' '}
+                    <ActionWord toneClass={toneForVerbBase('shed')}>DESPRENDE</ActionWord> hojas de metal que suenan como campanas, creando una melodía extraña{' '}
+                    <ActionWord toneClass={toneForVerbBase('shed')}>(shed–shed–shed)</ActionWord>.
+                    {'\n'}El usuario sigue avanzando y una puerta con boca grita "¡Silencio!" y{' '}
+                    <ActionWord toneClass={toneForVerbBase('shut')}>SE CIERRA</ActionWord> de golpe, dejando todo en oscuridad por un segundo{' '}
+                    <ActionWord toneClass={toneForVerbBase('shut')}>(shut–shut–shut)</ActionWord>. Un ninja aparece de la nada y{' '}
+                    <ActionWord toneClass={toneForVerbBase('slit')}>RAJA</ActionWord> un papel tan fino que casi no se ve, pero el corte brilla como un rayo{' '}
+                    <ActionWord toneClass={toneForVerbBase('slit')}>(slit–slit–slit)</ActionWord>.
+                    {'\n'}De pronto, un cuchillo gigante{' '}
+                    <ActionWord toneClass={toneForVerbBase('spread')}>ESPARCE</ActionWord> mantequilla en el suelo, haciendo que todos resbalen y rían{' '}
+                    <ActionWord toneClass={toneForVerbBase('spread')}>(spread–spread–spread)</ActionWord>. Una fuente con forma de persona corriendo que{' '}
+                    <ActionWord toneClass={toneForVerbBase('sweat')}>SUDA</ActionWord> agua sin parar, creando un charco que refleja el techo{' '}
+                    <ActionWord toneClass={toneForVerbBase('sweat')}>(sweat–sweat–sweat)</ActionWord>.
+                    {'\n'}Ve un motor a reacción que{' '}
+                    <ActionWord toneClass={toneForVerbBase('thrust')}>EMPUJA</ActionWord> un carrito de supermercado a velocidad luz{' '}
+                    <ActionWord toneClass={toneForVerbBase('thrust')}>(thrust–thrust–thrust)</ActionWord>. Un helado enorme se derrite encima de un escritorio que{' '}
+                    <ActionWord toneClass={toneForVerbBase('upset')}>MOLESTA</ActionWord> a los papeles{' '}
+                    <ActionWord toneClass={toneForVerbBase('upset')}>(upset–upset–upset)</ActionWord>. Y por último ve a una nube que llueve solo sobre una silla,{' '}
+                    <ActionWord toneClass={toneForVerbBase('wet')}>MOJÁNDOLA</ActionWord>{' '}
+                    <ActionWord toneClass={toneForVerbBase('wet')}>(wet–wet–wet)</ActionWord>.
                   </p>
                 </div>
               </div>
@@ -413,8 +579,16 @@ const App = () => {
 
                 <div className="bg-white border border-slate-200 rounded-xl p-5">
                   <p className="font-bold text-slate-900 mb-2">🌟 Historia del Piso 2 (ABA)</p>
-                  <p className="text-slate-700 whitespace-pre-line">
-                    El usuario entra y ve: Una oruga se <ActionWord toneClass="text-emerald-700">CONVIERTE</ActionWord> en mariposa metálica… y vuelve a ser oruga <ActionWord toneClass="text-emerald-700">(become–became–become)</ActionWord>. Un perro <ActionWord toneClass="text-emerald-700">VIENE</ActionWord> corriendo, retrocede caminando… y vuelve a toda velocidad <ActionWord toneClass="text-emerald-700">(come–came–come)</ActionWord>. Un atleta <ActionWord toneClass="text-emerald-700">CORRE</ActionWord>, se congela en hielo… y vuelve a correr en llamas <ActionWord toneClass="text-emerald-700">(run–ran–run)</ActionWord>. Un saltador <ActionWord toneClass="text-emerald-700">SUPERA</ActionWord> el edificio, cae… y lo vuelve a superar con más fuerza <ActionWord toneClass="text-emerald-700">(overcome–overcame–overcome)</ActionWord>.
+                  <p className="text-slate-800 text-lg leading-8 whitespace-pre-line">
+                    El usuario entra y ve: Una oruga se{' '}
+                    <ActionWord toneClass={toneForVerbBase('become')}>CONVIERTE</ActionWord> en mariposa metálica… y vuelve a ser oruga{' '}
+                    <ActionWord toneClass={toneForVerbBase('become')}>(become–became–become)</ActionWord>. Un perro{' '}
+                    <ActionWord toneClass={toneForVerbBase('come')}>VIENE</ActionWord> corriendo, retrocede caminando… y vuelve a toda velocidad{' '}
+                    <ActionWord toneClass={toneForVerbBase('come')}>(come–came–come)</ActionWord>. Un atleta{' '}
+                    <ActionWord toneClass={toneForVerbBase('run')}>CORRE</ActionWord>, se congela en hielo… y vuelve a correr en llamas{' '}
+                    <ActionWord toneClass={toneForVerbBase('run')}>(run–ran–run)</ActionWord>. Un saltador{' '}
+                    <ActionWord toneClass={toneForVerbBase('overcome')}>SUPERA</ActionWord> el edificio, cae… y lo vuelve a superar con más fuerza{' '}
+                    <ActionWord toneClass={toneForVerbBase('overcome')}>(overcome–overcame–overcome)</ActionWord>.
                     {'\n'}"Aquí todo regresa para intentarlo de nuevo."
                   </p>
                 </div>
@@ -487,19 +661,7 @@ const App = () => {
                     <div className="mt-4 bg-white border border-slate-200 rounded-xl p-4">
                       <p className="font-bold text-slate-800 mb-2">Historia enlazada</p>
                       <p className="text-slate-700 whitespace-pre-line">
-                        {renderStoryWithHighlights(
-                          storiesABC[g.storyId],
-                          [
-                          // Historia 1 (IAU)
-                          'empieza', 'bebe', 'suena', 'baila', 'encoge', 'canta', 'hunde', 'apesta', 'nada',
-                          // Historias 2a / 2b (N final)
-                          'muerde', 'rompe', 'elige', 'conduce', 'come', 'cae', 'vuelan', 'prohíbe', 'olvida', 'perdonan', 'congela', 'da', 'va',
-                          'crece', 'esconde', 'sabe', 'yace', 'monta', 'levanta', 've', 'muestra', 'rasga', 'despierta', 'lleva', 'escribe',
-                          // Historia 3 (grupos 3,4,5)
-                          'habla', 'roba', 'lanza', 'agita', 'toma',
-                          ],
-                          'text-red-700'
-                        )}
+                        {renderStoryWithVerbHighlights(storiesABC[g.storyId], STORIES_ABC_ACTION_TO_BASE)}
                       </p>
                       {(g.storyId === 'story3') && (
                         <p className="text-slate-500 text-sm mt-2 italic">(Esta historia conecta los Grupos 3, 4 y 5.)</p>
