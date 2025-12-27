@@ -4,34 +4,59 @@ import { Check, X, RefreshCw, Sparkles, ChevronRight, ChevronLeft, Eye, Brain, T
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
 const verbsAAA = [
   { en: "bet", es: "apostar", image: "Un perro gigante apuesta huesos de oro en una mesa de póker." },
+  { en: "bid", es: "pujar/ofrecer/subastar", image: "Un subastador con megáfono ofrece montañas de zapatos gigantes en una feria." },
+  { en: "broadcast", es: "transmitir", image: "Una radio parlante gigante transmite noticias a las nubes." },
   { en: "burst", es: "estallar", image: "Globos de acero estallan soltando confeti infinito." },
   { en: "cast", es: "lanzar (papel)", image: "Un director de cine lanza guiones a actores robots." },
   { en: "cost", es: "costar", image: "Una etiqueta de precio gigante te persigue por el pasillo." },
   { en: "cut", es: "cortar", image: "Un árbol se corta a sí mismo con ramas en forma de tijeras." },
   { en: "fit", es: "encajar", image: "Un elefante intenta encajar en una caja de fósforos y entra perfecto." },
+  { en: "forecast", es: "pronosticar", image: "Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente." },
   { en: "hit", es: "golpear", image: "Un guante de boxeo con alas golpea una campana." },
   { en: "hurt", es: "herir/doler", image: "Un cactus gigante se sienta en una silla y se pincha a sí mismo." },
+  { en: "input", es: "introducir", image: "Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números." },
   { en: "knit", es: "tejer", image: "Dos ovejas tejen su propia lana con agujas láser." },
   { en: "let", es: "permitir", image: "Un semáforo con cara sonriente te deja pasar." },
+  { en: "output", es: "producir/salir", image: "Una impresora industrial produce globos de colores que salen volando en formación." },
   { en: "put", es: "poner", image: "Un brazo robótico pone sombreros en cabezas de estatuas." },
   { en: "quit", es: "renunciar", image: "Un empleado tira papeles al aire y sale volando en un cohete." },
   { en: "read", es: "leer", image: "Un libro rojo gigante te lee a ti en voz alta. (Suena 'red' en pasado)." },
+  { en: "rid", es: "librar", image: "Un perro enorme sacude su pelaje y se libera de todas las pulgas que lo molestaban." },
   { en: "set", es: "colocar/fijar", image: "Un camarero antigravedad coloca una mesa en el techo (al revés)." },
+  { en: "shed", es: "desprender", image: "Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas." },
   { en: "shut", es: "cerrar", image: "Una puerta con boca grita '¡Silencio!' y se cierra sola." },
   { en: "slit", es: "rajar", image: "Un ninja corta un papel tan fino que no se ve." },
   { en: "spread", es: "esparcir", image: "Un cuchillo unta mantequilla en el suelo de toda la sala." },
   { en: "sweat", es: "sudar", image: "Una fuente de agua con forma de persona corriendo y sudando." },
   { en: "thrust", es: "empujar", image: "Un motor a reacción empuja un carrito de supermercado a velocidad luz." },
   { en: "upset", es: "molestar", image: "Un helado enorme se derrite encima de un escritorio y fastidia (molesta) a los papeles." },
-  { en: "wet", es: "mojar", image: "Una nube personal llueve solo sobre una silla." },
-  { en: "bid", es: "pujar/ofrecer/subastar", image: "Un subastador con megáfono ofrece montañas de zapatos gigantes en una feria." },
-  { en: "broadcast", es: "transmitir", image: "Una radio parlante gigante transmite noticias a las nubes." },
-  { en: "forecast", es: "pronosticar", image: "Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente." },
-  { en: "input", es: "introducir", image: "Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números." },
-  { en: "output", es: "producir/salir", image: "Una impresora industrial produce globos de colores que salen volando en formación." },
-  { en: "rid", es: "librar", image: "Un perro enorme sacude su pelaje y se libera de todas las pulgas que lo molestaban." },
-  { en: "shed", es: "desprender", image: "Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas." }
+  { en: "wet", es: "mojar", image: "Una nube personal llueve solo sobre una silla." }
 ];
+
+function getAAAPalaceImageUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  // If PUBLIC_URL is empty, prefer relative paths so hosting under a subpath still works.
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  // Files can be case-sensitive in production (Linux). We'll try an uppercase default.
+  const fileName = base === 'forecast' ? 'forecast.webp' : `${base.toUpperCase()}.webp`;
+  return `${prefix}img/AAA/${fileName}`;
+}
+
+function getAAAPalaceImageFallbackUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  // Secondary attempt: alternate casing.
+  const fileName = base === 'forecast' ? 'FORECAST.webp' : `${base}.webp`;
+  return `${prefix}img/AAA/${fileName}`;
+}
 
 const intruderVerbs = [
   { en: "sing", es: "cantar", pattern: "Cambia (i-a-u)" },
@@ -89,6 +114,8 @@ export default function AAA_Game_Engine({ onExit }) {
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [palaceView, setPalaceView] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [palaceImageError, setPalaceImageError] = useState(false);
+  const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
   const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
@@ -342,29 +369,70 @@ export default function AAA_Game_Engine({ onExit }) {
               <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
               <p className="text-xl text-blue-300 mb-6 font-serif italic">"{verbsAAA[palaceView].es}"</p>
 
+              <div className="w-full max-w-4xl mb-6">
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => {
+                      setPalaceImageError(false);
+                      setPalaceImageVariant('primary');
+                      setPalaceView((prev) => Math.max(0, prev - 1));
+                    }}
+                    disabled={palaceView === 0}
+                    aria-label="Anterior"
+                    className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition shrink-0"
+                  >
+                    <ChevronLeft />
+                  </button>
+
+                  <div className="w-full">
+                    {!palaceImageError ? (
+                      <img
+                        key={`${verbsAAA[palaceView].en}-${palaceImageVariant}`}
+                        src={
+                          palaceImageVariant === 'primary'
+                            ? getAAAPalaceImageUrl(verbsAAA[palaceView].en)
+                            : getAAAPalaceImageFallbackUrl(verbsAAA[palaceView].en)
+                        }
+                        alt={verbsAAA[palaceView].en}
+                        loading="lazy"
+                        onError={() => {
+                          if (palaceImageVariant === 'primary') {
+                            setPalaceImageVariant('fallback');
+                          } else {
+                            setPalaceImageError(true);
+                          }
+                        }}
+                        className="w-full h-[260px] md:h-[360px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain"
+                      />
+                    ) : (
+                      <div className="w-full h-[260px] md:h-[360px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                        No se pudo cargar la imagen para <span className="font-mono ml-2">{verbsAAA[palaceView].en}</span>
+                      </div>
+                    )}
+
+                    <div className="mt-3 font-mono text-slate-500">{palaceView + 1} / {verbsAAA.length}</div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setPalaceImageError(false);
+                      setPalaceImageVariant('primary');
+                      setPalaceView((prev) => Math.min(verbsAAA.length - 1, prev + 1));
+                    }}
+                    disabled={palaceView === verbsAAA.length - 1}
+                    aria-label="Siguiente"
+                    className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition shrink-0"
+                  >
+                    <ChevronRight />
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-slate-800 p-4 rounded-lg max-w-lg border border-slate-600">
                 <p className="text-yellow-100 text-lg leading-relaxed">
                   👁️ {verbsAAA[palaceView].image}
                 </p>
               </div>
-            </div>
-
-            <div className="flex justify-between items-center gap-4">
-              <button
-                onClick={() => setPalaceView(prev => Math.max(0, prev - 1))}
-                disabled={palaceView === 0}
-                className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition"
-              >
-                <ChevronLeft />
-              </button>
-              <span className="font-mono text-slate-500">{palaceView + 1} / {verbsAAA.length}</span>
-              <button
-                onClick={() => setPalaceView(prev => Math.min(verbsAAA.length - 1, prev + 1))}
-                disabled={palaceView === verbsAAA.length - 1}
-                className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition"
-              >
-                <ChevronRight />
-              </button>
             </div>
           </div>
         )}
