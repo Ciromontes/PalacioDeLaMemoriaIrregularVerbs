@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check, X, RefreshCw, Sparkles, ChevronRight, ChevronLeft, Eye, Brain, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
@@ -283,6 +283,38 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [palaceImageError, setPalaceImageError] = useState(false);
   const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const touchStartXRef = useRef(null);
+
+  useEffect(() => {
+    const mq = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(pointer: coarse)')
+      : null;
+
+    const update = () => setIsCoarsePointer(Boolean(mq ? mq.matches : false));
+    update();
+
+    if (!mq) return;
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }
+    // Fallback for older browsers
+    mq.addListener(update);
+    return () => mq.removeListener(update);
+  }, []);
+
+  const goPalacePrev = () => {
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+    setPalaceView((prev) => (prev - 1 + verbsAAA.length) % verbsAAA.length);
+  };
+
+  const goPalaceNext = () => {
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+    setPalaceView((prev) => (prev + 1) % verbsAAA.length);
+  };
 
   const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
 
@@ -566,79 +598,100 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
         )}
 
         {stage === 'palace' && (
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-4 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-emerald-400">Galería Mental</h2>
               <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
             </div>
 
-            <div className="bg-slate-900/50 p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            {isCoarsePointer && (
+              <div className="mb-4 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-200 flex items-center gap-2">
+                <span className="font-bold">Desliza</span>
+                <span className="text-slate-400">hacia la izquierda</span>
+                <ChevronLeft className="w-5 h-5" />
+                <span className="text-slate-400">para avanzar</span>
+              </div>
+            )}
+
+            <div className="bg-slate-900/50 p-4 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
 
-              <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
-              <p className="text-xl text-blue-300 mb-6 font-serif italic">"{verbsAAA[palaceView].es}"</p>
+              <h3 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
+              <p className="text-lg md:text-xl text-blue-300 mb-4 md:mb-6 font-serif italic">"{verbsAAA[palaceView].es}"</p>
 
-              <div className="w-full max-w-4xl mb-6">
-                <div className="flex items-center justify-center gap-4">
+              <div className="w-full max-w-4xl mb-4 md:mb-6">
+                <div
+                  className="relative w-full"
+                  onTouchStart={(e) => {
+                    const x = e.touches?.[0]?.clientX;
+                    touchStartXRef.current = typeof x === 'number' ? x : null;
+                  }}
+                  onTouchEnd={(e) => {
+                    const startX = touchStartXRef.current;
+                    touchStartXRef.current = null;
+                    if (typeof startX !== 'number') return;
+
+                    const endX = e.changedTouches?.[0]?.clientX;
+                    if (typeof endX !== 'number') return;
+
+                    const delta = endX - startX;
+                    const threshold = 50;
+                    if (Math.abs(delta) < threshold) return;
+
+                    // Swipe left => next (ascendente)
+                    if (delta < 0) goPalaceNext();
+                    else goPalacePrev();
+                  }}
+                >
                   <button
-                    onClick={() => {
-                      setPalaceImageError(false);
-                      setPalaceImageVariant('primary');
-                      setPalaceView((prev) => Math.max(0, prev - 1));
-                    }}
-                    disabled={palaceView === 0}
+                    type="button"
+                    onClick={goPalacePrev}
                     aria-label="Anterior"
-                    className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition shrink-0"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-3 md:p-4 rounded-full hover:bg-blue-600 transition z-10"
                   >
                     <ChevronLeft />
                   </button>
 
-                  <div className="w-full">
-                    {!palaceImageError ? (
-                      <img
-                        key={`${verbsAAA[palaceView].en}-${palaceImageVariant}`}
-                        src={
-                          palaceImageVariant === 'primary'
-                            ? getAAAPalaceImageUrl(verbsAAA[palaceView].en)
-                            : getAAAPalaceImageFallbackUrl(verbsAAA[palaceView].en)
+                  {!palaceImageError ? (
+                    <img
+                      key={`${verbsAAA[palaceView].en}-${palaceImageVariant}`}
+                      src={
+                        palaceImageVariant === 'primary'
+                          ? getAAAPalaceImageUrl(verbsAAA[palaceView].en)
+                          : getAAAPalaceImageFallbackUrl(verbsAAA[palaceView].en)
+                      }
+                      alt={verbsAAA[palaceView].en}
+                      loading="lazy"
+                      onError={() => {
+                        if (palaceImageVariant === 'primary') {
+                          setPalaceImageVariant('fallback');
+                        } else {
+                          setPalaceImageError(true);
                         }
-                        alt={verbsAAA[palaceView].en}
-                        loading="lazy"
-                        onError={() => {
-                          if (palaceImageVariant === 'primary') {
-                            setPalaceImageVariant('fallback');
-                          } else {
-                            setPalaceImageError(true);
-                          }
-                        }}
-                        className="w-full h-[260px] md:h-[360px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain"
-                      />
-                    ) : (
-                      <div className="w-full h-[260px] md:h-[360px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
-                        No se pudo cargar la imagen para <span className="font-mono ml-2">{verbsAAA[palaceView].en}</span>
-                      </div>
-                    )}
-
-                    <div className="mt-3 font-mono text-slate-500">{palaceView + 1} / {verbsAAA.length}</div>
-                  </div>
+                      }}
+                      className="w-full h-[55vh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-[55vh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                      No se pudo cargar la imagen para <span className="font-mono ml-2">{verbsAAA[palaceView].en}</span>
+                    </div>
+                  )}
 
                   <button
-                    onClick={() => {
-                      setPalaceImageError(false);
-                      setPalaceImageVariant('primary');
-                      setPalaceView((prev) => Math.min(verbsAAA.length - 1, prev + 1));
-                    }}
-                    disabled={palaceView === verbsAAA.length - 1}
+                    type="button"
+                    onClick={goPalaceNext}
                     aria-label="Siguiente"
-                    className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-blue-600 transition shrink-0"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-3 md:p-4 rounded-full hover:bg-blue-600 transition z-10"
                   >
                     <ChevronRight />
                   </button>
                 </div>
+
+                <div className="mt-3 font-mono text-slate-500">{palaceView + 1} / {verbsAAA.length}</div>
               </div>
 
-              <div className="bg-slate-800 p-4 rounded-lg max-w-lg border border-slate-600">
-                <p className="text-yellow-100 text-lg leading-relaxed">
+              <div className="bg-slate-800 p-4 rounded-lg w-full max-w-3xl border border-slate-600">
+                <p className="text-yellow-100 text-base md:text-lg leading-relaxed">
                   👁️ {verbsAAA[palaceView].image}
                 </p>
               </div>
