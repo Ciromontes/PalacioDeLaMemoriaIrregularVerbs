@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Brain, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, RefreshCw, Sparkles, Trophy, X } from 'lucide-react';
+
+import { isSpeechSupported, speakEnglishBlock, stopSpeech, warmUpVoices } from './speech';
 
 // Piso 2 (ABA): Presente = Participio, Pasado distinto
 // Regla: El pasado cambia, pero el participio vuelve al origen.
@@ -162,6 +164,14 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
+  const [feedbackSpeechEn, setFeedbackSpeechEn] = useState([]);
+  const speechAvailable = isSpeechSupported();
+
+  useEffect(() => {
+    warmUpVoices();
+    return () => stopSpeech();
+  }, []);
+
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
@@ -180,6 +190,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   }, []);
 
   const initLevel = (level) => {
+    stopSpeech();
     setStage(level);
     setCurrentQuestion(0);
     setScore(0);
@@ -189,6 +200,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
+    setFeedbackSpeechEn([]);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
@@ -226,9 +238,11 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   };
 
   const handleNext = () => {
+    stopSpeech();
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
+    setFeedbackSpeechEn([]);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -242,10 +256,12 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
+      stopSpeech();
       setCurrentQuestion(prev => prev - 1);
       setFeedback('');
       setFeedbackDetails('');
       setShowFeedbackDetails(false);
+      setFeedbackSpeechEn([]);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -340,6 +356,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
     setFeedbackDetails(details);
     setShowFeedbackDetails(false);
+    setFeedbackSpeechEn([presentEn, pastEn, perfEn].filter(Boolean));
 
     if (isCorrect) {
       setScore(prev => prev + 1);
@@ -717,6 +734,24 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
             {stage === 'level4' && showFeedbackDetails && feedbackDetails && (
               <div className="mt-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4 whitespace-pre-line text-slate-100">
+                {speechAvailable && feedbackSpeechEn.length > 0 && (
+                  <div className="mb-3 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => speakEnglishBlock(feedbackSpeechEn)}
+                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                    >
+                      Escuchar EN
+                    </button>
+                    <button
+                      type="button"
+                      onClick={stopSpeech}
+                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                    >
+                      Detener
+                    </button>
+                  </div>
+                )}
                 {feedbackDetails}
               </div>
             )}

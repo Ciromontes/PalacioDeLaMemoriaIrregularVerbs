@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   Brain,
@@ -12,6 +12,8 @@ import {
   Trophy,
   X,
 } from 'lucide-react';
+
+import { isSpeechSupported, speakEnglishBlock, stopSpeech, warmUpVoices } from './speech';
 
 // PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
 // Regla: Las 3 formas son distintas.
@@ -425,7 +427,15 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
   const selectedGroup = useMemo(() => groupsABC.find((g) => g.id === selectedGroupId) ?? null, [selectedGroupId]);
 
+  const speechAvailable = isSpeechSupported();
+
+  useEffect(() => {
+    warmUpVoices();
+    return () => stopSpeech();
+  }, []);
+
   const resetRoundState = () => {
+    stopSpeech();
     setCurrentQuestion(0);
     setScore(0);
     setPoints(0);
@@ -464,6 +474,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
   const initLevel = (level) => {
     if (!selectedGroup) return;
+    stopSpeech();
     resetRoundState();
     setStage(level);
 
@@ -500,6 +511,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   };
 
   const handleNext = () => {
+    stopSpeech();
     setFeedback('');
     setFeedbackDetails(null);
     setShowFeedbackDetails(false);
@@ -516,6 +528,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
   const handlePrevious = () => {
     if (currentQuestion > 0) {
+      stopSpeech();
       setCurrentQuestion((prev) => prev - 1);
       setFeedback('');
       setFeedbackDetails(null);
@@ -1147,6 +1160,32 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                 {waitingForNext && showFeedbackDetails && feedbackDetails && (
                   <div className="mt-4 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
                     <div className="text-slate-200 font-bold mb-2">Retroalimentación (3 tiempos)</div>
+
+                    {speechAvailable && (
+                      <div className="mb-3 flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            speakEnglishBlock([
+                              feedbackDetails.present.en,
+                              feedbackDetails.past.en,
+                              feedbackDetails.perf.en,
+                            ]);
+                          }}
+                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
+                        >
+                          Escuchar EN
+                        </button>
+                        <button
+                          type="button"
+                          onClick={stopSpeech}
+                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
+                        >
+                          Detener
+                        </button>
+                      </div>
+                    )}
+
                     <div className="space-y-3">
                       <div>
                         <div className="text-slate-300 text-sm font-bold">Presente</div>
