@@ -13,22 +13,22 @@ const verbsAAA = [
   { en: "fit", es: "encajar", image: "Un elefante intenta encajar en una caja de fósforos y entra perfecto." },
   { en: "forecast", es: "pronosticar", image: "Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente." },
   { en: "hit", es: "golpear", image: "Un guante de boxeo con alas golpea una campana." },
-  { en: "hurt", es: "herir/doler", image: "Un cactus gigante se sienta en una silla y se pincha a sí mismo." },
+  { en: "hurt", es: "herir/doler", image: "Un robot se corta la mano y sale aceite." },
   { en: "input", es: "introducir", image: "Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números." },
-  { en: "knit", es: "tejer", image: "Dos ovejas tejen su propia lana con agujas láser." },
+  { en: "knit", es: "tejer", image: "Dos ovejas tejen la herida del robot con su lana y agujas láser." },
   { en: "let", es: "permitir", image: "Un semáforo con cara sonriente te deja pasar." },
   { en: "output", es: "producir/salir", image: "Una impresora industrial produce globos de colores que salen volando en formación." },
   { en: "put", es: "poner", image: "Un brazo robótico pone sombreros en cabezas de estatuas." },
-  { en: "quit", es: "renunciar", image: "Un empleado tira papeles al aire y sale volando en un cohete." },
+  { en: "quit", es: "renunciar", image: "Un empleado que renuncia tira papeles al aire y sale volando en un cohete." },
   { en: "read", es: "leer", image: "Un libro rojo gigante te lee a ti en voz alta. (Suena 'red' en pasado)." },
-  { en: "rid", es: "librar", image: "Un perro enorme sacude su pelaje y se libera de todas las pulgas que lo molestaban." },
+  { en: "rid", es: "librar", image: "Un perro gigante usa un secador de pelo para librarse de todas las pulgas; al desprenderse se convierten en estrellas." },
   { en: "set", es: "colocar/fijar", image: "Un camarero antigravedad coloca una mesa en el techo (al revés)." },
   { en: "shed", es: "desprender", image: "Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas." },
-  { en: "shut", es: "cerrar", image: "Una puerta con boca grita '¡Silencio!' y se cierra sola." },
+  { en: "shut", es: "cerrar", image: "Un hombre cierra la puerta antes de que un león furioso intente entrar." },
   { en: "slit", es: "rajar", image: "Un ninja corta un papel tan fino que no se ve." },
   { en: "spread", es: "esparcir", image: "Un cuchillo unta mantequilla en el suelo de toda la sala." },
   { en: "sweat", es: "sudar", image: "Una fuente de agua con forma de persona corriendo y sudando." },
-  { en: "thrust", es: "empujar", image: "Un motor a reacción empuja un carrito de supermercado a velocidad luz." },
+  { en: "thrust", es: "empujar", image: "Un niño intenta empujar un elefante con todas sus fuerzas." },
   { en: "upset", es: "molestar", image: "Un helado enorme se derrite encima de un escritorio y fastidia (molesta) a los papeles." },
   { en: "wet", es: "mojar", image: "Una nube personal llueve solo sobre una silla." }
 ];
@@ -69,47 +69,214 @@ const intruderVerbs = [
   { en: "run", es: "correr", pattern: "Va y vuelve (ABA)" }
 ];
 
-// FRASES PARA NIVEL 4 - 28 frases (una por cada verbo AAA)
-const sentences = [
-  { es: "Ayer, me ___ el dedo con papel.", en: "Yesterday, I ___ my finger with paper.", verb: "cut", meaning: "cortar" },
-  { es: "He ___ las llaves en la mesa.", en: "I have ___ the keys on the table.", verb: "put", meaning: "poner" },
-  { es: "El globo ha ___ en mil pedazos.", en: "The balloon has ___ into a thousand pieces.", verb: "burst", meaning: "estallar" },
-  { es: "Ella ___ la puerta con fuerza anoche.", en: "She ___ the door hard last night.", verb: "shut", meaning: "cerrar" },
-  { es: "¿Cuánto ha ___ este robot?", en: "How much has this robot ___?", verb: "cost", meaning: "costar" },
-  { es: "El ninja ___ la tela silenciosamente.", en: "The ninja ___ the fabric silently.", verb: "slit", meaning: "rajar" },
-  { es: "Siempre ___ en el casino los viernes.", en: "He always ___ at the casino on Fridays.", verb: "bet", meaning: "apostar" },
-  { es: "El actor fue ___ en el papel principal.", en: "The actor was ___ in the leading role.", verb: "cast", meaning: "lanzar" },
-  { es: "El traje le ___ perfectamente.", en: "The suit ___ him perfectly.", verb: "fit", meaning: "encajar" },
-  { es: "El boxeador ___ a su oponente.", en: "The boxer ___ his opponent.", verb: "hit", meaning: "golpear" },
-  { es: "Sus palabras me ___ profundamente.", en: "His words ___ me deeply.", verb: "hurt", meaning: "herir" },
-  { es: "Mi abuela ___ un suéter para mí.", en: "My grandmother ___ a sweater for me.", verb: "knit", meaning: "tejer" },
-  { es: "El profesor nos ___ usar el teléfono.", en: "The teacher ___ us use the phone.", verb: "let", meaning: "permitir" },
-  { es: "Él ___ su trabajo la semana pasada.", en: "He ___ his job last week.", verb: "quit", meaning: "renunciar" },
-  { es: "Ayer ___ un libro fascinante.", en: "Yesterday I ___ a fascinating book.", verb: "read", meaning: "leer" },
-  { es: "El chef ___ la mesa para la cena.", en: "The chef ___ the table for dinner.", verb: "set", meaning: "colocar" },
-  { es: "___ mantequilla en el pan.", en: "I ___ butter on the bread.", verb: "spread", meaning: "esparcir" },
-  { es: "___ mucho durante el ejercicio.", en: "I ___ a lot during exercise.", verb: "sweat", meaning: "sudar" },
-  { es: "El cohete se ___ hacia adelante.", en: "The rocket ___ forward.", verb: "thrust", meaning: "empujar" },
-  { es: "La noticia ___ a todos.", en: "The news ___ everyone.", verb: "upset", meaning: "molestar" },
-  { es: "La lluvia ___ la ropa tendida.", en: "The rain ___ the hanging clothes.", verb: "wet", meaning: "mojar" },
-  { es: "___ $100 por la pintura.", en: "I ___ $100 for the painting.", verb: "bid", meaning: "SUBASTA" },
-  { es: "La cadena ___ el evento en vivo.", en: "The network ___ the live event.", verb: "broadcast", meaning: "transmitir" },
-  { es: "El meteorólogo ___ lluvia para mañana.", en: "The meteorologist ___ rain for tomorrow.", verb: "forecast", meaning: "pronosticar" },
-  { es: "___ los datos en el sistema.", en: "I ___ the data into the system.", verb: "input", meaning: "introducir" },
-  { es: "La máquina ___ 100 unidades por hora.", en: "The machine ___ 100 units per hour.", verb: "output", meaning: "producir" },
-  { es: "Nos ___ de las malas hierbas.", en: "We ___ ourselves of the weeds.", verb: "rid", meaning: "librar" },
-  { es: "El árbol ___ sus hojas en otoño.", en: "The tree ___ its leaves in autumn.", verb: "shed", meaning: "desprender" }
-];
+function fillBlank(sentence, word) {
+  return String(sentence ?? '').replace('___', String(word ?? ''));
+}
 
-export default function AAA_Game_Engine({ onExit }) {
+function getContextTemplatesAAA() {
+  // Retroalimentación: 3 tiempos (presente / pasado / present perfect) con EN+ES.
+  // Nota: En AAA el verbo no cambia, pero igual mostramos 3 ejemplos completos.
+  return {
+    bet: {
+      present: { en: 'I ___ on my team when the pressure is high.', esFull: 'Apuesto por mi equipo cuando hay presión.' },
+      past: { en: 'Yesterday I ___ on the underdog for fun.', esFull: 'Ayer aposté por el menos favorito por diversión.' },
+      perf: { en: 'This season I have ___ only small amounts.', esFull: 'Esta temporada he apostado solo cantidades pequeñas.' },
+    },
+    bid: {
+      present: { en: 'I ___ on rare books online.', esFull: 'Pujo por libros raros en línea.' },
+      past: { en: 'Yesterday I ___ $100 at the auction.', esFull: 'Ayer ofrecí $100 en la subasta.' },
+      perf: { en: 'This week I have ___ several times for the same item.', esFull: 'Esta semana he pujado varias veces por el mismo artículo.' },
+    },
+    broadcast: {
+      present: { en: 'The station ___ the news every morning.', esFull: 'La emisora transmite las noticias cada mañana.' },
+      past: { en: 'Yesterday they ___ the match live.', esFull: 'Ayer transmitieron el partido en vivo.' },
+      perf: { en: 'They have ___ updates all day.', esFull: 'Han transmitido actualizaciones todo el día.' },
+    },
+    burst: {
+      present: { en: 'Some balloons ___ in the heat.', esFull: 'Algunos globos estallan con el calor.' },
+      past: { en: 'The balloon ___ suddenly during the party.', esFull: 'El globo estalló de repente durante la fiesta.' },
+      perf: { en: 'The pipe has ___ and we shut the water off.', esFull: 'La tubería ha reventado y cerramos el agua.' },
+    },
+    cast: {
+      present: { en: 'The director ___ new actors for each project.', esFull: 'El director selecciona nuevos actores para cada proyecto.' },
+      past: { en: 'They ___ her in the lead role.', esFull: 'La eligieron para el papel principal.' },
+      perf: { en: 'They have ___ several new actors this month.', esFull: 'Este mes han seleccionado a varios actores nuevos.' },
+    },
+    cost: {
+      present: { en: 'This course ___ less than the advanced one.', esFull: 'Este curso cuesta menos que el avanzado.' },
+      past: { en: 'The repair ___ more than expected.', esFull: 'La reparación costó más de lo esperado.' },
+      perf: { en: 'It has ___ us a lot of time to fix.', esFull: 'Nos ha costado mucho tiempo arreglarlo.' },
+    },
+    cut: {
+      present: { en: 'I sometimes ___ my finger with paper.', esFull: 'A veces me corto el dedo con papel.' },
+      past: { en: 'Yesterday I ___ my finger while cooking.', esFull: 'Ayer me corté el dedo mientras cocinaba.' },
+      perf: { en: 'We have ___ the budget by 10%.', esFull: 'Hemos recortado el presupuesto un 10%.' },
+    },
+    fit: {
+      present: { en: 'This key ___ the lock perfectly.', esFull: 'Esta llave encaja perfectamente en la cerradura.' },
+      past: { en: 'The suit ___ me perfectly.', esFull: 'El traje me quedó perfecto.' },
+      perf: { en: 'All the data has ___ on one page.', esFull: 'Todos los datos han cabido en una sola página.' },
+    },
+    forecast: {
+      present: { en: 'They ___ rain for tomorrow.', esFull: 'Pronostican lluvia para mañana.' },
+      past: { en: 'Yesterday they ___ strong winds.', esFull: 'Ayer pronosticaron vientos fuertes.' },
+      perf: { en: 'They have ___ a colder week ahead.', esFull: 'Han pronosticado una semana más fría.' },
+    },
+    hit: {
+      present: { en: 'Sales often ___ a peak in December.', esFull: 'Las ventas suelen alcanzar un pico en diciembre.' },
+      past: { en: 'Yesterday the ball ___ the window.', esFull: 'Ayer la pelota golpeó la ventana.' },
+      perf: { en: 'The team has ___ its target this quarter.', esFull: 'El equipo ha alcanzado su meta este trimestre.' },
+    },
+    hurt: {
+      present: { en: 'My back ___ if I sit too long.', esFull: 'Me duele la espalda si me siento demasiado tiempo.' },
+      past: { en: 'Yesterday my knee ___ after the run.', esFull: 'Ayer me dolió la rodilla después de correr.' },
+      perf: { en: 'That comment has ___ his feelings.', esFull: 'Ese comentario ha herido sus sentimientos.' },
+    },
+    input: {
+      present: { en: 'I ___ the data into the system every day.', esFull: 'Introduzco los datos en el sistema todos los días.' },
+      past: { en: 'Yesterday I ___ the new values manually.', esFull: 'Ayer introduje los nuevos valores manualmente.' },
+      perf: { en: 'We have ___ all records for the month.', esFull: 'Hemos ingresado todos los registros del mes.' },
+    },
+    knit: {
+      present: { en: 'She ___ a scarf in the evenings.', esFull: 'Ella teje una bufanda por las noches.' },
+      past: { en: 'My grandmother ___ a sweater for me.', esFull: 'Mi abuela tejió un suéter para mí.' },
+      perf: { en: 'She has ___ three hats this winter.', esFull: 'Este invierno ha tejido tres gorros.' },
+    },
+    let: {
+      present: { en: 'My manager ___ me work from home on Fridays.', esFull: 'Mi jefe me permite trabajar desde casa los viernes.' },
+      past: { en: 'Yesterday they ___ us leave early.', esFull: 'Ayer nos dejaron salir temprano.' },
+      perf: { en: 'They have ___ us use the lab for practice.', esFull: 'Nos han dejado usar el laboratorio para practicar.' },
+    },
+    output: {
+      present: { en: 'The machine ___ 100 units per hour.', esFull: 'La máquina produce 100 unidades por hora.' },
+      past: { en: 'Yesterday it ___ a complete report.', esFull: 'Ayer produjo un informe completo.' },
+      perf: { en: 'It has ___ consistent results all week.', esFull: 'Ha producido resultados consistentes toda la semana.' },
+    },
+    put: {
+      present: { en: 'I ___ my phone on silent during meetings.', esFull: 'Pongo el teléfono en silencio durante las reuniones.' },
+      past: { en: 'Yesterday I ___ the keys on the table.', esFull: 'Ayer puse las llaves en la mesa.' },
+      perf: { en: 'I have ___ the documents in the folder.', esFull: 'He puesto los documentos en la carpeta.' },
+    },
+    quit: {
+      present: { en: 'Some people ___ when things get hard.', esFull: 'Algunas personas renuncian cuando las cosas se complican.' },
+      past: { en: 'He ___ his job last week.', esFull: 'Él renunció a su trabajo la semana pasada.' },
+      perf: { en: 'She has ___ smoking.', esFull: 'Ella ha dejado de fumar.' },
+    },
+    read: {
+      present: { en: 'I ___ emails every morning.', esFull: 'Leo correos cada mañana.' },
+      past: { en: 'Yesterday I ___ a fascinating book.', esFull: 'Ayer leí un libro fascinante.' },
+      perf: { en: 'I have ___ the instructions twice.', esFull: 'He leído las instrucciones dos veces.' },
+    },
+    rid: {
+      present: { en: 'We ___ the garden of weeds every spring.', esFull: 'Nos libramos de las malas hierbas cada primavera.' },
+      past: { en: 'Yesterday we ___ the house of old boxes.', esFull: 'Ayer nos deshicimos de cajas viejas en la casa.' },
+      perf: { en: 'We have ___ ourselves of distractions during study time.', esFull: 'Nos hemos librado de distracciones durante el tiempo de estudio.' },
+    },
+    set: {
+      present: { en: 'I ___ clear goals for the week.', esFull: 'Fijo metas claras para la semana.' },
+      past: { en: 'Yesterday we ___ the table for dinner.', esFull: 'Ayer pusimos la mesa para la cena.' },
+      perf: { en: 'We have ___ a deadline for Friday.', esFull: 'Hemos fijado una fecha límite para el viernes.' },
+    },
+    shed: {
+      present: { en: 'Trees ___ leaves in autumn.', esFull: 'Los árboles pierden hojas en otoño.' },
+      past: { en: 'The dog ___ a lot of hair yesterday.', esFull: 'El perro mudó mucho pelo ayer.' },
+      perf: { en: 'The company has ___ staff this year.', esFull: 'La empresa ha reducido personal este año.' },
+    },
+    shut: {
+      present: { en: 'Please ___ the door quietly.', esFull: 'Por favor, cierra la puerta con cuidado.' },
+      past: { en: 'She ___ the door hard last night.', esFull: 'Ella cerró la puerta con fuerza anoche.' },
+      perf: { en: 'I have ___ the window to block the noise.', esFull: 'He cerrado la ventana para bloquear el ruido.' },
+    },
+    slit: {
+      present: { en: 'This tool can ___ plastic easily.', esFull: 'Esta herramienta puede rajar el plástico fácilmente.' },
+      past: { en: 'The ninja ___ the fabric silently.', esFull: 'El ninja rajó la tela en silencio.' },
+      perf: { en: 'Someone has ___ the envelope open.', esFull: 'Alguien ha rajado el sobre.' },
+    },
+    spread: {
+      present: { en: 'I ___ butter on the bread.', esFull: 'Unto mantequilla en el pan.' },
+      past: { en: 'Yesterday I ___ the map on the table.', esFull: 'Ayer extendí el mapa sobre la mesa.' },
+      perf: { en: 'The news has ___ quickly online.', esFull: 'La noticia se ha difundido rápidamente en línea.' },
+    },
+    sweat: {
+      present: { en: 'I ___ a lot during exercise.', esFull: 'Sudo mucho durante el ejercicio.' },
+      past: { en: 'Yesterday I ___ a lot at the gym.', esFull: 'Ayer sudé mucho en el gimnasio.' },
+      perf: { en: 'I have ___ through my shirt today.', esFull: 'Hoy he sudado hasta empapar la camiseta.' },
+    },
+    thrust: {
+      present: { en: 'The engine ___ the rocket forward.', esFull: 'El motor impulsa el cohete hacia adelante.' },
+      past: { en: 'The rocket ___ forward at launch.', esFull: 'El cohete se impulsó hacia adelante al despegar.' },
+      perf: { en: 'The crowd has ___ him to the front.', esFull: 'La multitud lo ha empujado hacia el frente.' },
+    },
+    upset: {
+      present: { en: 'Loud noise ___ my dog.', esFull: 'El ruido fuerte molesta a mi perro.' },
+      past: { en: 'The news ___ everyone.', esFull: 'La noticia molestó a todos.' },
+      perf: { en: 'The delay has ___ our plans.', esFull: 'El retraso ha trastornado nuestros planes.' },
+    },
+    wet: {
+      present: { en: 'Rain can ___ the floor and make it slippery.', esFull: 'La lluvia puede mojar el piso y volverlo resbaloso.' },
+      past: { en: 'The rain ___ the hanging clothes.', esFull: 'La lluvia mojó la ropa tendida.' },
+      perf: { en: 'The storm has ___ the streets.', esFull: 'La tormenta ha mojado las calles.' },
+    },
+  };
+}
+
+function buildContextQuestionsAAA() {
+  const templates = getContextTemplatesAAA();
+  return verbsAAA.flatMap((v) => {
+    const base = v.en;
+    const tpl = templates?.[base];
+
+    const present = tpl?.present ?? { en: 'I ___ every day.', esFull: 'Lo hago todos los días.' };
+    const past = tpl?.past ?? { en: 'Yesterday I ___.', esFull: 'Ayer lo hice.' };
+    const perf = tpl?.perf ?? { en: 'This week I have ___.', esFull: 'Esta semana lo he hecho.' };
+
+    return [
+      { verb: base, meaning: v.es, label: 'Presente', esFull: present.esFull, en: present.en, answer: base },
+      { verb: base, meaning: v.es, label: 'Pasado', esFull: past.esFull, en: past.en, answer: base },
+      { verb: base, meaning: v.es, label: 'Participio (Present Perfect)', esFull: perf.esFull, en: perf.en, answer: base },
+    ];
+  });
+}
+
+function buildLetterPattern(word) {
+  const w = (word ?? '').trim();
+  if (w.length <= 1) return w;
+  if (w.length === 2) return `${w[0]} ${w[1]}`;
+  const middle = Array.from({ length: w.length - 2 }, () => '_').join(' ');
+  return `${w[0]} ${middle} ${w[w.length - 1]}`;
+}
+
+function buildTightPattern(word, revealPrefix = 2) {
+  const w = (word ?? '').trim();
+  if (w.length <= 2) return w;
+  const prefixLen = Math.min(Math.max(1, revealPrefix), Math.max(1, w.length - 1));
+  if (w.length <= prefixLen + 1) return w;
+  const prefix = w.slice(0, prefixLen);
+  const middle = '_'.repeat(Math.max(0, w.length - prefixLen - 1));
+  return `${prefix}${middle}${w[w.length - 1]}`;
+}
+
+function pointsForHintLevel(hintLevel) {
+  const level = Number(hintLevel) || 0;
+  if (level <= 0) return 1;
+  if (level === 1) return 0.8;
+  if (level === 2) return 0.6;
+  return 0.4;
+}
+
+export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const [stage, setStage] = useState('menu');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [points, setPoints] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState('');
+  const [feedbackDetails, setFeedbackDetails] = useState(null);
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [showHint, setShowHint] = useState(false);
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [palaceView, setPalaceView] = useState(0);
@@ -144,20 +311,24 @@ export default function AAA_Game_Engine({ onExit }) {
   };
 
   const generateLevel4Questions = () => {
-    return shuffle(sentences).slice(0, 6);
+    return shuffle(buildContextQuestionsAAA()).slice(0, 6);
   };
 
   const initLevel = (level) => {
     setStage(level);
     setCurrentQuestion(0);
     setScore(0);
+    setPoints(0);
     setTotalAnswered(0);
     setFeedback('');
+    setFeedbackDetails(null);
+    setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
     setSelectedIntruders([]);
     setShowHint(false);
     setSelectedAnswer(null);
+    setHintLevel4(0);
 
     if (level === 'level1') setQuestions(generateLevel1Questions());
     if (level === 'level2') setQuestions(generateLevel2Questions());
@@ -173,6 +344,7 @@ export default function AAA_Game_Engine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Exacto! ${q.verb} = ${q.correct}. (AAA: No cambia)`);
     } else {
       setFeedback(`❌ Ups. ${q.verb} significa "${q.correct}". Recuerda: ${q.image}`);
@@ -187,6 +359,7 @@ export default function AAA_Game_Engine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Correcto! "${q.es}" es ${q.en}. (AAA: ${q.en} - ${q.en} - ${q.en})`);
     } else {
       setFeedback(`❌ La respuesta es "${q.en}". En el espejo todo se ve igual.`);
@@ -215,6 +388,7 @@ export default function AAA_Game_Engine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Excelente! Sacaste a los intrusos del Palacio de Espejos.`);
     } else {
       const missing = correctIntruders.filter(x => !userIntruders.includes(x));
@@ -225,25 +399,47 @@ export default function AAA_Game_Engine({ onExit }) {
 
   const checkLevel4Answer = () => {
     const q = questions[currentQuestion];
-    const isCorrect = userAnswer.toLowerCase().trim() === q.verb;
+    const isCorrect = userAnswer.toLowerCase().trim() === q.answer;
     setTotalAnswered(prev => prev + 1);
+
+    const earnedPoints = isCorrect ? pointsForHintLevel(hintLevel4) : 0;
+
+    const templates = getContextTemplatesAAA();
+    const tpl = templates?.[q.verb] ?? null;
+    const present = tpl?.present ?? { en: 'I ___ every day.', esFull: 'Lo hago todos los días.' };
+    const past = tpl?.past ?? { en: 'Yesterday I ___.', esFull: 'Ayer lo hice.' };
+    const perf = tpl?.perf ?? { en: 'This week I have ___.', esFull: 'Esta semana lo he hecho.' };
+
+    setFeedbackDetails({
+      present: { en: fillBlank(present.en, q.verb), es: present.esFull },
+      past: { en: fillBlank(past.en, q.verb), es: past.esFull },
+      perf: { en: fillBlank(perf.en, q.verb), es: perf.esFull },
+      forms: { base: q.verb, past: q.verb, participle: q.verb },
+    });
+    setShowFeedbackDetails(false);
+
+    const hintSummary = hintLevel4 > 0 ? ` (pistas usadas: ${hintLevel4}, puntos: ${earnedPoints.toFixed(1)}/1.0)` : '';
 
     if (isCorrect) {
       setScore(prev => prev + 1);
-      setFeedback(`✅ ¡Perfecto! "${q.verb}" es AAA, así que en pasado se escribe igual.`);
+      setPoints((prev) => prev + earnedPoints);
+      setFeedback(`✅ ¡Perfecto! "${q.verb}" es AAA, así que no cambia.${hintSummary}`);
     } else {
-      setFeedback(`❌ Incorrecto. Era "${q.verb}". Al ser AAA, no cambia en pasado.`);
+      setFeedback(`❌ Incorrecto. Era "${q.verb}". Al ser AAA, no cambia.${hintSummary}`);
     }
     setWaitingForNext(true);
   };
 
   const handleNext = () => {
     setFeedback('');
+    setFeedbackDetails(null);
+    setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
     setSelectedIntruders([]);
     setShowHint(false);
     setSelectedAnswer(null);
+    setHintLevel4(0);
 
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1);
@@ -256,11 +452,14 @@ export default function AAA_Game_Engine({ onExit }) {
     if (currentQuestion > 0) {
       setCurrentQuestion(prev => prev - 1);
       setFeedback('');
+      setFeedbackDetails(null);
+      setShowFeedbackDetails(false);
       setWaitingForNext(false);
       setUserAnswer('');
       setSelectedIntruders([]);
       setShowHint(false);
       setSelectedAnswer(null);
+      setHintLevel4(0);
     }
   };
 
@@ -292,7 +491,7 @@ export default function AAA_Game_Engine({ onExit }) {
           <div className="mb-6 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
             <div className="flex justify-between text-sm mb-2 font-mono text-blue-200">
               <span>Progreso: {currentQuestion + 1} / {questions.length}</span>
-              <span>Aciertos: {score}</span>
+              <span>Aciertos: {score} | Puntos: {points.toFixed(1)}</span>
             </div>
             <div className="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
               <div
@@ -327,6 +526,16 @@ export default function AAA_Game_Engine({ onExit }) {
               </div>
               <ChevronRight className="w-6 h-6 opacity-50 group-hover:opacity-100" />
             </button>
+
+            {typeof onViewGallery === 'function' && (
+              <button
+                type="button"
+                onClick={onViewGallery}
+                className="text-sm text-slate-300 hover:text-white underline text-center"
+              >
+                Recorrido mental (tabla)
+              </button>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               <button onClick={() => initLevel('level1')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-blue-400">
@@ -558,13 +767,8 @@ export default function AAA_Game_Engine({ onExit }) {
 
             <div className="bg-slate-900 p-6 rounded-xl mb-6 space-y-4">
               <div className="text-center">
-                <p className="text-xl md:text-2xl leading-relaxed text-blue-200">
-                  {questions[currentQuestion].es.split('___')[0]}
-                  <span className="inline-block border-b-2 border-blue-400 min-w-[100px] text-yellow-400 font-bold px-2">
-                    {userAnswer || "?"}
-                  </span>
-                  {questions[currentQuestion].es.split('___')[1]}
-                </p>
+                <div className="text-slate-300 text-sm mb-2">{questions[currentQuestion].label}</div>
+                <p className="text-xl md:text-2xl leading-relaxed text-blue-200">ES: {questions[currentQuestion].esFull}</p>
               </div>
 
               <div className="text-center">
@@ -591,6 +795,33 @@ export default function AAA_Game_Engine({ onExit }) {
             />
 
             {!waitingForNext && (
+              <div className="flex flex-col items-center gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setHintLevel4((prev) => Math.min(3, prev + 1))}
+                  disabled={hintLevel4 >= 3}
+                  className="text-slate-300 hover:text-white text-sm underline disabled:opacity-50"
+                >
+                  Pedir pista
+                </button>
+                {hintLevel4 > 0 && (
+                  <div className="text-sm text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 text-center whitespace-pre-line">
+                    {(() => {
+                      const ans = (questions[currentQuestion].verb ?? '').trim();
+                      const first = ans ? ans[0] : '';
+                      const spaced = buildLetterPattern(ans);
+                      const tight = buildTightPattern(ans, 2);
+
+                      if (hintLevel4 === 1) return `Pista 1: el verbo empieza con ${first}`;
+                      if (hintLevel4 === 2) return `Pista 2: ${spaced}`;
+                      return `Pista 3: ${tight}`;
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!waitingForNext && (
               <button
                 onClick={checkLevel4Answer}
                 disabled={!userAnswer}
@@ -599,13 +830,62 @@ export default function AAA_Game_Engine({ onExit }) {
                 Completar
               </button>
             )}
+
+            {waitingForNext && feedback && (
+              <div className={`mt-6 p-6 rounded-xl border ${feedback.includes('✅') ? 'bg-green-900/40 border-green-500/50' : 'bg-red-900/40 border-red-500/50'}`}>
+                <div className="whitespace-pre-wrap font-medium text-lg">{feedback}</div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowFeedbackDetails((v) => !v)}
+                    className="bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 transition font-bold"
+                  >
+                    {showFeedbackDetails ? 'Ocultar retroalimentación' : 'Ver retroalimentación'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-white text-slate-900 px-6 py-2 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
+                  >
+                    Siguiente <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                {showFeedbackDetails && feedbackDetails && (
+                  <div className="mt-4 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+                    <div className="text-slate-200 font-bold mb-2">Retroalimentación (3 tiempos)</div>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Presente</div>
+                        <div className="text-white">EN: {feedbackDetails.present.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.present.es}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Pasado</div>
+                        <div className="text-white">EN: {feedbackDetails.past.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.past.es}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Participio (Present Perfect)</div>
+                        <div className="text-white">EN: {feedbackDetails.perf.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.perf.es}</div>
+                      </div>
+                      <div className="text-slate-400 text-sm font-mono">
+                        Formas: {feedbackDetails.forms.base} — {feedbackDetails.forms.past} — {feedbackDetails.forms.participle}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
-        {feedback && (
+        {feedback && stage !== 'level4' && (
           <div className={`mt-6 p-6 rounded-xl flex flex-col md:flex-row items-center gap-4 ${feedback.includes('✅') ? 'bg-green-900/40 border border-green-500/50' : 'bg-red-900/40 border border-red-500/50'}`}>
             <div className="flex-1 text-center md:text-left font-medium text-lg">
-              {feedback}
+              <div className="whitespace-pre-wrap">{feedback}</div>
             </div>
             <div className="flex gap-3 w-full md:w-auto">
               <button
@@ -639,6 +919,7 @@ export default function AAA_Game_Engine({ onExit }) {
               <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
                 <div className="text-4xl font-bold text-emerald-400 mb-1">{score}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-widest">Aciertos</div>
+                <div className="text-slate-300 text-sm mt-2">Puntos: <span className="font-mono">{points.toFixed(1)}</span></div>
               </div>
             </div>
 

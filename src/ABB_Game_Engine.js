@@ -93,6 +93,24 @@ function buildLetterPattern(word) {
   return `${w[0]} ${middle} ${w[w.length - 1]}`;
 }
 
+function buildTightPattern(word, revealPrefix = 2) {
+  const w = (word ?? '').trim();
+  if (w.length <= 2) return w;
+  const prefixLen = Math.min(Math.max(1, revealPrefix), Math.max(1, w.length - 1));
+  if (w.length <= prefixLen + 1) return w;
+  const prefix = w.slice(0, prefixLen);
+  const middle = '_'.repeat(Math.max(0, w.length - prefixLen - 1));
+  return `${prefix}${middle}${w[w.length - 1]}`;
+}
+
+function pointsForHintLevel(hintLevel) {
+  const level = Number(hintLevel) || 0;
+  if (level <= 0) return 1;
+  if (level === 1) return 0.8;
+  if (level === 2) return 0.6;
+  return 0.4;
+}
+
 const intruders = [
   { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
   { base: 'come', past: 'came', participle: 'come', es: 'venir', pattern: 'ABA' },
@@ -107,6 +125,14 @@ function shuffle(array) {
 
 function fillBlank(sentence, word) {
   return sentence.replace('___', word);
+}
+
+function spanishInfFromEs(es) {
+  const raw = String(es ?? '').trim();
+  if (!raw) return '';
+  const first = raw.split('/')[0].trim();
+  if (!first) return '';
+  return first.charAt(0).toLowerCase() + first.slice(1);
 }
 
 function getContextTemplates() {
@@ -304,15 +330,18 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [points, setPoints] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [feedbackDetails, setFeedbackDetails] = useState('');
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
-  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
 
   const [questions, setQuestions] = useState([]);
 
@@ -335,9 +364,12 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   const resetRoundState = () => {
     setCurrentQuestion(0);
     setScore(0);
+    setPoints(0);
     setTotalAnswered(0);
     setWaitingForNext(false);
     setFeedback('');
+    setFeedbackDetails('');
+    setShowFeedbackDetails(false);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
@@ -405,6 +437,8 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
   const handleNext = () => {
     setFeedback('');
+    setFeedbackDetails('');
+    setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -420,6 +454,8 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1);
       setFeedback('');
+      setFeedbackDetails('');
+      setShowFeedbackDetails(false);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -437,6 +473,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Correcto! ${q.verb.base} = ${q.correct}. (ABB)`);
     } else {
       setFeedback(`❌ No. ${q.verb.base} significa "${q.correct}".\nImagen absurda: ${q.verb.image}`);
@@ -451,6 +488,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ Bien. ${q.base} - ${q.past} - ${q.participle} (ABB)`);
     } else {
       setFeedback(`❌ Era "${q.base}".\nFormas: ${q.base} - ${q.past} - ${q.participle}`);
@@ -475,6 +513,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback('✅ Perfecto. Identificaste los que NO son ABB.');
     } else {
       const missing = correct.filter((x) => !user.includes(x));
@@ -488,14 +527,42 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     const isCorrect = userAnswer.toLowerCase().trim() === q.answer;
     setTotalAnswered((prev) => prev + 1);
 
-    const enFull = fillBlank(q.en, q.answer);
-    const esFull = q.esFull;
+    const templates = getContextTemplates();
+    const tpl = templates[q.verb.base];
+    const pastEn = tpl?.past?.en ? fillBlank(tpl.past.en, q.verb.past) : '';
+    const pastEs = tpl?.past?.esFull ?? '';
+    const perfEn = tpl?.perf?.en ? fillBlank(tpl.perf.en, q.verb.participle) : '';
+    const perfEs = tpl?.perf?.esFull ?? '';
+
+    const presentSuffix = tpl?.past?.en ? String(tpl.past.en).split('___')[1] ?? '' : '';
+    const presentEn = presentSuffix ? `Normally, people tend to ${q.verb.base}${presentSuffix}` : `Normally, people tend to ${q.verb.base}.`;
+    const inf = spanishInfFromEs(q.verb.es);
+    const presentEs = inf ? `Normalmente, en el trabajo, yo suelo ${inf}.` : 'Normalmente, en el trabajo, yo suelo practicar.';
+
+    const earnedPoints = isCorrect ? pointsForHintLevel(hintLevel4) : 0;
+    const details = [
+      'Presente',
+      presentEn,
+      presentEs,
+      '',
+      'Pasado',
+      pastEn,
+      pastEs,
+      '',
+      'Participio',
+      perfEn,
+      perfEs,
+    ].filter(Boolean).join('\n');
+
+    setFeedbackDetails(details);
+    setShowFeedbackDetails(false);
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
-      setFeedback(`✅ Correcto. ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setPoints((prev) => prev + earnedPoints);
+      setFeedback(`✅ Correcto. ${q.note} (+${earnedPoints} puntos)`);
     } else {
-      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setFeedback(`❌ Incorrecto. La forma correcta era "${q.answer}". ${q.note}`);
     }
     setWaitingForNext(true);
   };
@@ -527,7 +594,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
           <div className="mb-6 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
             <div className="flex justify-between text-sm mb-2 font-mono text-purple-200">
               <span>Progreso: {currentQuestion + 1} / {questions.length}</span>
-              <span>Aciertos: {score}</span>
+              <span>Aciertos: {score} | Puntos: {points.toFixed(1)}</span>
             </div>
             <div className="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
               <div
@@ -565,6 +632,16 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               </div>
               <ChevronRight className="w-6 h-6 opacity-50 group-hover:opacity-100" />
             </button>
+
+            {typeof onViewGallery === 'function' && (
+              <button
+                type="button"
+                onClick={onViewGallery}
+                className="text-sm text-slate-300 hover:text-white underline text-center"
+              >
+                Recorrido mental (tabla)
+              </button>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               {groupsABB.map((g) => (
@@ -859,7 +936,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
             {!waitingForNext && (
               <div className="flex flex-col items-center gap-2 mb-4">
                 <button
-                  onClick={() => setHintLevel4((prev) => Math.min(2, prev + 1))}
+                  onClick={() => setHintLevel4((prev) => Math.min(3, prev + 1))}
                   className="text-slate-300 hover:text-white text-sm underline"
                 >
                   Pedir pista
@@ -869,11 +946,12 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
                     {(() => {
                       const ans = (questions[currentQuestion].answer ?? '').trim();
                       const first = ans ? ans[0] : '';
-                      const last = ans ? ans[ans.length - 1] : '';
-                      const pattern = buildLetterPattern(ans);
+                      const spaced = buildLetterPattern(ans);
+                      const tight = buildTightPattern(ans, 2);
 
-                      if (hintLevel4 === 1) return `Pista: el verbo empieza con ${first}`;
-                      return `Pista: el verbo termina con ${last}\n${pattern}`;
+                      if (hintLevel4 === 1) return `Pista 1: el verbo empieza con ${first}`;
+                      if (hintLevel4 === 2) return `Pista 2: ${spaced}`;
+                      return `Pista 3: ${tight}`;
                     })()}
                   </div>
                 )}
@@ -886,30 +964,56 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
                 disabled={!userAnswer}
                 className="w-full bg-amber-600 hover:bg-amber-500 p-4 rounded-xl font-bold transition disabled:opacity-50"
               >
-                Verificar
+                Completar
               </button>
             )}
           </div>
         )}
 
         {feedback && (
-          <div className={`mt-6 p-6 rounded-xl flex flex-col md:flex-row items-center gap-4 ${feedback.includes('✅') ? 'bg-green-900/40 border border-green-500/50' : 'bg-red-900/40 border border-red-500/50'}`}>
-            <div className="flex-1 text-center md:text-left font-medium text-lg whitespace-pre-line">{feedback}</div>
-            <div className="flex gap-3 w-full md:w-auto">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestion === 0}
-                className="flex-1 md:flex-none bg-slate-800 p-3 rounded-lg hover:bg-slate-700 disabled:opacity-50 transition"
-              >
-                <ChevronLeft />
-              </button>
-              <button
-                onClick={handleNext}
-                className="flex-1 md:flex-none bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
-              >
-                Siguiente <ChevronRight size={20} />
-              </button>
-            </div>
+          <div className={`mt-6 p-6 rounded-xl ${feedback.includes('✅') ? 'bg-green-900/40 border border-green-500/50' : 'bg-red-900/40 border border-red-500/50'}`}>
+            <div className="text-center md:text-left font-medium text-lg whitespace-pre-line">{feedback}</div>
+
+            {stage === 'level4' && waitingForNext ? (
+              <div className="mt-4 flex flex-col md:flex-row gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowFeedbackDetails((v) => !v)}
+                  className="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-lg font-bold transition"
+                >
+                  Ver retroalimentación
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
+                >
+                  Siguiente <ChevronRight size={20} />
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 flex gap-3 w-full md:w-auto justify-center">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentQuestion === 0}
+                  className="bg-slate-800 p-3 rounded-lg hover:bg-slate-700 disabled:opacity-50 transition"
+                >
+                  <ChevronLeft />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
+                >
+                  Siguiente <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
+
+            {stage === 'level4' && showFeedbackDetails && feedbackDetails && (
+              <div className="mt-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4 whitespace-pre-line text-slate-100">
+                {feedbackDetails}
+              </div>
+            )}
           </div>
         )}
 
@@ -927,6 +1031,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
                 <div className="text-4xl font-bold text-purple-300 mb-1">{score}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-widest">Aciertos</div>
+                <div className="text-sm text-slate-300 mt-2">Puntos: {points.toFixed(1)}</div>
               </div>
             </div>
 

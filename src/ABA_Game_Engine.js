@@ -20,6 +20,24 @@ function buildLetterPattern(word) {
   return `${w[0]} ${middle} ${w[w.length - 1]}`;
 }
 
+function buildTightPattern(word, revealPrefix = 2) {
+  const w = (word ?? '').trim();
+  if (w.length <= 2) return w;
+  const prefixLen = Math.min(Math.max(1, revealPrefix), Math.max(1, w.length - 1));
+  if (w.length <= prefixLen + 1) return w;
+  const prefix = w.slice(0, prefixLen);
+  const middle = '_'.repeat(Math.max(0, w.length - prefixLen - 1));
+  return `${prefix}${middle}${w[w.length - 1]}`;
+}
+
+function pointsForHintLevel(hintLevel) {
+  const level = Number(hintLevel) || 0;
+  if (level <= 0) return 1;
+  if (level === 1) return 0.8;
+  if (level === 2) return 0.6;
+  return 0.4;
+}
+
 const intruders = [
   // No-ABA (mezcla de AAA/ABB/ABC) para el nivel de intrusos
   { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
@@ -29,84 +47,120 @@ const intruders = [
   { base: 'read', past: 'read', participle: 'read', es: 'leer', pattern: 'AAA' },
 ];
 
-const contextSentences = [
-  {
-    es: 'Ayer el cliente ___ a la oficina para una revisión.',
-    en: 'Yesterday the client ___ to the office for a review.',
-    answer: 'came',
-    note: 'Pasado (ABA): come → came',
-    enFull: 'Yesterday the client came to the office for a review.',
-    esFull: 'Ayer el cliente vino a la oficina para una revisión.'
+const contextTemplatesABA = {
+  come: {
+    present: {
+      enFull: 'The client comes to the office for a review.',
+      esFull: 'El cliente viene a la oficina para una revisión.',
+    },
+    past: {
+      en: 'Yesterday the client ___ to the office for a review.',
+      enFull: 'Yesterday the client came to the office for a review.',
+      esFull: 'Ayer el cliente vino a la oficina para una revisión.',
+    },
+    perf: {
+      en: 'This week the client has ___ to two follow-up meetings.',
+      enFull: 'This week the client has come to two follow-up meetings.',
+      esFull: 'Esta semana el cliente ha venido a dos reuniones de seguimiento.',
+    },
   },
-  {
-    es: 'Esta semana el cliente ha ___ a dos reuniones de seguimiento.',
-    en: 'This week the client has ___ to two follow-up meetings.',
-    answer: 'come',
-    note: 'Participio (ABA): have come',
-    enFull: 'This week the client has come to two follow-up meetings.',
-    esFull: 'Esta semana el cliente ha venido a dos reuniones de seguimiento.'
+  become: {
+    present: {
+      enFull: 'I become more confident when presenting.',
+      esFull: 'Me convierto en una persona más segura al presentar.',
+    },
+    past: {
+      en: 'Last year I ___ the team lead.',
+      enFull: 'Last year I became the team lead.',
+      esFull: 'El año pasado me convertí en líder del equipo.',
+    },
+    perf: {
+      en: 'This quarter I have ___ more confident when presenting.',
+      enFull: 'This quarter I have become more confident when presenting.',
+      esFull: 'Este trimestre me he convertido en una persona más segura al presentar.',
+    },
   },
-  {
-    es: 'El año pasado yo ___ líder del equipo.',
-    en: 'Last year I ___ the team lead.',
-    answer: 'became',
-    note: 'Pasado (ABA): become → became',
-    enFull: 'Last year I became the team lead.',
-    esFull: 'El año pasado me convertí en líder del equipo.'
+  run: {
+    present: {
+      enFull: 'I run after work to reduce stress.',
+      esFull: 'Corro después del trabajo para reducir el estrés.',
+    },
+    past: {
+      en: 'Yesterday I ___ before work as part of the wellness program.',
+      enFull: 'Yesterday I ran before work as part of the wellness program.',
+      esFull: 'Ayer corrí antes del trabajo como parte del programa de bienestar.',
+    },
+    perf: {
+      en: 'This month I have ___ after work to reduce stress.',
+      enFull: 'This month I have run after work to reduce stress.',
+      esFull: 'Este mes he corrido después del trabajo para reducir el estrés.',
+    },
   },
-  {
-    es: 'Este trimestre yo me he ___ más seguro al presentar.',
-    en: 'This quarter I have ___ more confident when presenting.',
-    answer: 'become',
-    note: 'Participio (ABA): have become',
-    enFull: 'This quarter I have become more confident when presenting.',
-    esFull: 'Este trimestre me he convertido en una persona más segura al presentar.'
+  overcome: {
+    present: {
+      enFull: 'The team overcomes challenges with clear communication.',
+      esFull: 'El equipo supera retos con una comunicación clara.',
+    },
+    past: {
+      en: 'Last week the team ___ a scheduling issue and delivered on time.',
+      enFull: 'Last week the team overcame a scheduling issue and delivered on time.',
+      esFull: 'La semana pasada el equipo superó un problema de agenda y entregó a tiempo.',
+    },
+    perf: {
+      en: 'This quarter the team has ___ several challenges with clear communication.',
+      enFull: 'This quarter the team has overcome several challenges with clear communication.',
+      esFull: 'Este trimestre el equipo ha superado varios retos con comunicación clara.',
+    },
   },
-  {
-    es: 'Ayer yo ___ antes del trabajo como parte del programa de bienestar.',
-    en: 'Yesterday I ___ before work as part of the wellness program.',
-    answer: 'ran',
-    note: 'Pasado (ABA): run → ran',
-    enFull: 'Yesterday I ran before work as part of the wellness program.',
-    esFull: 'Ayer corrí antes del trabajo como parte del programa de bienestar.'
-  },
-  {
-    es: 'Este mes yo he ___ después del trabajo para reducir el estrés.',
-    en: 'This month I have ___ after work to reduce stress.',
-    answer: 'run',
-    note: 'Participio (ABA): have run',
-    enFull: 'This month I have run after work to reduce stress.',
-    esFull: 'Este mes he corrido después del trabajo para reducir el estrés.'
-  },
-  {
-    es: 'La semana pasada el equipo ___ un problema de agenda y entregó a tiempo.',
-    en: 'Last week the team ___ a scheduling issue and delivered on time.',
-    answer: 'overcame',
-    note: 'Pasado (ABA): overcome → overcame',
-    enFull: 'Last week the team overcame a scheduling issue and delivered on time.',
-    esFull: 'La semana pasada el equipo superó un problema de agenda y entregó a tiempo.'
-  },
-  {
-    es: 'Este trimestre el equipo ha ___ varios retos con comunicación clara.',
-    en: 'This quarter the team has ___ several challenges with clear communication.',
-    answer: 'overcome',
-    note: 'Participio (ABA): have overcome',
-    enFull: 'This quarter the team has overcome several challenges with clear communication.',
-    esFull: 'Este trimestre el equipo ha superado varios retos con comunicación clara.'
-  },
-];
+};
+
+function fillBlank(sentence, word) {
+  return String(sentence ?? '').replace('___', word);
+}
+
+function buildContextQuestionsABA() {
+  const byBase = Object.entries(contextTemplatesABA);
+  return byBase.flatMap(([base, tpl]) => {
+    const verb = verbsABA.find((v) => v.base === base);
+    if (!verb) return [];
+
+    return [
+      {
+        verb,
+        kind: 'past',
+        esFull: tpl.past.esFull,
+        en: tpl.past.en,
+        answer: verb.past,
+        label: 'Past Simple (ABA)',
+        note: `Past Simple (ABA): ${verb.base} → ${verb.past}`,
+      },
+      {
+        verb,
+        kind: 'perf',
+        esFull: tpl.perf.esFull,
+        en: tpl.perf.en,
+        answer: verb.participle,
+        label: 'Present Perfect (ABA)',
+        note: `Present Perfect (ABA): has/have ${verb.participle}`,
+      },
+    ];
+  });
+}
 
 function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
 
-export default function ABAGameEngine({ onExit }) {
+export default function ABAGameEngine({ onExit, onViewGallery }) {
   const [stage, setStage] = useState('menu'); // menu | palace | level1 | level2 | level3 | level4 | results
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [points, setPoints] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [feedbackDetails, setFeedbackDetails] = useState('');
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
@@ -114,7 +168,7 @@ export default function ABAGameEngine({ onExit }) {
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
 
-  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
 
   const [questions, setQuestions] = useState([]);
 
@@ -129,9 +183,12 @@ export default function ABAGameEngine({ onExit }) {
     setStage(level);
     setCurrentQuestion(0);
     setScore(0);
+    setPoints(0);
     setTotalAnswered(0);
     setWaitingForNext(false);
     setFeedback('');
+    setFeedbackDetails('');
+    setShowFeedbackDetails(false);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
@@ -164,12 +221,14 @@ export default function ABAGameEngine({ onExit }) {
     }
 
     if (level === 'level4') {
-      setQuestions(shuffle(contextSentences));
+      setQuestions(shuffle(buildContextQuestionsABA()));
     }
   };
 
   const handleNext = () => {
     setFeedback('');
+    setFeedbackDetails('');
+    setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -185,6 +244,8 @@ export default function ABAGameEngine({ onExit }) {
     if (currentQuestion > 0) {
       setCurrentQuestion(prev => prev - 1);
       setFeedback('');
+      setFeedbackDetails('');
+      setShowFeedbackDetails(false);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -202,6 +263,7 @@ export default function ABAGameEngine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Correcto! ${q.verb.base} = ${q.correct}. (ABA)`);
     } else {
       setFeedback(`❌ No. ${q.verb.base} significa "${q.correct}". Imagen: ${q.verb.image}`);
@@ -216,6 +278,7 @@ export default function ABAGameEngine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ Bien. ${q.base} - ${q.past} - ${q.participle} (ABA)`);
     } else {
       setFeedback(`❌ Era "${q.base}". Formas: ${q.base} - ${q.past} - ${q.participle}`);
@@ -238,6 +301,7 @@ export default function ABAGameEngine({ onExit }) {
 
     if (isCorrect) {
       setScore(prev => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback('✅ Perfecto. Identificaste los que NO son ABA.');
     } else {
       const missing = correct.filter(x => !user.includes(x));
@@ -251,11 +315,38 @@ export default function ABAGameEngine({ onExit }) {
     const isCorrect = userAnswer.toLowerCase().trim() === q.answer;
     setTotalAnswered(prev => prev + 1);
 
+    const tpl = contextTemplatesABA[q.verb.base];
+    const presentEn = tpl?.present?.enFull ?? '';
+    const presentEs = tpl?.present?.esFull ?? '';
+    const pastEn = tpl?.past?.en ? fillBlank(tpl.past.en, q.verb.past) : '';
+    const pastEs = tpl?.past?.esFull ?? '';
+    const perfEn = tpl?.perf?.en ? fillBlank(tpl.perf.en, q.verb.participle) : '';
+    const perfEs = tpl?.perf?.esFull ?? '';
+
+    const earnedPoints = isCorrect ? pointsForHintLevel(hintLevel4) : 0;
+    const details = [
+      'Presente',
+      presentEn,
+      presentEs,
+      '',
+      'Pasado',
+      pastEn,
+      pastEs,
+      '',
+      'Participio',
+      perfEn,
+      perfEs,
+    ].filter(Boolean).join('\n');
+
+    setFeedbackDetails(details);
+    setShowFeedbackDetails(false);
+
     if (isCorrect) {
       setScore(prev => prev + 1);
-      setFeedback(`✅ Correcto. ${q.note}\n\nEN: ${q.enFull}\nES: ${q.esFull}`);
+      setPoints((prev) => prev + earnedPoints);
+      setFeedback(`✅ Correcto. ${q.note} (+${earnedPoints} puntos)`);
     } else {
-      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\n\nEN: ${q.enFull}\nES: ${q.esFull}`);
+      setFeedback(`❌ Incorrecto. La forma correcta era "${q.answer}". ${q.note}`);
     }
     setWaitingForNext(true);
   };
@@ -287,7 +378,7 @@ export default function ABAGameEngine({ onExit }) {
           <div className="mb-6 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
             <div className="flex justify-between text-sm mb-2 font-mono text-green-200">
               <span>Progreso: {currentQuestion + 1} / {questions.length}</span>
-              <span>Aciertos: {score}</span>
+              <span>Aciertos: {score} | Puntos: {points.toFixed(1)}</span>
             </div>
             <div className="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
               <div
@@ -323,6 +414,16 @@ export default function ABAGameEngine({ onExit }) {
               </div>
               <ChevronRight className="w-6 h-6 opacity-50 group-hover:opacity-100" />
             </button>
+
+            {typeof onViewGallery === 'function' && (
+              <button
+                type="button"
+                onClick={onViewGallery}
+                className="text-sm text-slate-300 hover:text-white underline text-center"
+              >
+                Recorrido mental (tabla)
+              </button>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               <button onClick={() => initLevel('level1')} className="bg-slate-700 hover:bg-slate-600 p-6 rounded-xl text-left transition hover:ring-2 ring-green-400">
@@ -525,6 +626,7 @@ export default function ABAGameEngine({ onExit }) {
                 </span>
                 {questions[currentQuestion].en.split('___')[1]}
               </p>
+              <p className="text-sm text-slate-400 text-center italic">{questions[currentQuestion].label}</p>
             </div>
 
             <input
@@ -540,7 +642,7 @@ export default function ABAGameEngine({ onExit }) {
             {!waitingForNext && (
               <div className="flex flex-col items-center gap-2 mb-4">
                 <button
-                  onClick={() => setHintLevel4((prev) => Math.min(2, prev + 1))}
+                  onClick={() => setHintLevel4((prev) => Math.min(3, prev + 1))}
                   className="text-slate-300 hover:text-white text-sm underline"
                 >
                   Pedir pista
@@ -550,11 +652,12 @@ export default function ABAGameEngine({ onExit }) {
                     {(() => {
                       const ans = (questions[currentQuestion].answer ?? '').trim();
                       const first = ans ? ans[0] : '';
-                      const last = ans ? ans[ans.length - 1] : '';
-                      const pattern = buildLetterPattern(ans);
+                      const spaced = buildLetterPattern(ans);
+                      const tight = buildTightPattern(ans, 2);
 
-                      if (hintLevel4 === 1) return `Pista: el verbo empieza con ${first}`;
-                      return `Pista: el verbo termina con ${last}\n${pattern}`;
+                      if (hintLevel4 === 1) return `Pista 1: el verbo empieza con ${first}`;
+                      if (hintLevel4 === 2) return `Pista 2: ${spaced}`;
+                      return `Pista 3: ${tight}`;
                     })()}
                   </div>
                 )}
@@ -567,30 +670,56 @@ export default function ABAGameEngine({ onExit }) {
                 disabled={!userAnswer}
                 className="w-full bg-amber-600 hover:bg-amber-500 p-4 rounded-xl font-bold transition disabled:opacity-50"
               >
-                Verificar
+                Completar
               </button>
             )}
           </div>
         )}
 
         {feedback && (
-          <div className={`mt-6 p-6 rounded-xl flex flex-col md:flex-row items-center gap-4 ${feedback.includes('✅') ? 'bg-green-900/40 border border-green-500/50' : 'bg-red-900/40 border border-red-500/50'}`}>
-            <div className="flex-1 text-center md:text-left font-medium text-lg whitespace-pre-line">{feedback}</div>
-            <div className="flex gap-3 w-full md:w-auto">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestion === 0}
-                className="flex-1 md:flex-none bg-slate-800 p-3 rounded-lg hover:bg-slate-700 disabled:opacity-50 transition"
-              >
-                <ChevronLeft />
-              </button>
-              <button
-                onClick={handleNext}
-                className="flex-1 md:flex-none bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
-              >
-                Siguiente <ChevronRight size={20} />
-              </button>
-            </div>
+          <div className={`mt-6 p-6 rounded-xl ${feedback.includes('✅') ? 'bg-green-900/40 border border-green-500/50' : 'bg-red-900/40 border border-red-500/50'}`}>
+            <div className="text-center md:text-left font-medium text-lg whitespace-pre-line">{feedback}</div>
+
+            {stage === 'level4' && waitingForNext ? (
+              <div className="mt-4 flex flex-col md:flex-row gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowFeedbackDetails((v) => !v)}
+                  className="bg-slate-800 hover:bg-slate-700 px-6 py-3 rounded-lg font-bold transition"
+                >
+                  Ver retroalimentación
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
+                >
+                  Siguiente <ChevronRight size={20} />
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 flex gap-3 w-full md:w-auto justify-center">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentQuestion === 0}
+                  className="bg-slate-800 p-3 rounded-lg hover:bg-slate-700 disabled:opacity-50 transition"
+                >
+                  <ChevronLeft />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="bg-white text-slate-900 px-6 py-3 rounded-lg font-bold hover:bg-slate-200 transition flex items-center justify-center gap-2"
+                >
+                  Siguiente <ChevronRight size={20} />
+                </button>
+              </div>
+            )}
+
+            {stage === 'level4' && showFeedbackDetails && feedbackDetails && (
+              <div className="mt-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4 whitespace-pre-line text-slate-100">
+                {feedbackDetails}
+              </div>
+            )}
           </div>
         )}
 
@@ -608,6 +737,7 @@ export default function ABAGameEngine({ onExit }) {
               <div className="bg-slate-900 p-6 rounded-xl border border-slate-700">
                 <div className="text-4xl font-bold text-green-300 mb-1">{score}</div>
                 <div className="text-xs text-slate-400 uppercase tracking-widest">Aciertos</div>
+                <div className="text-sm text-slate-300 mt-2">Puntos: {points.toFixed(1)}</div>
               </div>
             </div>
 

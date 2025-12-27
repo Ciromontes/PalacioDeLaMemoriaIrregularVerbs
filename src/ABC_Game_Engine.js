@@ -127,6 +127,24 @@ function buildLetterPattern(word) {
   return `${w[0]} ${middle} ${w[w.length - 1]}`;
 }
 
+function buildTightPattern(word, revealPrefix = 2) {
+  const w = (word ?? '').trim();
+  if (w.length <= 2) return w;
+  const prefixLen = Math.min(Math.max(1, revealPrefix), Math.max(1, w.length - 1));
+  if (w.length <= prefixLen + 1) return w;
+  const prefix = w.slice(0, prefixLen);
+  const middle = '_'.repeat(Math.max(0, w.length - prefixLen - 1));
+  return `${prefix}${middle}${w[w.length - 1]}`;
+}
+
+function pointsForHintLevel(hintLevel) {
+  const level = Number(hintLevel) || 0;
+  if (level <= 0) return 1;
+  if (level === 1) return 0.8;
+  if (level === 2) return 0.6;
+  return 0.4;
+}
+
 const intruders = [
   { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
   { base: 'cut', past: 'cut', participle: 'cut', es: 'cortar', pattern: 'AAA' },
@@ -149,159 +167,197 @@ function getContextTemplates() {
   // Importante: el español debe ser natural y NO debe insertar el verbo en inglés.
   return {
     begin: {
+      present: { en: 'We ___ every session with a short recap.', esFull: 'Comenzamos cada sesión con un breve repaso.' },
       past: { en: 'Yesterday the course ___ with a short diagnostic test.', esFull: 'Ayer el curso comenzó con una prueba diagnóstica breve.' },
       perf: { en: 'This week the project has ___ with clear goals and roles.', esFull: 'Esta semana el proyecto ha comenzado con objetivos y roles claros.' },
     },
     drink: {
+      present: { en: 'I ___ water during breaks to stay focused.', esFull: 'Bebo agua durante los descansos para mantenerme concentrado.' },
       past: { en: 'Yesterday I ___ water during the break.', esFull: 'Ayer bebí agua durante el descanso.' },
       perf: { en: 'Today I have ___ enough water to stay focused.', esFull: 'Hoy he bebido suficiente agua para mantenerme concentrado.' },
     },
     ring: {
+      present: { en: 'Phones ___ all the time in shared workspaces.', esFull: 'Los teléfonos suenan todo el tiempo en espacios de trabajo compartidos.' },
       past: { en: 'Yesterday the phone ___ during the meeting.', esFull: 'Ayer el teléfono sonó durante la reunión.' },
       perf: { en: 'This morning my phone has ___ three times already.', esFull: 'Esta mañana mi teléfono ha sonado tres veces.' },
     },
     shrink: {
+      present: { en: 'Some fabrics ___ if you wash them in hot water.', esFull: 'Algunas telas encogen si las lavas con agua caliente.' },
       past: { en: 'Yesterday the fabric ___ after the first wash.', esFull: 'Ayer la tela encogió después del primer lavado.' },
       perf: { en: 'This month the budget has ___ due to new constraints.', esFull: 'Este mes el presupuesto se ha reducido debido a nuevas restricciones.' },
     },
     sing: {
+      present: { en: 'We ___ a short song to warm up our voices.', esFull: 'Cantamos una canción corta para calentar la voz.' },
       past: { en: 'Yesterday the choir ___ at the end of the ceremony.', esFull: 'Ayer el coro cantó al final de la ceremonia.' },
       perf: { en: 'This semester the group has ___ in several events.', esFull: 'Este semestre el grupo ha cantado en varios eventos.' },
     },
     sink: {
+      present: { en: 'Some small boats ___ quickly in rough water.', esFull: 'Algunas embarcaciones pequeñas se hunden rápido en aguas agitadas.' },
       past: { en: 'Yesterday the boat ___ after taking on water.', esFull: 'Ayer el barco se hundió después de entrarle agua.' },
       perf: { en: 'This year several small boats have ___ in the storm season.', esFull: 'Este año varias embarcaciones pequeñas se han hundido en la temporada de tormentas.' },
     },
     stink: {
+      present: { en: 'Some cleaning chemicals ___ if you mix them incorrectly.', esFull: 'Algunos químicos de limpieza huelen muy mal si los mezclas incorrectamente.' },
       past: { en: 'Yesterday the trash ___ because the bag tore.', esFull: 'Ayer la basura apestó porque la bolsa se rompió.' },
       perf: { en: 'This week the hallway has ___ due to a plumbing issue.', esFull: 'Esta semana el pasillo ha olido mal por un problema de plomería.' },
     },
     swim: {
+      present: { en: 'I ___ twice a week to improve my stamina.', esFull: 'Nado dos veces por semana para mejorar mi resistencia.' },
       past: { en: 'Yesterday I ___ for thirty minutes after work.', esFull: 'Ayer nadé treinta minutos después del trabajo.' },
       perf: { en: 'This month I have ___ regularly to improve my stamina.', esFull: 'Este mes he nadado con regularidad para mejorar mi resistencia.' },
     },
 
     bite: {
+      present: { en: 'Some dogs ___ shoes if they are bored.', esFull: 'Algunos perros muerden zapatos si se aburren.' },
       past: { en: 'Yesterday a dog ___ my shoe near the entrance.', esFull: 'Ayer un perro mordió mi zapato cerca de la entrada.' },
       perf: { en: 'This week a mosquito has ___ me twice at night.', esFull: 'Esta semana un mosquito me ha picado dos veces por la noche.' },
     },
     break: {
+      present: { en: 'We ___ the process into smaller steps to make it clear.', esFull: 'Dividimos el proceso en pasos más pequeños para que sea claro.' },
       past: { en: 'Yesterday the glass ___ during transport.', esFull: 'Ayer el vaso se rompió durante el transporte.' },
       perf: { en: 'This quarter the team has ___ the process into clear steps.', esFull: 'Este trimestre el equipo ha desglosado el proceso en pasos claros.' },
     },
     choose: {
+      present: { en: 'We ___ a vendor based on quality and support.', esFull: 'Elegimos a un proveedor según la calidad y el soporte.' },
       past: { en: 'Yesterday we ___ a vendor after comparing proposals.', esFull: 'Ayer elegimos a un proveedor después de comparar propuestas.' },
       perf: { en: 'This week we have ___ a simpler approach for the project.', esFull: 'Esta semana hemos elegido un enfoque más simple para el proyecto.' },
     },
     drive: {
+      present: { en: 'I ___ to different sites when we run trainings.', esFull: 'Conduzco a distintos lugares cuando damos capacitaciones.' },
       past: { en: 'Yesterday I ___ to the client site for a workshop.', esFull: 'Ayer conduje hasta las instalaciones del cliente para un taller.' },
       perf: { en: 'This month I have ___ to multiple sites for training.', esFull: 'Este mes he conducido a varios lugares por capacitación.' },
     },
     eat: {
+      present: { en: 'We ___ lunch between sessions to keep our energy up.', esFull: 'Comemos entre sesiones para mantener la energía.' },
       past: { en: 'Yesterday we ___ lunch between sessions.', esFull: 'Ayer comimos almuerzo entre sesiones.' },
       perf: { en: 'Today I have ___ a balanced meal to keep my energy steady.', esFull: 'Hoy he comido una comida equilibrada para mantener mi energía estable.' },
     },
     fall: {
+      present: { en: 'Temperatures often ___ quickly after sunset.', esFull: 'Las temperaturas suelen bajar rápido después del atardecer.' },
       past: { en: 'Yesterday the temperature ___ sharply in the evening.', esFull: 'Ayer la temperatura cayó bruscamente por la tarde.' },
       perf: { en: 'This week sales have ___ after the holiday peak.', esFull: 'Esta semana las ventas han bajado después del pico navideño.' },
     },
     fly: {
+      present: { en: 'We ___ to conferences when the schedule allows it.', esFull: 'Volamos a conferencias cuando el calendario lo permite.' },
       past: { en: 'Yesterday I ___ to another city for a conference.', esFull: 'Ayer volé a otra ciudad para una conferencia.' },
       perf: { en: 'This year I have ___ several times for work.', esFull: 'Este año he volado varias veces por trabajo.' },
     },
     forbid: {
+      present: { en: 'We ___ phones during exams to avoid distractions.', esFull: 'Prohibimos los teléfonos durante los exámenes para evitar distracciones.' },
       past: { en: 'Yesterday the instructor ___ phones during the exam.', esFull: 'Ayer el instructor prohibió los teléfonos durante el examen.' },
       perf: { en: 'This term the school has ___ late submissions without approval.', esFull: 'Este periodo la institución ha prohibido entregas tardías sin autorización.' },
     },
     forget: {
+      present: { en: 'I sometimes ___ my access card if I am in a rush.', esFull: 'A veces olvido mi tarjeta de acceso si voy con prisa.' },
       past: { en: 'Yesterday I ___ my access card at home.', esFull: 'Ayer olvidé mi tarjeta de acceso en casa.' },
       perf: { en: 'This month I have ___ fewer tasks by using reminders.', esFull: 'Este mes he olvidado menos tareas gracias a los recordatorios.' },
     },
     forgive: {
+      present: { en: 'We ___ small mistakes and focus on improvement.', esFull: 'Perdonamos errores pequeños y nos enfocamos en mejorar.' },
       past: { en: 'Yesterday I ___ a minor mistake and moved on.', esFull: 'Ayer perdoné un error menor y seguí adelante.' },
       perf: { en: 'This year the team has ___ disagreements to keep collaboration strong.', esFull: 'Este año el equipo ha perdonado desacuerdos para mantener una buena colaboración.' },
     },
     freeze: {
+      present: { en: 'Sometimes the screen ___ when the connection is unstable.', esFull: 'A veces la pantalla se congela cuando la conexión es inestable.' },
       past: { en: 'Yesterday the screen ___ during the presentation.', esFull: 'Ayer la pantalla se congeló durante la presentación.' },
       perf: { en: 'This week the app has ___ twice and we investigated the cause.', esFull: 'Esta semana la aplicación se ha quedado congelada dos veces y revisamos la causa.' },
     },
     give: {
+      present: { en: 'We ___ clear feedback after each exercise.', esFull: 'Damos retroalimentación clara después de cada ejercicio.' },
       past: { en: 'Yesterday the coach ___ clear feedback after practice.', esFull: 'Ayer el entrenador dio retroalimentación clara después de la práctica.' },
       perf: { en: 'This week the mentor has ___ useful advice to new staff.', esFull: 'Esta semana el mentor ha dado consejos útiles al personal nuevo.' },
     },
     go: {
+      present: { en: 'I ___ to the lab on Tuesdays for practice.', esFull: 'Voy al laboratorio los martes para practicar.' },
       past: { en: 'Yesterday we ___ to the lab for a demonstration.', esFull: 'Ayer fuimos al laboratorio para una demostración.' },
       perf: { en: 'This month I have ___ to several meetings with the team.', esFull: 'Este mes he ido a varias reuniones con el equipo.' },
     },
 
     grow: {
+      present: { en: 'We ___ by learning from feedback and practice.', esFull: 'Crecemos aprendiendo de la retroalimentación y la práctica.' },
       past: { en: 'Yesterday the company ___ after launching the new service.', esFull: 'Ayer la empresa creció tras lanzar el nuevo servicio.' },
       perf: { en: 'This year the team has ___ in confidence and skills.', esFull: 'Este año el equipo ha crecido en confianza y habilidades.' },
     },
     hide: {
+      present: { en: 'We ___ sensitive data to protect privacy.', esFull: 'Ocultamos datos sensibles para proteger la privacidad.' },
       past: { en: 'Yesterday we ___ the backup key in a secure place.', esFull: 'Ayer escondimos la llave de respaldo en un lugar seguro.' },
       perf: { en: 'This week the team has ___ sensitive data to protect privacy.', esFull: 'Esta semana el equipo ha ocultado datos sensibles para proteger la privacidad.' },
     },
     know: {
+      present: { en: 'We ___ the policy well because we review it often.', esFull: 'Conocemos bien la política porque la revisamos seguido.' },
       past: { en: 'Yesterday I ___ the answer after reviewing the notes.', esFull: 'Ayer supe la respuesta después de repasar las notas.' },
       perf: { en: 'This week I have ___ the topic better after practice.', esFull: 'Esta semana he entendido mejor el tema gracias a la práctica.' },
     },
     lie: {
+      present: { en: 'The documents ___ on the desk until we file them.', esFull: 'Los documentos yacen sobre el escritorio hasta que los archivamos.' },
       past: { en: 'Yesterday the document ___ on the desk all day.', esFull: 'Ayer el documento yació sobre el escritorio todo el día.' },
       perf: { en: 'This week the device has ___ unused in storage.', esFull: 'Esta semana el dispositivo ha permanecido guardado sin usarse.' },
     },
     ride: {
+      present: { en: 'I ___ the subway to avoid traffic.', esFull: 'Uso el metro para evitar el tráfico.' },
       past: { en: 'Yesterday I ___ the bus to the training center.', esFull: 'Ayer tomé el autobús hasta el centro de capacitación.' },
       perf: { en: 'This month I have ___ the subway to avoid traffic.', esFull: 'Este mes he usado el metro para evitar el tráfico.' },
     },
     rise: {
+      present: { en: 'Costs often ___ when demand increases.', esFull: 'Los costos suelen subir cuando aumenta la demanda.' },
       past: { en: 'Yesterday prices ___ after the announcement.', esFull: 'Ayer los precios subieron después del anuncio.' },
       perf: { en: 'This year costs have ___ due to inflation.', esFull: 'Este año los costos han aumentado por la inflación.' },
     },
     see: {
+      present: { en: 'We ___ good results when we practice consistently.', esFull: 'Vemos buenos resultados cuando practicamos con constancia.' },
       past: { en: 'Yesterday I ___ the error immediately during testing.', esFull: 'Ayer vi el error de inmediato durante las pruebas.' },
       perf: { en: 'This week we have ___ improvements in the results.', esFull: 'Esta semana hemos visto mejoras en los resultados.' },
     },
     show: {
+      present: { en: 'We ___ progress in every session.', esFull: 'Mostramos avances en cada sesión.' },
       past: { en: 'Yesterday the trainer ___ the correct steps on the screen.', esFull: 'Ayer el instructor mostró los pasos correctos en la pantalla.' },
       perf: { en: 'This month the team has ___ progress in every session.', esFull: 'Este mes el equipo ha mostrado avances en cada sesión.' },
     },
     tear: {
+      present: { en: 'Some labels ___ easily when you remove them.', esFull: 'Algunas etiquetas se rasgan fácilmente al quitarlas.' },
       past: { en: 'Yesterday the paper ___ when I removed the label.', esFull: 'Ayer el papel se rasgó cuando quité la etiqueta.' },
       perf: { en: 'This week the old banner has ___ in several places.', esFull: 'Esta semana la pancarta vieja se ha rasgado en varias partes.' },
     },
     wake: {
+      present: { en: 'I ___ early to study consistently.', esFull: 'Me despierto temprano para estudiar con constancia.' },
       past: { en: 'Yesterday I ___ early to prepare for the exam.', esFull: 'Ayer me desperté temprano para prepararme para el examen.' },
       perf: { en: 'This week I have ___ earlier to study consistently.', esFull: 'Esta semana me he despertado más temprano para estudiar con constancia.' },
     },
     wear: {
+      present: { en: 'I ___ safety gear on every site visit.', esFull: 'Uso equipo de seguridad en cada visita.' },
       past: { en: 'Yesterday I ___ formal clothes for the presentation.', esFull: 'Ayer llevé ropa formal para la presentación.' },
       perf: { en: 'This month I have ___ safety gear during all site visits.', esFull: 'Este mes he usado equipo de seguridad en todas las visitas.' },
     },
     write: {
+      present: { en: 'I ___ a short summary after each meeting.', esFull: 'Escribo un resumen breve después de cada reunión.' },
       past: { en: 'Yesterday I ___ a short summary after the meeting.', esFull: 'Ayer escribí un resumen breve después de la reunión.' },
       perf: { en: 'This week I have ___ three reports for the project.', esFull: 'Esta semana he escrito tres informes para el proyecto.' },
     },
 
     speak: {
+      present: { en: 'We ___ about priorities at the start of the week.', esFull: 'Hablamos de prioridades al inicio de la semana.' },
       past: { en: 'Yesterday the speaker ___ clearly during the workshop.', esFull: 'Ayer el ponente habló con claridad durante el taller.' },
       perf: { en: 'This month I have ___ with the team about priorities.', esFull: 'Este mes he hablado con el equipo sobre prioridades.' },
     },
     steal: {
+      present: { en: 'Thieves sometimes ___ devices from parked cars.', esFull: 'A veces los ladrones roban dispositivos de autos estacionados.' },
       past: { en: 'Yesterday someone ___ a laptop from the office.', esFull: 'Ayer alguien robó una laptop de la oficina.' },
       perf: { en: 'This year thieves have ___ several devices in the area.', esFull: 'Este año han robado varios dispositivos en la zona.' },
     },
 
     throw: {
+      present: { en: 'We ___ away outdated documents securely.', esFull: 'Tiramos documentos antiguos de forma segura.' },
       past: { en: 'Yesterday the player ___ the ball too far.', esFull: 'Ayer el jugador lanzó la pelota demasiado lejos.' },
       perf: { en: 'This week I have ___ away outdated documents securely.', esFull: 'Esta semana he tirado documentos antiguos de forma segura.' },
     },
 
     shake: {
+      present: { en: 'Some drills ___ the building a little.', esFull: 'Algunos simulacros sacuden un poco el edificio.' },
       past: { en: 'Yesterday the building ___ during the earthquake drill.', esFull: 'Ayer el edificio se sacudió durante el simulacro de sismo.' },
       perf: { en: 'This week the news has ___ everyone’s confidence a bit.', esFull: 'Esta semana las noticias han sacudido un poco la confianza de todos.' },
     },
     take: {
+      present: { en: 'I ___ notes during trainings to remember key points.', esFull: 'Tomo apuntes durante las capacitaciones para recordar lo importante.' },
       past: { en: 'Yesterday I ___ notes during the training.', esFull: 'Ayer tomé apuntes durante la capacitación.' },
       perf: { en: 'This week I have ___ a short course on safety.', esFull: 'Esta semana he tomado un curso corto de seguridad.' },
     },
@@ -348,15 +404,18 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
+  const [points, setPoints] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [waitingForNext, setWaitingForNext] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [feedbackDetails, setFeedbackDetails] = useState(null);
+  const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
   const [userAnswer, setUserAnswer] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
-  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 pattern with last letter
+  const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
 
   const [questions, setQuestions] = useState([]);
 
@@ -369,9 +428,12 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   const resetRoundState = () => {
     setCurrentQuestion(0);
     setScore(0);
+    setPoints(0);
     setTotalAnswered(0);
     setWaitingForNext(false);
     setFeedback('');
+    setFeedbackDetails(null);
+    setShowFeedbackDetails(false);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
@@ -439,6 +501,8 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
   const handleNext = () => {
     setFeedback('');
+    setFeedbackDetails(null);
+    setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -454,6 +518,8 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
     if (currentQuestion > 0) {
       setCurrentQuestion((prev) => prev - 1);
       setFeedback('');
+      setFeedbackDetails(null);
+      setShowFeedbackDetails(false);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -471,6 +537,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ ¡Correcto! ${q.verb.base} = ${q.correct}. (ABC)`);
     } else {
       setFeedback(`❌ No. ${q.verb.base} significa "${q.correct}".\nImagen absurda: ${q.verb.image}`);
@@ -485,6 +552,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback(`✅ Bien. ${q.base} - ${q.past} - ${q.participle} (ABC)`);
     } else {
       setFeedback(`❌ Era "${q.base}".\nFormas: ${q.base} - ${q.past} - ${q.participle}`);
@@ -509,6 +577,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
+      setPoints((prev) => prev + 1);
       setFeedback('✅ Perfecto. Identificaste los que NO son ABC.');
     } else {
       const missing = correct.filter((x) => !user.includes(x));
@@ -522,14 +591,46 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
     const isCorrect = userAnswer.toLowerCase().trim() === q.answer;
     setTotalAnswered((prev) => prev + 1);
 
-    const enFull = fillBlank(q.en, q.answer);
-    const esFull = q.esFull;
+    const base = q?.verb?.base ?? '';
+    const past = q?.verb?.past ?? '';
+    const participle = q?.verb?.participle ?? '';
+
+    const templates = getContextTemplates();
+    const tpl = templates?.[base] ?? null;
+
+    const presentEnTpl = tpl?.present?.en ?? 'Every day I ___ the task.';
+    const presentEsFull = tpl?.present?.esFull ?? 'Cada día hago la tarea.';
+    const pastEnTpl = tpl?.past?.en ?? 'Yesterday I ___ the task.';
+    const pastEsFull = tpl?.past?.esFull ?? 'Ayer realicé la tarea.';
+    const perfEnTpl = tpl?.perf?.en ?? 'This week I have ___ the task.';
+    const perfEsFull = tpl?.perf?.esFull ?? 'Esta semana he realizado la tarea.';
+
+    const earnedPoints = isCorrect ? pointsForHintLevel(hintLevel4) : 0;
+    const hintSummary = hintLevel4 > 0 ? ` (pistas usadas: ${hintLevel4}, puntos: ${earnedPoints.toFixed(1)}/1.0)` : '';
+
+    setFeedbackDetails({
+      present: {
+        en: fillBlank(presentEnTpl, base),
+        es: presentEsFull,
+      },
+      past: {
+        en: fillBlank(pastEnTpl, past),
+        es: pastEsFull,
+      },
+      perf: {
+        en: fillBlank(perfEnTpl, participle),
+        es: perfEsFull,
+      },
+      forms: { base, past, participle },
+    });
+    setShowFeedbackDetails(false);
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
-      setFeedback(`✅ Correcto. ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setPoints((prev) => prev + earnedPoints);
+      setFeedback(`✅ Correcto. ${q.note}${hintSummary}`);
     } else {
-      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}\n\nEN: ${enFull}\nES: ${esFull}`);
+      setFeedback(`❌ La forma correcta era "${q.answer}". ${q.note}${hintSummary}`);
     }
     setWaitingForNext(true);
   };
@@ -561,7 +662,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
           <div className="mb-6 bg-slate-800 p-4 rounded-xl shadow-lg border border-slate-700">
             <div className="flex justify-between text-sm mb-2 font-mono text-red-200">
               <span>Progreso: {currentQuestion + 1} / {questions.length}</span>
-              <span>Aciertos: {score}</span>
+              <span>Aciertos: {score} | Puntos: {points.toFixed(1)}</span>
             </div>
             <div className="w-full bg-slate-700 h-3 rounded-full overflow-hidden">
               <div
@@ -599,6 +700,16 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
               </div>
               <ChevronRight className="w-6 h-6 opacity-50 group-hover:opacity-100" />
             </button>
+
+            {typeof onViewGallery === 'function' && (
+              <button
+                type="button"
+                onClick={onViewGallery}
+                className="text-sm text-slate-300 hover:text-white underline text-center"
+              >
+                Recorrido mental (tabla)
+              </button>
+            )}
 
             <div className="grid md:grid-cols-2 gap-4">
               {groupsABC.map((g) => (
@@ -972,15 +1083,15 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                 disabled={waitingForNext}
                 className="bg-amber-600 hover:bg-amber-500 disabled:opacity-40 px-5 py-3 rounded-xl font-bold"
               >
-                Verificar
+                Completar
               </button>
             </div>
 
             <div className="mt-4">
               <button
                 type="button"
-                onClick={() => setHintLevel4((v) => Math.min(2, v + 1))}
-                disabled={waitingForNext || hintLevel4 >= 2}
+                onClick={() => setHintLevel4((v) => Math.min(3, v + 1))}
+                disabled={waitingForNext || hintLevel4 >= 3}
                 className="text-sm underline text-slate-300 hover:text-white disabled:opacity-40"
               >
                 Pedir pista
@@ -990,12 +1101,20 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                   <div className="text-sm text-slate-300">Pistas:</div>
                   {hintLevel4 >= 1 && (
                     <div>
-                      Primera letra: <span className="font-mono font-bold">{questions[currentQuestion].answer[0]}</span>
+                      Pista 1 (inicio):{' '}
+                      <span className="font-mono font-bold">{(questions[currentQuestion].answer ?? '')[0]}</span>
                     </div>
                   )}
                   {hintLevel4 >= 2 && (
                     <div>
-                      Última letra + patrón: <span className="font-mono font-bold">{buildLetterPattern(questions[currentQuestion].answer)}</span>
+                      Pista 2 (patrón):{' '}
+                      <span className="font-mono font-bold">{buildLetterPattern(questions[currentQuestion].answer)}</span>
+                    </div>
+                  )}
+                  {hintLevel4 >= 3 && (
+                    <div>
+                      Pista 3 (compacta):{' '}
+                      <span className="font-mono font-bold">{buildTightPattern(questions[currentQuestion].answer, 2)}</span>
                     </div>
                   )}
                 </div>
@@ -1003,27 +1122,68 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
             </div>
 
             {feedback && (
-              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
-                {feedback}
+              <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 text-slate-100">
+                <div className="whitespace-pre-wrap">{feedback}</div>
+
+                {waitingForNext && feedbackDetails && (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowFeedbackDetails((v) => !v)}
+                      className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
+                    >
+                      {showFeedbackDetails ? 'Ocultar retroalimentación' : 'Ver retroalimentación'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="bg-amber-600 hover:bg-amber-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+                    >
+                      Siguiente <ChevronRight size={18} />
+                    </button>
+                  </div>
+                )}
+
+                {waitingForNext && showFeedbackDetails && feedbackDetails && (
+                  <div className="mt-4 bg-slate-900/40 border border-slate-700 rounded-xl p-4">
+                    <div className="text-slate-200 font-bold mb-2">Retroalimentación (3 tiempos)</div>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Presente</div>
+                        <div className="text-white">EN: {feedbackDetails.present.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.present.es}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Pasado</div>
+                        <div className="text-white">EN: {feedbackDetails.past.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.past.es}</div>
+                      </div>
+                      <div>
+                        <div className="text-slate-300 text-sm font-bold">Participio (Present Perfect)</div>
+                        <div className="text-white">EN: {feedbackDetails.perf.en}</div>
+                        <div className="text-slate-200">ES: {feedbackDetails.perf.es}</div>
+                      </div>
+                      <div className="text-slate-400 text-sm font-mono">
+                        Formas: {feedbackDetails.forms.base} — {feedbackDetails.forms.past} — {feedbackDetails.forms.participle}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="flex items-center justify-between mt-6">
-              <button
-                onClick={handlePrevious}
-                disabled={currentQuestion === 0}
-                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
-              >
-                <ChevronLeft size={18} /> Anterior
-              </button>
-              <button
-                onClick={handleNext}
-                disabled={!waitingForNext}
-                className="bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500 px-6 py-3 rounded-lg font-bold flex items-center gap-2"
-              >
-                Siguiente <ChevronRight size={18} />
-              </button>
-            </div>
+            {!waitingForNext && (
+              <div className="flex items-center justify-between mt-6">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentQuestion === 0}
+                  className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+                >
+                  <ChevronLeft size={18} /> Anterior
+                </button>
+                <div className="text-slate-400 text-sm">Completa y luego elige: retroalimentación o siguiente.</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1034,6 +1194,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
               <h2 className="text-3xl font-black">Resultados</h2>
             </div>
             <p className="text-slate-200 text-lg">Aciertos: <span className="font-black">{score}</span> / {totalAnswered}</p>
+            <p className="text-slate-300 mt-1">Puntos: <span className="font-black">{points.toFixed(1)}</span></p>
             <p className="text-slate-400 mt-2">Vuelve al grupo para seguir practicando los sonidos.</p>
 
             <div className="mt-6 grid md:grid-cols-2 gap-4">

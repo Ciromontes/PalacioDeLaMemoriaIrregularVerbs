@@ -67,22 +67,22 @@ const floor1VerbsAAA = [
   { base: 'fit', past: 'fit', participle: 'fit', es: 'Encajar', image: 'Un elefante intenta encajar en una caja de fósforos y entra perfecto.' },
   { base: 'forecast', past: 'forecast', participle: 'forecast', es: 'Pronosticar', image: 'Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente.' },
   { base: 'hit', past: 'hit', participle: 'hit', es: 'Golpear', image: 'Un guante de boxeo con alas golpea una campana.' },
-  { base: 'hurt', past: 'hurt', participle: 'hurt', es: 'Herir/Doler', image: 'Un robot se corta la mano y sale aceite' },
+  { base: 'hurt', past: 'hurt', participle: 'hurt', es: 'Herir/Doler', image: 'Un robot se corta la mano y sale aceite.' },
   { base: 'input', past: 'input', participle: 'input', es: 'Introducir', image: 'Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números.' },
-  { base: 'knit', past: 'knit', participle: 'knit', es: 'Tejer', image: 'Dos ovejas tejen la herida del robot  con su lana y agujas láser.' },
+  { base: 'knit', past: 'knit', participle: 'knit', es: 'Tejer', image: 'Dos ovejas tejen la herida del robot con su lana y agujas láser.' },
   { base: 'let', past: 'let', participle: 'let', es: 'Permitir', image: 'Un semáforo con cara sonriente te deja pasar.' },
   { base: 'output', past: 'output', participle: 'output', es: 'Producir/Salir', image: 'Una impresora industrial produce globos de colores que salen volando en formación.' },
   { base: 'put', past: 'put', participle: 'put', es: 'Poner', image: 'Un brazo robótico pone sombreros en cabezas de estatuas.' },
-  { base: 'quit', past: 'quit', participle: 'quit', es: 'Renunciar', image: 'Un empleado tira papeles al aire y sale volando en un cohete.' },
+  { base: 'quit', past: 'quit', participle: 'quit', es: 'Renunciar', image: 'Un empleado que renuncia tira papeles al aire y sale volando en un cohete.' },
   { base: 'read', past: 'read', participle: 'read', es: 'Leer', image: "Un libro rojo gigante te lee a ti en voz alta. (Suena 'red' en pasado)." },
-  { base: 'rid', past: 'rid', participle: 'rid', es: 'Librar', image: 'Un perro enorme sacude su pelaje y se libera de todas las pulgas que lo molestaban.' },
+  { base: 'rid', past: 'rid', participle: 'rid', es: 'Librar', image: 'Un perro gigante usa un secador de pelo para librarse de todas las pulgas; al desprenderse se convierten en estrellas.' },
   { base: 'set', past: 'set', participle: 'set', es: 'Colocar/Fijar', image: 'Un camarero antigravedad coloca una mesa en el techo (al revés).' },
   { base: 'shed', past: 'shed', participle: 'shed', es: 'Desprender', image: 'Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas.' },
-  { base: 'shut', past: 'shut', participle: 'shut', es: 'Cerrar', image: 'Una puerta con boca grita "¡Silencio!" y se cierra sola.' },
+  { base: 'shut', past: 'shut', participle: 'shut', es: 'Cerrar', image: 'Un hombre cierra la puerta antes de que un león furioso intente entrar.' },
   { base: 'slit', past: 'slit', participle: 'slit', es: 'Rajar', image: 'Un ninja corta un papel tan fino que no se ve.' },
   { base: 'spread', past: 'spread', participle: 'spread', es: 'Esparcir', image: 'Un cuchillo unta mantequilla en el suelo de toda la sala.' },
   { base: 'sweat', past: 'sweat', participle: 'sweat', es: 'Sudar', image: 'Una fuente de agua con forma de persona corriendo y sudando.' },
-  { base: 'thrust', past: 'thrust', participle: 'thrust', es: 'Empujar', image: 'Un motor a reacción empuja un carrito de supermercado a velocidad luz.' },
+  { base: 'thrust', past: 'thrust', participle: 'thrust', es: 'Empujar', image: 'Un niño intenta empujar un elefante con todas sus fuerzas.' },
   { base: 'upset', past: 'upset', participle: 'upset', es: 'Molestar', image: 'Un helado enorme se derrite encima de un escritorio y fastidia (molesta) a los papeles.' },
   { base: 'wet', past: 'wet', participle: 'wet', es: 'Mojar', image: 'Una nube personal llueve solo sobre una silla.' },
 ];
@@ -255,6 +255,13 @@ const mentalImages = {
 const App = () => {
   const [scene, setScene] = useState('MAIN_MENU');
   const [selectedFloor, setSelectedFloor] = useState(null);
+  const [galleryReturnScene, setGalleryReturnScene] = useState('MAP');
+
+  const openGalleryForFloor = (floorId, returnScene = 'MAP') => {
+    setSelectedFloor(floorId);
+    setGalleryReturnScene(returnScene);
+    setScene('GALLERY');
+  };
 
   const MainMenu = () => (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center">
@@ -398,7 +405,15 @@ const App = () => {
         ].map((floor) => (
           <div
             key={floor.id}
-            onClick={() => { if (!floor.locked) { setSelectedFloor(floor.id); setScene('GALLERY'); } }}
+            onClick={() => {
+              if (floor.locked) return;
+              setSelectedFloor(floor.id);
+              if (floor.id === 1) setScene('GAME_AAA');
+              else if (floor.id === 2) setScene('GAME_ABA');
+              else if (floor.id === 3) setScene('GAME_ABB');
+              else if (floor.id === 4) setScene('GAME_ABC');
+              else setScene('MAP');
+            }}
             className={`${floor.color} ${floor.locked ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 cursor-pointer'} transition-all p-6 rounded-2xl shadow-2xl relative overflow-hidden group`}
           >
             <div className="flex justify-between items-start">
@@ -420,7 +435,10 @@ const App = () => {
 
     return (
       <div className="min-h-screen bg-slate-100 p-8">
-        <button onClick={() => setScene('MAP')} className="text-slate-600 flex items-center mb-6 font-bold">
+        <button
+          onClick={() => setScene(galleryReturnScene || 'MAP')}
+          className="text-slate-600 flex items-center mb-6 font-bold"
+        >
           <ArrowLeft className="mr-2" /> Volver al Mapa
         </button>
         <div className="max-w-4xl mx-auto">
@@ -709,28 +727,28 @@ const App = () => {
       {scene === 'MAP' && <PalaceMap />}
       {scene === 'GALLERY' && <MentalGallery />}
       {scene === 'GAME_AAA' && (
-        <AAAGameEngine onExit={() => setScene('MAP')} />
+        <AAAGameEngine
+          onExit={() => setScene('MAP')}
+          onViewGallery={() => openGalleryForFloor(1, 'GAME_AAA')}
+        />
       )}
       {scene === 'GAME_ABA' && (
-        <ABAGameEngine onExit={() => setScene('MAP')} />
+        <ABAGameEngine
+          onExit={() => setScene('MAP')}
+          onViewGallery={() => openGalleryForFloor(2, 'GAME_ABA')}
+        />
       )}
       {scene === 'GAME_ABB' && (
         <ABBGameEngine
           onExit={() => setScene('MAP')}
-          onViewGallery={() => {
-            setSelectedFloor(3);
-            setScene('GALLERY');
-          }}
+          onViewGallery={() => openGalleryForFloor(3, 'GAME_ABB')}
         />
       )}
 
       {scene === 'GAME_ABC' && (
         <ABCGameEngine
           onExit={() => setScene('MAP')}
-          onViewGallery={() => {
-            setSelectedFloor(4);
-            setScene('GALLERY');
-          }}
+          onViewGallery={() => openGalleryForFloor(4, 'GAME_ABC')}
         />
       )}
     </div>
