@@ -1162,44 +1162,64 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                     <div className="text-slate-200 font-bold mb-2">Retroalimentación (3 tiempos)</div>
 
                     {speechAvailable && (
-                      <div className="mb-3 flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            speakEnglishBlock([
-                              feedbackDetails.present.en,
-                              feedbackDetails.past.en,
-                              feedbackDetails.perf.en,
-                            ]);
-                          }}
-                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
-                        >
-                          Escuchar EN
-                        </button>
-                        <button
-                          type="button"
-                          onClick={stopSpeech}
-                          className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
-                        >
-                          Detener
-                        </button>
+                      <div className="mb-3">
+                        <div className="text-slate-300 text-sm mb-2">Elige la frase que desees y tócala para escucharla en inglés.</div>
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={stopSpeech}
+                            className="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg font-bold"
+                          >
+                            Detener
+                          </button>
+                        </div>
                       </div>
                     )}
 
                     <div className="space-y-3">
                       <div>
                         <div className="text-slate-300 text-sm font-bold">Presente</div>
-                        <div className="text-white">EN: {feedbackDetails.present.en}</div>
+                        {speechAvailable ? (
+                          <button
+                            type="button"
+                            onClick={() => speakEnglishBlock([feedbackDetails.present.en])}
+                            className="text-left text-white hover:text-amber-200 underline decoration-dotted"
+                          >
+                            EN: {feedbackDetails.present.en}
+                          </button>
+                        ) : (
+                          <div className="text-white">EN: {feedbackDetails.present.en}</div>
+                        )}
                         <div className="text-slate-200">ES: {feedbackDetails.present.es}</div>
                       </div>
                       <div>
                         <div className="text-slate-300 text-sm font-bold">Pasado</div>
-                        <div className="text-white">EN: {feedbackDetails.past.en}</div>
+                        {speechAvailable ? (
+                          <button
+                            type="button"
+                            onClick={() => speakEnglishBlock([feedbackDetails.past.en])}
+                            className="text-left text-white hover:text-amber-200 underline decoration-dotted"
+                          >
+                            EN: {feedbackDetails.past.en}
+                          </button>
+                        ) : (
+                          <div className="text-white">EN: {feedbackDetails.past.en}</div>
+                        )}
                         <div className="text-slate-200">ES: {feedbackDetails.past.es}</div>
                       </div>
                       <div>
                         <div className="text-slate-300 text-sm font-bold">Participio (Present Perfect)</div>
-                        <div className="text-white">EN: {feedbackDetails.perf.en}</div>
+                        {speechAvailable ? (
+                          <button
+                            type="button"
+                            onClick={() => speakEnglishBlock([feedbackDetails.perf.en])}
+                            className="text-left text-white hover:text-amber-200 underline decoration-dotted"
+                          >
+                            EN: {feedbackDetails.perf.en}
+                          </button>
+                        ) : (
+                          <div className="text-white">EN: {feedbackDetails.perf.en}</div>
+                        )}
                         <div className="text-slate-200">ES: {feedbackDetails.perf.es}</div>
                       </div>
                       <div className="text-slate-400 text-sm font-mono">

@@ -1,7 +1,29 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Brain, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, RefreshCw, Sparkles, Trophy, X } from 'lucide-react';
 
-import { isSpeechSupported, speakEnglishBlock, stopSpeech, warmUpVoices } from './speech';
+import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
+
+function getABAPalaceImageUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  // Prefer uppercase filenames like COME.webp
+  return `${prefix}img/ABA/${base.toUpperCase()}.webp`;
+}
+
+function getABAPalaceImageFallbackUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  // Secondary attempt: lowercase filenames
+  return `${prefix}img/ABA/${base}.webp`;
+}
 
 // Piso 2 (ABA): Presente = Participio, Pasado distinto
 // Regla: El pasado cambia, pero el participio vuelve al origen.
@@ -164,7 +186,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
-  const [feedbackSpeechEn, setFeedbackSpeechEn] = useState([]);
+  const [feedbackSpeechEn, setFeedbackSpeechEn] = useState(null);
   const speechAvailable = isSpeechSupported();
 
   useEffect(() => {
@@ -177,6 +199,8 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
+  const [palaceImageError, setPalaceImageError] = useState(false);
+  const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
   const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
 
@@ -200,12 +224,15 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([]);
+    setFeedbackSpeechEn(null);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
+
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
 
     if (level === 'level1') {
       const selected = shuffle(verbsABA);
@@ -242,7 +269,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([]);
+    setFeedbackSpeechEn(null);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -261,7 +288,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
       setFeedback('');
       setFeedbackDetails('');
       setShowFeedbackDetails(false);
-      setFeedbackSpeechEn([]);
+      setFeedbackSpeechEn(null);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -356,7 +383,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
     setFeedbackDetails(details);
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([presentEn, pastEn, perfEn].filter(Boolean));
+    setFeedbackSpeechEn({ presentEn, pastEn, perfEn });
 
     if (isCorrect) {
       setScore(prev => prev + 1);
@@ -484,6 +511,54 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
               <p className="text-xl text-green-200 mb-2 font-serif italic">"{verbsABA[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{verbsABA[palaceView].base} - {verbsABA[palaceView].past} - {verbsABA[palaceView].participle}</p>
 
+              <div className="w-full max-w-4xl mb-4">
+                <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
+
+                {!palaceImageError ? (
+                  <img
+                    key={`${verbsABA[palaceView].base}-${palaceImageVariant}`}
+                    src={
+                      palaceImageVariant === 'primary'
+                        ? getABAPalaceImageUrl(verbsABA[palaceView].base)
+                        : getABAPalaceImageFallbackUrl(verbsABA[palaceView].base)
+                    }
+                    alt={verbsABA[palaceView].base}
+                    loading="lazy"
+                    onClick={() => {
+                      if (!speechAvailable) return;
+                      speakEnglishSequence(
+                        [verbsABA[palaceView].base, verbsABA[palaceView].past, verbsABA[palaceView].participle],
+                        { gapMs: 350 }
+                      );
+                    }}
+                    onKeyDown={(e) => {
+                      if (!speechAvailable) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        speakEnglishSequence(
+                          [verbsABA[palaceView].base, verbsABA[palaceView].past, verbsABA[palaceView].participle],
+                          { gapMs: 350 }
+                        );
+                      }
+                    }}
+                    role={speechAvailable ? 'button' : undefined}
+                    tabIndex={speechAvailable ? 0 : undefined}
+                    onError={() => {
+                      if (palaceImageVariant === 'primary') {
+                        setPalaceImageVariant('fallback');
+                      } else {
+                        setPalaceImageError(true);
+                      }
+                    }}
+                    className={`w-full h-[55vh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
+                  />
+                ) : (
+                  <div className="w-full h-[55vh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                    No se pudo cargar la imagen para <span className="font-mono ml-2">{verbsABA[palaceView].base}</span>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-slate-800 p-4 rounded-lg max-w-lg border border-slate-600">
                 <p className="text-slate-100 text-lg leading-relaxed">
                   {verbsABA[palaceView].image}
@@ -493,16 +568,24 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
             <div className="flex justify-between items-center gap-4">
               <button
-                onClick={() => setPalaceView(prev => Math.max(0, prev - 1))}
-                disabled={palaceView === 0}
+                onClick={() => {
+                  stopSpeech();
+                  setPalaceImageError(false);
+                  setPalaceImageVariant('primary');
+                  setPalaceView((prev) => (prev - 1 + verbsABA.length) % verbsABA.length);
+                }}
                 className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-green-600 transition"
               >
                 <ChevronLeft />
               </button>
               <span className="font-mono text-slate-500">{palaceView + 1} / {verbsABA.length}</span>
               <button
-                onClick={() => setPalaceView(prev => Math.min(verbsABA.length - 1, prev + 1))}
-                disabled={palaceView === verbsABA.length - 1}
+                onClick={() => {
+                  stopSpeech();
+                  setPalaceImageError(false);
+                  setPalaceImageVariant('primary');
+                  setPalaceView((prev) => (prev + 1) % verbsABA.length);
+                }}
                 className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-green-600 transition"
               >
                 <ChevronRight />
@@ -734,22 +817,47 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
             {stage === 'level4' && showFeedbackDetails && feedbackDetails && (
               <div className="mt-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4 whitespace-pre-line text-slate-100">
-                {speechAvailable && feedbackSpeechEn.length > 0 && (
-                  <div className="mb-3 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => speakEnglishBlock(feedbackSpeechEn)}
-                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
-                    >
-                      Escuchar EN
-                    </button>
-                    <button
-                      type="button"
-                      onClick={stopSpeech}
-                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
-                    >
-                      Detener
-                    </button>
+                {speechAvailable && feedbackSpeechEn && (
+                  <div className="mb-3">
+                    <div className="text-slate-300 text-sm mb-2">Elige la frase que desees y tócala para escucharla en inglés.</div>
+                    <div className="flex flex-col gap-2">
+                      {feedbackSpeechEn.presentEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.presentEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Presente (EN): {feedbackSpeechEn.presentEn}
+                        </button>
+                      ) : null}
+                      {feedbackSpeechEn.pastEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.pastEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Pasado (EN): {feedbackSpeechEn.pastEn}
+                        </button>
+                      ) : null}
+                      {feedbackSpeechEn.perfEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.perfEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Participio / Present Perfect (EN): {feedbackSpeechEn.perfEn}
+                        </button>
+                      ) : null}
+                      <div className="flex flex-wrap gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={stopSpeech}
+                          className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Detener
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {feedbackDetails}

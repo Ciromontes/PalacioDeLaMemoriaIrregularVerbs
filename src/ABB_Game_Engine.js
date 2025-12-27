@@ -339,7 +339,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
-  const [feedbackSpeechEn, setFeedbackSpeechEn] = useState([]);
+  const [feedbackSpeechEn, setFeedbackSpeechEn] = useState(null);
   const speechAvailable = isSpeechSupported();
 
   const [userAnswer, setUserAnswer] = useState('');
@@ -381,7 +381,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([]);
+    setFeedbackSpeechEn(null);
     setUserAnswer('');
     setShowHint(false);
     setSelectedAnswer(null);
@@ -452,7 +452,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     setFeedback('');
     setFeedbackDetails('');
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([]);
+    setFeedbackSpeechEn(null);
     setWaitingForNext(false);
     setUserAnswer('');
     setShowHint(false);
@@ -471,7 +471,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
       setFeedback('');
       setFeedbackDetails('');
       setShowFeedbackDetails(false);
-      setFeedbackSpeechEn([]);
+      setFeedbackSpeechEn(null);
       setWaitingForNext(false);
       setUserAnswer('');
       setShowHint(false);
@@ -572,7 +572,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
     setFeedbackDetails(details);
     setShowFeedbackDetails(false);
-    setFeedbackSpeechEn([presentEn, pastEn, perfEn].filter(Boolean));
+    setFeedbackSpeechEn({ presentEn, pastEn, perfEn });
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
@@ -1028,22 +1028,47 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
             {stage === 'level4' && showFeedbackDetails && feedbackDetails && (
               <div className="mt-4 bg-slate-900/50 border border-slate-700 rounded-xl p-4 whitespace-pre-line text-slate-100">
-                {speechAvailable && feedbackSpeechEn.length > 0 && (
-                  <div className="mb-3 flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => speakEnglishBlock(feedbackSpeechEn)}
-                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
-                    >
-                      Escuchar EN
-                    </button>
-                    <button
-                      type="button"
-                      onClick={stopSpeech}
-                      className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
-                    >
-                      Detener
-                    </button>
+                {speechAvailable && feedbackSpeechEn && (
+                  <div className="mb-3">
+                    <div className="text-slate-300 text-sm mb-2">Elige la frase que desees y tócala para escucharla en inglés.</div>
+                    <div className="flex flex-col gap-2">
+                      {feedbackSpeechEn.presentEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.presentEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Presente (EN): {feedbackSpeechEn.presentEn}
+                        </button>
+                      ) : null}
+                      {feedbackSpeechEn.pastEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.pastEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Pasado (EN): {feedbackSpeechEn.pastEn}
+                        </button>
+                      ) : null}
+                      {feedbackSpeechEn.perfEn ? (
+                        <button
+                          type="button"
+                          onClick={() => speakEnglishBlock([feedbackSpeechEn.perfEn])}
+                          className="text-left bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Participio / Present Perfect (EN): {feedbackSpeechEn.perfEn}
+                        </button>
+                      ) : null}
+                      <div className="flex flex-wrap gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={stopSpeech}
+                          className="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg font-bold transition"
+                        >
+                          Detener
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {feedbackDetails}
