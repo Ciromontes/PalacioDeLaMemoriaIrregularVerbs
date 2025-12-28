@@ -522,7 +522,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
         )}
 
         {stage === 'palace' && (
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-4 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-emerald-300">Galería Mental (ABA)</h2>
               <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
@@ -537,7 +537,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
               </div>
             )}
 
-            <div className="bg-slate-900/50 p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            <div className="bg-slate-900/50 p-3 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
 
               <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{verbsABA[palaceView].base.toUpperCase()}</h3>
@@ -624,10 +624,10 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
                           setPalaceImageError(true);
                         }
                       }}
-                      className={`w-full h-[70vh] md:h-[520px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
+                      className={`w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
                     />
                   ) : (
-                    <div className="w-full h-[70vh] md:h-[520px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                    <div className="w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
                       No se pudo cargar la imagen para <span className="font-mono ml-2">{verbsABA[palaceView].base}</span>
                     </div>
                   )}
