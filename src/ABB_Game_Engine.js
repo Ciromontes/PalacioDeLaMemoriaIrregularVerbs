@@ -87,6 +87,26 @@ export const groupsABB = [
   },
 ];
 
+function getABBPalaceImageUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  return `${prefix}img/ABB/${base.toUpperCase()}.webp`;
+}
+
+function getABBPalaceImageFallbackUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  return `${prefix}img/ABB/${base}.webp`;
+}
+
 function buildLetterPattern(word) {
   const w = (word ?? '').trim();
   if (w.length <= 1) return w;
@@ -353,6 +373,8 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   const [palaceTitle, setPalaceTitle] = useState('');
   const [palaceList, setPalaceList] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
+  const [palaceImageError, setPalaceImageError] = useState(false);
+  const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
   const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
 
@@ -370,6 +392,12 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     warmUpVoices();
     return () => stopSpeech();
   }, []);
+
+  useEffect(() => {
+    if (stage !== 'palace') return;
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+  }, [stage, palaceView, palaceTitle]);
 
   const resetRoundState = () => {
     stopSpeech();
@@ -778,6 +806,28 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{palaceList[palaceView].base.toUpperCase()}</h3>
               <p className="text-xl text-purple-200 mb-2 font-serif italic">"{palaceList[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{palaceList[palaceView].base} - {palaceList[palaceView].past} - {palaceList[palaceView].participle}</p>
+
+              {!palaceImageError ? (
+                <img
+                  key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
+                  src={
+                    palaceImageVariant === 'primary'
+                      ? getABBPalaceImageUrl(palaceList[palaceView].base)
+                      : getABBPalaceImageFallbackUrl(palaceList[palaceView].base)
+                  }
+                  alt={palaceList[palaceView].base}
+                  loading="lazy"
+                  onError={() => {
+                    if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
+                    else setPalaceImageError(true);
+                  }}
+                  className="w-full max-w-4xl h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-6"
+                />
+              ) : (
+                <div className="w-full max-w-4xl h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-6">
+                  No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
+                </div>
+              )}
 
               <div className="bg-slate-800 p-4 rounded-lg max-w-lg border border-slate-600">
                 <p className="text-slate-100 text-lg leading-relaxed">{palaceList[palaceView].image}</p>

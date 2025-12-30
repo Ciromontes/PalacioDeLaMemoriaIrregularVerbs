@@ -121,6 +121,26 @@ export const storiesABC = {
     'En la última sala del laboratorio, un loro habla dando un discurso presidencial (speak–spoke–spoken). De repente, un ladrón invisible roba la luna (steal–stole–stolen). Un brazo mecánico lanza pelotas de béisbol al espacio (throw–threw–thrown). A su lado, una planta crece tan rápido que rompe el techo (grow–grew–grown). Un libro gigante sabe y revela secretos (know–knew–known). En el centro, una licuadora gigante agita un edificio entero (shake–shook–shaken). Finalmente, una garra de máquina de peluches toma un coche (take–took–taken).',
 };
 
+function getABCPalaceImageUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  return `${prefix}img/ABC/${base.toUpperCase()}.webp`;
+}
+
+function getABCPalaceImageFallbackUrl(verbBase) {
+  const base = String(verbBase ?? '').trim().toLowerCase();
+  if (!base) return '';
+
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+
+  return `${prefix}img/ABC/${base}.webp`;
+}
+
 function buildLetterPattern(word) {
   const w = (word ?? '').trim();
   if (w.length <= 1) return w;
@@ -424,6 +444,8 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   const [palaceTitle, setPalaceTitle] = useState('');
   const [palaceList, setPalaceList] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
+  const [palaceImageError, setPalaceImageError] = useState(false);
+  const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
   const selectedGroup = useMemo(() => groupsABC.find((g) => g.id === selectedGroupId) ?? null, [selectedGroupId]);
 
@@ -433,6 +455,12 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
     warmUpVoices();
     return () => stopSpeech();
   }, []);
+
+  useEffect(() => {
+    if (stage !== 'palace') return;
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+  }, [stage, palaceView, palaceTitle]);
 
   const resetRoundState = () => {
     stopSpeech();
@@ -753,6 +781,29 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                 {palaceList[palaceView].base} — {palaceList[palaceView].past} — {palaceList[palaceView].participle}
               </div>
               <div className="text-slate-200 font-semibold mb-3">{palaceList[palaceView].es}</div>
+
+              {!palaceImageError ? (
+                <img
+                  key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
+                  src={
+                    palaceImageVariant === 'primary'
+                      ? getABCPalaceImageUrl(palaceList[palaceView].base)
+                      : getABCPalaceImageFallbackUrl(palaceList[palaceView].base)
+                  }
+                  alt={palaceList[palaceView].base}
+                  loading="lazy"
+                  onError={() => {
+                    if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
+                    else setPalaceImageError(true);
+                  }}
+                  className="w-full h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-4"
+                />
+              ) : (
+                <div className="w-full h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-4">
+                  No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
+                </div>
+              )}
+
               <div className="text-slate-300">{palaceList[palaceView].image}</div>
             </div>
 

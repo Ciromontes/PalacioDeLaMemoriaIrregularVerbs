@@ -5,34 +5,34 @@ import { isSpeechSupported, speakEnglishBlock, speakEnglishTriplet, stopSpeech, 
 
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
 const verbsAAA = [
-  { en: "bet", es: "apostar", image: "Un perro gigante apuesta huesos de oro en una mesa de póker." },
-  { en: "bid", es: "pujar/ofrecer/subastar", image: "Un subastador con megáfono ofrece montañas de zapatos gigantes en una feria." },
-  { en: "broadcast", es: "transmitir", image: "Una radio parlante gigante transmite noticias a las nubes." },
-  { en: "burst", es: "estallar", image: "Globos de acero estallan soltando confeti infinito." },
-  { en: "cast", es: "lanzar (papel)", image: "Un director de cine lanza guiones a actores robots." },
-  { en: "cost", es: "costar", image: "Una etiqueta de precio gigante te persigue por el pasillo." },
-  { en: "cut", es: "cortar", image: "Un árbol se corta a sí mismo con ramas en forma de tijeras." },
-  { en: "fit", es: "encajar", image: "Un elefante intenta encajar en una caja de fósforos y entra perfecto." },
-  { en: "forecast", es: "pronosticar", image: "Un meteorólogo gigante dibuja nubes y rayos en el cielo usando un marcador fluorescente." },
-  { en: "hit", es: "golpear", image: "Un guante de boxeo con alas golpea una campana." },
-  { en: "hurt", es: "herir/doler", image: "Un robot se corta la mano y sale aceite." },
-  { en: "input", es: "introducir", image: "Un teclado enorme introduce datos masticando tarjetas perforadas y escupiendo números." },
-  { en: "knit", es: "tejer", image: "Dos ovejas tejen la herida del robot con su lana y agujas láser." },
-  { en: "let", es: "permitir", image: "Un semáforo con cara sonriente te deja pasar." },
-  { en: "output", es: "producir/salir", image: "Una impresora industrial produce globos de colores que salen volando en formación." },
-  { en: "put", es: "poner", image: "Un brazo robótico pone sombreros en cabezas de estatuas." },
-  { en: "quit", es: "renunciar", image: "Un empleado que renuncia tira papeles al aire y sale volando en un cohete." },
-  { en: "read", es: "leer", image: "Un libro rojo gigante te lee a ti en voz alta. (Suena 'red' en pasado)." },
-  { en: "rid", es: "librar", image: "Un perro gigante usa un secador de pelo para librarse de todas las pulgas; al desprenderse se convierten en estrellas." },
-  { en: "set", es: "colocar/fijar", image: "Un camarero antigravedad coloca una mesa en el techo (al revés)." },
+  { en: "bet", es: "apostar", image: "El gatito apila monedas de chocolate en una mesa de póker, mientras un perro gigante apuesta huesos de oro. El gatito mira sus monedas con duda." },
+  { en: "bid", es: "pujar/ofrecer/subastar", image: "El gatito, con megáfono, subasta un ovillo de lana a ratones. Los ratones ofrecen quesos, y el gatito ríe al aceptar el mejor." },
+  { en: "broadcast", es: "transmitir", image: "El gatito habla por una radio de cristal. Su ronroneo se convierte en música que resuena en los espejos." },
+  { en: "burst", es: "estallar", image: "El gatito salta sobre un globo de espejo. Al reventar, los fragmentos reflejan su cara asombrada." },
+  { en: "cast", es: "lanzar (papel)", image: "Un director lanza guiones a actores robots. El gatito intenta atrapar uno, pero el guion lo envuelve como un abanico." },
+  { en: "cost", es: "costar", image: "Una etiqueta de precio con patitas persigue al gatito, que intenta esconderse tras un espejo. La etiqueta marca \"1 abrazo\"." },
+  { en: "cut", es: "cortar", image: "El gatito corta un papel de seda con una uña. El corte se refleja infinitamente en los espejos, creando un laberinto de líneas." },
+  { en: "fit", es: "encajar", image: "El gatito se mete en una caja de música. Su cola esponjosa asoma, y la caja suena una melodía al cerrarse." },
+  { en: "forecast", es: "pronosticar", image: "Un meteorólogo dibuja nubes en el cielo. El gatito, asustado, abre una sombrilla que refleja tormentas de pelusa." },
+  { en: "hit", es: "golpear", image: "El gatito golpea una campana de cristal con un guante de boxeo. El sonido hace vibrar todos los espejos, que repiten el \"ding\"." },
+  { en: "hurt", es: "herir/doler", image: "El gatito se pincha con un cactus de cristal. Sus lágrimas, al caer, se convierten en diamantes que ruedan por el suelo." },
+  { en: "input", es: "introducir", image: "El gatito introduce galletas en una ranura de un \"teclado\" de espejos. Los espejos escupen migajas que forman palabras." },
+  { en: "knit", es: "tejer", image: "El gatito teje un suéter con agujas de cristal, pero termina enredado en su propia lana, convertido en un ovillo viviente." },
+  { en: "let", es: "permitir", image: "Un semáforo de cristal sonríe y cambia a verde para el gatito, que cruza con una flor en la boca. Todos los reflejos repiten su paso." },
+  { en: "output", es: "producir/salir", image: "El gatito saca pelotas de hilo de una impresora de espejos. Las pelotas rebotan y dejan estelas de colores en el aire." },
+  { en: "put", es: "poner", image: "El gatito coloca coronas de flores en estatuas de cristal. Las estatuas cobran vida, sonríen y le agradecen con un guiño." },
+  { en: "quit", es: "renunciar", image: "Un empleado tira papeles al aire y sale volando en un cohete. El gatito recoge los papeles y los guarda en su mochila, como tesoros." },
+  { en: "read", es: "leer", image: "Un libro de espejos lee en voz alta los pensamientos del gatito. Él se sonroja y tapa el libro con la pata." },
+  { en: "rid", es: "librar", image: "El gatito usa un secador para soplar pelusas de su pelaje. Las pelusas se convierten en estrellas al caer, iluminando la sala." },
+  { en: "set", es: "colocar/fijar", image: "El gatito coloca una taza de té en una mesa flotante al revés. El té forma un remolino dentro de la taza, desafiando la gravedad." },
   { en: "shed", es: "desprender", image: "Un árbol mecánico se sacude y desprende hojas de metal que suenan como campanas." },
-  { en: "shut", es: "cerrar", image: "Un hombre cierra la puerta antes de que un león furioso intente entrar." },
-  { en: "slit", es: "rajar", image: "Un ninja corta un papel tan fino que no se ve." },
-  { en: "spread", es: "esparcir", image: "Un cuchillo unta mantequilla en el suelo de toda la sala." },
-  { en: "sweat", es: "sudar", image: "Una fuente de agua con forma de persona corriendo y sudando." },
-  { en: "thrust", es: "empujar", image: "Un niño intenta empujar un elefante con todas sus fuerzas." },
-  { en: "upset", es: "molestar", image: "Un helado enorme se derrite encima de un escritorio y fastidia (molesta) a los papeles." },
-  { en: "wet", es: "mojar", image: "Una nube personal llueve solo sobre una silla." }
+  { en: "shut", es: "cerrar", image: "Un hombre sierra una puerta de cristal para evitar que entre un león. El gatito ayuda empujando la puerta, con los ojos como platos." },
+  { en: "slit", es: "rajar", image: "El gatito corta un papel de seda con una uña. El corte se multiplica en los espejos, creando un túnel de papel picado." },
+  { en: "spread", es: "esparcir", image: "Un cuchillo unta mantequilla en el suelo. El gatito, sorprendido, resbala y termina sentado en un charco de mantequilla brillante." },
+  { en: "sweat", es: "sudar", image: "El gatito ve una fuente-persona sudando. Las gotas caen sobre él, y al sacudirse, su pelaje esparce destellos de agua." },
+  { en: "thrust", es: "empujar", image: "El gatito empuja un carrito de helados de cristal. El carrito avanza lentamente, dejando un rastro de copos de azúcar." },
+  { en: "upset", es: "molestar", image: "Un helado gigante se derrite sobre un escritorio, arruinando papeles. El gatito mete la patita en el charco, y el helado le lame los dedos." },
+  { en: "wet", es: "mojar", image: "Una nube personal llueve solo sobre el gatito, que extiende las patitas para atrapar las gotas con la lengua. Al caer, las gotas forman charcos que reflejan peces de colores nadando. El gatito intenta pescar uno con la pata." }
 ];
 
 function getAAAPalaceImageUrl(verbBase) {
@@ -44,6 +44,7 @@ function getAAAPalaceImageUrl(verbBase) {
   const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
 
   // Files can be case-sensitive in production (Linux). We'll try an uppercase default.
+  // Special-case forecast because older assets used lowercase.
   const fileName = base === 'forecast' ? 'forecast.webp' : `${base.toUpperCase()}.webp`;
   return `${prefix}img/AAA/${fileName}`;
 }
