@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Brain,
@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { isSpeechSupported, speakEnglishBlock, stopSpeech, warmUpVoices } from './speech';
+import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 
 // PISO 3: LA OFICINA DE LOS GEMELOS (Patrón ABB)
 // Regla: El Pasado y el Participio son idénticos.
@@ -376,6 +376,9 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   const [palaceImageError, setPalaceImageError] = useState(false);
   const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const touchStartXRef = useRef(null);
+
   const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
 
   const selectedGroup = useMemo(
@@ -394,10 +397,45 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   }, []);
 
   useEffect(() => {
+    const mq = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia('(pointer: coarse)')
+      : null;
+
+    const update = () => setIsCoarsePointer(Boolean(mq ? mq.matches : false));
+    update();
+
+    if (!mq) return;
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    }
+    mq.addListener(update);
+    return () => mq.removeListener(update);
+  }, []);
+
+  useEffect(() => {
     if (stage !== 'palace') return;
     setPalaceImageError(false);
     setPalaceImageVariant('primary');
   }, [stage, palaceView, palaceTitle]);
+
+  const goPalacePrev = () => {
+    if (!palaceList.length) return;
+    if (palaceView === 0) return;
+    stopSpeech();
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+    setPalaceView((prev) => Math.max(0, prev - 1));
+  };
+
+  const goPalaceNext = () => {
+    if (!palaceList.length) return;
+    if (palaceView >= palaceList.length - 1) return;
+    stopSpeech();
+    setPalaceImageError(false);
+    setPalaceImageVariant('primary');
+    setPalaceView((prev) => Math.min(palaceList.length - 1, prev + 1));
+  };
 
   const resetRoundState = () => {
     stopSpeech();
@@ -786,7 +824,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
         )}
 
         {stage === 'palace' && palaceList[palaceView] && (
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-4 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-purple-200">{palaceTitle}</h2>
               <button
@@ -797,7 +835,15 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               </button>
             </div>
 
-            <div className="bg-slate-900/50 p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            {isCoarsePointer && (
+              <div className="mb-4 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-200 flex items-center gap-2">
+                <span className="font-bold">Desliza</span>
+                <span className="text-slate-400">para ver la siguiente</span>
+                <ChevronLeft className="w-5 h-5" />
+              </div>
+            )}
+
+            <div className="bg-slate-900/50 p-3 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
 
               {palaceList[palaceView].groupTitle && (
@@ -807,49 +853,102 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               <p className="text-xl text-purple-200 mb-2 font-serif italic">"{palaceList[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{palaceList[palaceView].base} - {palaceList[palaceView].past} - {palaceList[palaceView].participle}</p>
 
-              {!palaceImageError ? (
-                <img
-                  key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
-                  src={
-                    palaceImageVariant === 'primary'
-                      ? getABBPalaceImageUrl(palaceList[palaceView].base)
-                      : getABBPalaceImageFallbackUrl(palaceList[palaceView].base)
-                  }
-                  alt={palaceList[palaceView].base}
-                  loading="lazy"
-                  onError={() => {
-                    if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
-                    else setPalaceImageError(true);
+              <div className="w-full max-w-5xl mb-4">
+                <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
+
+                <div
+                  className="relative w-full"
+                  onTouchStart={(e) => {
+                    const x = e.touches?.[0]?.clientX;
+                    touchStartXRef.current = typeof x === 'number' ? x : null;
                   }}
-                  className="w-full max-w-4xl h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-6"
-                />
-              ) : (
-                <div className="w-full max-w-4xl h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-6">
-                  No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
+                  onTouchEnd={(e) => {
+                    const startX = touchStartXRef.current;
+                    touchStartXRef.current = null;
+                    if (typeof startX !== 'number') return;
+
+                    const endX = e.changedTouches?.[0]?.clientX;
+                    if (typeof endX !== 'number') return;
+
+                    const delta = endX - startX;
+                    const threshold = 50;
+                    if (Math.abs(delta) < threshold) return;
+
+                    // Swipe left => next
+                    if (delta < 0) goPalaceNext();
+                    else goPalacePrev();
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={goPalacePrev}
+                    disabled={palaceView === 0}
+                    aria-label="Anterior"
+                    className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-4 rounded-full hover:bg-purple-600 transition z-10 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronLeft />
+                  </button>
+
+                  {!palaceImageError ? (
+                    <img
+                      key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
+                      src={
+                        palaceImageVariant === 'primary'
+                          ? getABBPalaceImageUrl(palaceList[palaceView].base)
+                          : getABBPalaceImageFallbackUrl(palaceList[palaceView].base)
+                      }
+                      alt={palaceList[palaceView].base}
+                      loading="lazy"
+                      onClick={() => {
+                        if (!speechAvailable) return;
+                        speakEnglishSequence(
+                          [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
+                          { gapMs: 350 }
+                        );
+                      }}
+                      onKeyDown={(e) => {
+                        if (!speechAvailable) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          speakEnglishSequence(
+                            [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
+                            { gapMs: 350 }
+                          );
+                        }
+                      }}
+                      role={speechAvailable ? 'button' : undefined}
+                      tabIndex={speechAvailable ? 0 : undefined}
+                      onError={() => {
+                        if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
+                        else setPalaceImageError(true);
+                      }}
+                      className={`w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
+                    />
+                  ) : (
+                    <div className="w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                      No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={goPalaceNext}
+                    disabled={palaceView === palaceList.length - 1}
+                    aria-label="Siguiente"
+                    className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-4 rounded-full hover:bg-purple-600 transition z-10 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronRight />
+                  </button>
                 </div>
-              )}
+              </div>
 
               <div className="bg-slate-800 p-4 rounded-lg max-w-lg border border-slate-600">
                 <p className="text-slate-100 text-lg leading-relaxed">{palaceList[palaceView].image}</p>
               </div>
             </div>
 
-            <div className="flex justify-between items-center gap-4">
-              <button
-                onClick={() => setPalaceView((prev) => Math.max(0, prev - 1))}
-                disabled={palaceView === 0}
-                className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-purple-600 transition"
-              >
-                <ChevronLeft />
-              </button>
+            <div className="flex justify-center items-center gap-4">
               <span className="font-mono text-slate-500">{palaceView + 1} / {palaceList.length}</span>
-              <button
-                onClick={() => setPalaceView((prev) => Math.min(palaceList.length - 1, prev + 1))}
-                disabled={palaceView === palaceList.length - 1}
-                className="bg-slate-700 p-4 rounded-full disabled:opacity-30 hover:bg-purple-600 transition"
-              >
-                <ChevronRight />
-              </button>
             </div>
           </div>
         )}
