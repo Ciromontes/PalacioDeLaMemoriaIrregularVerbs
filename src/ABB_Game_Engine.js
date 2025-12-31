@@ -25,16 +25,86 @@ export const groupsABB = [
     title: 'Grupo 1: Los Explosivos (Terminan en T)',
     hint: 'Muchos terminan con sonido “t” (bent, built, burnt, ...).',
     verbs: [
-      { base: 'bend', past: 'bent', participle: 'bent', es: 'Doblar', image: 'Un poste de luz se dobla para mirar un celula' },
-      { base: 'build', past: 'built', participle: 'built', es: 'Construir', image: 'Castores con cascos construyen una presa de legos.' },
-      { base: 'burn', past: 'burnt', participle: 'burnt', es: 'Quemar', image: 'Una tostadora lanza pan quemado al espacio.' },
-      { base: 'creep', past: 'crept', participle: 'crept', es: 'Arrastrarse', image: 'Una planta crece rápido arrastrándose por la pared.' },
-      { base: 'deal', past: 'dealt', participle: 'dealt', es: 'Tratar/Repartir', image: 'Un robot reparte cartas que son rebanadas de pizza.' },
-      { base: 'dream', past: 'dreamt', participle: 'dreamt', es: 'Soñar', image: 'Una nube de pensamiento sólida flota sobre tu cabeza.' },
-      { base: 'feel', past: 'felt', participle: 'felt', es: 'Sentir', image: 'Un corazón de felpa gigante late fuerte.' },
-      { base: 'keep', past: 'kept', participle: 'kept', es: 'Guardar', image: 'Una ardilla guarda nueces en una caja fuerte blindada.' },
-      { base: 'leave', past: 'left', participle: 'left', es: 'Dejar/Salir', image: 'Unas botas caminan solas hacia la salida.' },
-      { base: 'lend', past: 'lent', participle: 'lent', es: 'Prestar', image: 'Un banco presta paraguas de colores.' },
+      {
+        base: 'bend',
+        past: 'bent',
+        participle: 'bent',
+        es: 'Doblar',
+        image:
+          'Una ardilla exploradora observa asombrada cómo un poste de luz gigante se dobla hacia abajo como goma elástica para mirar curiosamente un teléfono celular en el suelo.',
+      },
+      {
+        base: 'build',
+        past: 'built',
+        participle: 'built',
+        es: 'Construir',
+        image:
+          'Una ardilla exploradora aplaude emocionada viendo cómo castores con cascos de construcción amarillos construyen una presa enorme usando bloques de Lego gigantes de colores.',
+      },
+      {
+        base: 'burn',
+        past: 'burnt',
+        participle: 'burnt',
+        es: 'Quemar',
+        image:
+          'Una ardilla exploradora se agacha cubriéndose con su cola esponjosa mientras una tostadora gigante cromada quema pan y lo lanza como cohetes ardientes directamente al espacio con llamas.',
+      },
+      {
+        base: 'creep',
+        past: 'crept',
+        participle: 'crept',
+        es: 'Arrastrarse',
+        image:
+          'Una ardilla exploradora mira divertida con su lupa cómo una tortuga gigante se arrastra lentamente sobre un charco de queso derretido dorado dejando rastro brillante.',
+      },
+      {
+        base: 'deal',
+        past: 'dealt',
+        participle: 'dealt',
+        es: 'Tratar/Repartir',
+        image:
+          'Una ardilla exploradora recibe cartas con sus manitas mientras un robot crupier plateado reparte cartas que son rebanadas de pizza humeantes con pepperoni y queso derretido.',
+      },
+      {
+        base: 'dream',
+        past: 'dreamt',
+        participle: 'dreamt',
+        es: 'Soñar',
+        image:
+          'Una ardilla exploradora duerme acurrucada con su cola como almohada mientras una nube de pensamiento sólida y esponjosa sueña flotando sobre su cabeza mostrando bellotas doradas.',
+      },
+      {
+        base: 'feel',
+        past: 'felt',
+        participle: 'felt',
+        es: 'Sentir',
+        image:
+          'Una ardilla exploradora toca con ambas manitas un corazón gigante de felpa rojo que siente y late fuerte visible creando ondas sonoras y vibraciones que la hacen temblar adorablemente.',
+      },
+      {
+        base: 'keep',
+        past: 'kept',
+        participle: 'kept',
+        es: 'Guardar',
+        image:
+          'Una ardilla exploradora guarda sus nueces preciosas en una caja fuerte blindada gigante plateada con cerradura de combinación girando la rueda con esfuerzo adorable.',
+      },
+      {
+        base: 'leave',
+        past: 'left',
+        participle: 'left',
+        es: 'Dejar/Salir',
+        image:
+          'Un reloj de arena gigante comienza a caminar hacia la salida, dejando un rastro de arena dorada que forma patrones ABA en el suelo. La ardilla intenta detenerlo con un paraguas invertido.',
+      },
+      {
+        base: 'lend',
+        past: 'lent',
+        participle: 'lent',
+        es: 'Prestar',
+        image:
+          'Una ardilla exploradora recibe un paraguas rosa con ambas manos mientras un banco edificio gigante con cara amable presta paraguas de todos los colores del arcoíris que flotan hacia las personas.',
+      },
       { base: 'light', past: 'lit', participle: 'lit', es: 'Iluminar', image: 'Una bombilla con piernas ilumina el camino.' },
       { base: 'lose', past: 'lost', participle: 'lost', es: 'Perder', image: 'Un mapa se borra a sí mismo mientras lo miras.' },
       { base: 'mean', past: 'meant', participle: 'meant', es: 'Significar', image: 'Un diccionario habla y te explica cosas.' },
@@ -45,7 +115,7 @@ export const groupsABB = [
       { base: 'sleep', past: 'slept', participle: 'slept', es: 'Dormir', image: 'Una cama flotante te arrulla en el aire.' },
       { base: 'spend', past: 'spent', participle: 'spent', es: 'Gastar', image: 'Monedas de oro se evaporan al tocarlas.' },
       { base: 'sweep', past: 'swept', participle: 'swept', es: 'Barrer', image: 'Una escoba baila vals con el polvo.' },
-      { base: 'weep', past: 'wept', participle: 'wept', es: 'Lloar', image: 'Una estatua llora fuentes de limonada.' },
+      { base: 'weep', past: 'wept', participle: 'wept', es: 'Llorar', image: 'Una estatua llora fuentes de limonada.' },
     ],
   },
   {
@@ -53,13 +123,13 @@ export const groupsABB = [
     title: 'Grupo 2: Los "GHT" (Sonido gutural)',
     hint: 'Terminaciones “-ought / -aught” (brought, bought, caught...).',
     verbs: [
-      { base: 'bring', past: 'brought', participle: 'brought', es: 'Traer', image: 'Un perro trae un dinosaurio en la boca.' },
-      { base: 'buy', past: 'bought', participle: 'bought', es: 'Comprar', image: 'Un carrito de compras se come tu dinero.' },
-      { base: 'catch', past: 'caught', participle: 'caught', es: 'Atrapar', image: 'Un guante de béisbol gigante atrapa un meteorito.' },
-      { base: 'fight', past: 'fought', participle: 'fought', es: 'Pelear', image: 'Dos almohadas luchan con espadas de espuma.' },
-      { base: 'seek', past: 'sought', participle: 'sought', es: 'Buscar', image: 'Una lupa gigante busca huellas digitales en el aire.' },
-      { base: 'teach', past: 'taught', participle: 'taught', es: 'Enseñar', image: 'Un búho con gafas escribe en una pizarra digital.' },
-      { base: 'think', past: 'thought', participle: 'thought', es: 'Pensar', image: 'Una bombilla se enciende sobre tu cabeza y explota.' },
+      { base: 'bring', past: 'brought', participle: 'brought', es: 'Traer', image: 'Un perro que inspira ternura trae un dinosaurio en la boca.' },
+      { base: 'buy', past: 'bought', participle: 'bought', es: 'Comprar', image: 'Un carrito de compras llevado por un perrito muy tierno se come tu dinero.' },
+      { base: 'catch', past: 'caught', participle: 'caught', es: 'Atrapar', image: 'Un perrito muy tierno con un guante de béisbol gigante atrapa un meteorito.' },
+      { base: 'fight', past: 'fought', participle: 'fought', es: 'Pelear', image: 'Dos almohadas lindos perritos luchan con espadas de espuma.' },
+      { base: 'seek', past: 'sought', participle: 'sought', es: 'Buscar', image: 'Una perrito muy tierno con una lupa gigante busca huellas digitales en el aire.' },
+      { base: 'teach', past: 'taught', participle: 'taught', es: 'Enseñar', image: 'Un búho con gafas escribe en una pizarra digital con alumnos perritos tiernos.' },
+      { base: 'think', past: 'thought', participle: 'thought', es: 'Pensar', image: 'Una bombilla se enciende sobre la cabeza de un perrito tierno y explota.' },
     ],
   },
   {
@@ -67,9 +137,27 @@ export const groupsABB = [
     title: 'Grupo 3: Los "AID/AID" (Sonido Eid)',
     hint: 'Formas compactas con sonido “eid” (laid, paid, said).',
     verbs: [
-      { base: 'lay', past: 'laid', participle: 'laid', es: 'Poner (huevos)', image: 'Una gallina mecánica pone huevos de oro.' },
-      { base: 'pay', past: 'paid', participle: 'paid', es: 'Pagar', image: 'Un cajero automático te da billetes que cantan.' },
-      { base: 'say', past: 'said', participle: 'said', es: 'Decir', image: 'Bocadillos de cómic salen de tu boca y flotan.' },
+      {
+        base: 'lay',
+        past: 'laid',
+        participle: 'laid',
+        es: 'Poner (huevos)',
+        image: 'El panda observa asombrado cómo una gallina mecánica dorada pone un huevo de oro gigante y brillante',
+      },
+      {
+        base: 'pay',
+        past: 'paid',
+        participle: 'paid',
+        es: 'Pagar',
+        image: 'El panda recibe billetes que cantan y bailan saliendo de un cajero automático',
+      },
+      {
+        base: 'say',
+        past: 'said',
+        participle: 'said',
+        es: 'Decir',
+        image: 'Bocadillos de cómic gigantes y coloridos salen de la boca del panda y flotan alrededor',
+      },
     ],
   },
   {
@@ -77,12 +165,12 @@ export const groupsABB = [
     title: 'Grupo 4: Los que cambian vocales (I -> U)',
     hint: 'Mira la vocal: i → u (dig/dug, stick/stuck...).',
     verbs: [
-      { base: 'dig', past: 'dug', participle: 'dug', es: 'Cavar', image: 'Un topo con taladro cava un túnel en el piso.' },
-      { base: 'stick', past: 'stuck', participle: 'stuck', es: 'Pegar', image: 'Zapatos con chicle te dejan pegado al techo.' },
-      { base: 'sting', past: 'stung', participle: 'stung', es: 'Picar', image: 'Una abeja mecánica te pica con una inyección de risa.' },
-      { base: 'strike', past: 'struck', participle: 'struck', es: 'Golpear/Huelga', image: 'Un rayo cae sobre un reloj y lo derrite.' },
-      { base: 'swing', past: 'swung', participle: 'swung', es: 'Balancear', image: 'Un mono se balancea en una liana de luces neón.' },
-      { base: 'hang', past: 'hung', participle: 'hung', es: 'Colgar', image: 'Un clavo en la pared sostiene una mochila que canta' },
+      { base: 'dig', past: 'dug', participle: 'dug', es: 'Cavar', image: 'El panda cava con un taladro mientras tierra y rocas vuelan por el aire' },
+      { base: 'stick', past: 'stuck', participle: 'stuck', es: 'Pegar', image: 'Los zapatos del panda quedan pegados al techo con chicle rosa gigante y elástico' },
+      { base: 'sting', past: 'stung', participle: 'stung', es: 'Picar', image: 'Una abeja mecánica dorada pica al panda con una jeringa brillante de risa' },
+      { base: 'strike', past: 'struck', participle: 'struck', es: 'Golpear/Huelga', image: 'Un rayo brillante y eléctrico cae sobre un reloj gigante derritiéndolo' },
+      { base: 'swing', past: 'swung', participle: 'swung', es: 'Balancear', image: 'El panda se balancea en una liana de luces neón brillantes y coloridas' },
+      { base: 'hang', past: 'hung', participle: 'hung', es: 'Colgar', image: 'Perchas flotantes doradas sostienen ropa invisible con siluetas brillantes' },
     ],
   },
 ];
@@ -824,7 +912,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
         )}
 
         {stage === 'palace' && palaceList[palaceView] && (
-          <div className="bg-slate-800 rounded-2xl p-4 md:p-8 border border-slate-700 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-2 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-purple-200">{palaceTitle}</h2>
               <button
@@ -843,7 +931,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               </div>
             )}
 
-            <div className="bg-slate-900/50 p-3 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            <div className="bg-slate-900/50 p-2 md:p-8 rounded-xl text-center mb-4 md:mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>
 
               {palaceList[palaceView].groupTitle && (
@@ -853,7 +941,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               <p className="text-xl text-purple-200 mb-2 font-serif italic">"{palaceList[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{palaceList[palaceView].base} - {palaceList[palaceView].past} - {palaceList[palaceView].participle}</p>
 
-              <div className="w-full max-w-5xl mb-4">
+              <div className="w-full max-w-5xl mb-3 md:mb-4">
                 <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
 
                 <div
@@ -922,10 +1010,10 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
                         if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
                         else setPalaceImageError(true);
                       }}
-                      className={`w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
+                      className={`w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain ${speechAvailable ? 'cursor-pointer' : ''}`}
                     />
                   ) : (
-                    <div className="w-full h-[82svh] md:h-[520px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
+                    <div className="w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300">
                       No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
                     </div>
                   )}
