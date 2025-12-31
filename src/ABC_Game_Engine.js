@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 
-import { isSpeechSupported, speakEnglishBlock, stopSpeech, warmUpVoices } from './speech';
+import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 
 // PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
 // Regla: Las 3 formas son distintas.
@@ -26,14 +26,70 @@ export const groupsABC = [
     hint: 'Patrón vocálico i → a → u. Muy musical: repite el cambio en voz alta.',
     storyId: 'story1',
     verbs: [
-      { base: 'begin', past: 'began', participle: 'begun', es: 'Empezar', image: 'Una carrera: disparo de salida, corredores, meta.' },
-      { base: 'drink', past: 'drank', participle: 'drunk', es: 'Beber', image: 'Una botella bebe de un vaso.' },
-      { base: 'ring', past: 'rang', participle: 'rung', es: 'Sonar', image: 'Un teléfono gigante baila al sonar.' },
-      { base: 'shrink', past: 'shrank', participle: 'shrunk', es: 'Encoger', image: 'Un gigante se vuelve enano al tocar un botón.' },
-      { base: 'sing', past: 'sang', participle: 'sung', es: 'Cantar', image: 'Un micrófono canta ópera solo.' },
-      { base: 'sink', past: 'sank', participle: 'sunk', es: 'Hundir', image: 'Un barco de papel se hunde en gelatina.' },
-      { base: 'stink', past: 'stank', participle: 'stunk', es: 'Apestar', image: 'Un zorrillo con perfume francés.' },
-      { base: 'swim', past: 'swam', participle: 'swum', es: 'Nadar', image: 'Un pez nada en el aire fuera de la pecera.' },
+      {
+        base: 'begin',
+        past: 'began',
+        participle: 'begun',
+        es: 'Empezar',
+        image:
+          'Una rana cantante de jazz empieza saltando con potencia desde línea de salida junto a corredores en carrera explosiva con disparo de pistola.',
+      },
+      {
+        base: 'drink',
+        past: 'drank',
+        participle: 'drunk',
+        es: 'Beber',
+        image:
+          'Una rana cantante observa fascinada cómo una botella gigante con boca bebe sola de un vaso volcándose y tragando el líquido.',
+      },
+      {
+        base: 'ring',
+        past: 'rang',
+        participle: 'rung',
+        es: 'Sonar',
+        image:
+          'Una rana cantante con saxofón mira asombrada cómo un teléfono gigante vintage suena bailando y girando con campanas tintineando.',
+      },
+      {
+        base: 'shrink',
+        past: 'shrank',
+        participle: 'shrunk',
+        es: 'Encoger',
+        image:
+          'Una rana cantante salta sorprendida cuando un gigante enorme se encoge al tocar un botón rojo volviéndose enano diminuto.',
+      },
+      {
+        base: 'sing',
+        past: 'sang',
+        participle: 'sung',
+        es: 'Cantar',
+        image:
+          'Una rana cantante con garganta inflada brillante observa maravillada cómo un micrófono cromado canta ópera solo con voz potente.',
+      },
+      {
+        base: 'sink',
+        past: 'sank',
+        participle: 'sunk',
+        es: 'Hundir',
+        image:
+          'Una rana cantante flota en gelatina transparente viendo cómo un barco de papel se hunde lentamente atravesando la sustancia gelatinosa.',
+      },
+      {
+        base: 'stink',
+        past: 'stank',
+        participle: 'stunk',
+        es: 'Apestar',
+        image:
+          'Una rana cantante se tapa la nariz con dedos adhesivos mientras un zorrillo elegante apesta rociando perfume francés que huele terrible.',
+      },
+      {
+        base: 'swim',
+        past: 'swam',
+        participle: 'swum',
+        es: 'Nadar',
+        image:
+          'Una rana cantante aplaude emocionada viendo cómo un pez dorado nada por el aire fuera de su pecera haciendo brazadas aéreas.',
+      },
     ],
   },
   {
@@ -42,19 +98,110 @@ export const groupsABC = [
     hint: 'El participio termina en -n (bitten, broken, chosen...).',
     storyId: 'story2a',
     verbs: [
-      { base: 'bite', past: 'bit', participle: 'bitten', es: 'Morder', image: 'Una dentadura postiza muerde una manzana de metal.' },
-      { base: 'break', past: 'broke', participle: 'broken', es: 'Romper', image: 'Un vaso se rompe y se convierte en arena.' },
-      { base: 'choose', past: 'chose', participle: 'chosen', es: 'Elegir', image: 'Una mano gigante señala "tú" desde el cielo.' },
-      { base: 'drive', past: 'drove', participle: 'driven', es: 'Conducir', image: 'Un coche futurista se conduce solo con luces inteligentes.' },
-      { base: 'eat', past: 'ate', participle: 'eaten', es: 'Comer', image: 'Una hamburguesa se come a sí misma.' },
-      { base: 'fall', past: 'fell', participle: 'fallen', es: 'Caer', image: 'Una pluma cae y rompe el suelo como si fuera pesada.' },
-      { base: 'fly', past: 'flew', participle: 'flown', es: 'Volar', image: 'Pingüinos con propulsores vuelan en formación.' },
-      { base: 'forbid', past: 'forbade', participle: 'forbidden', es: 'Prohibir', image: 'Un robot policía pone cinta amarilla de "NO PASAR".' },
-      { base: 'forget', past: 'forgot', participle: 'forgotten', es: 'Olvidar', image: 'Una nube borra la cara de una estatua.' },
-      { base: 'forgive', past: 'forgave', participle: 'forgiven', es: 'Perdonar', image: 'Dos tanques de guerra se perdonan y se abrazan.' },
-      { base: 'freeze', past: 'froze', participle: 'frozen', es: 'Congelar', image: 'Un lanzallamas congela disparando hielo azul sobre el río.' },
-      { base: 'give', past: 'gave', participle: 'given', es: 'Dar', image: 'Un río de luz da regalos flotantes que llegan solos a las manos.' },
-      { base: 'go', past: 'went', participle: 'gone', es: 'Ir', image: 'Un cohete despega y desaparece en un agujero negro.' },
+      {
+        base: 'bite',
+        past: 'bit',
+        participle: 'bitten',
+        es: 'Morder',
+        image:
+          'Una nutria aviadora observa asombrada cómo una dentadura postiza gigante muerde una manzana de metal brillante que cruje y chispea.',
+      },
+      {
+        base: 'break',
+        past: 'broke',
+        participle: 'broken',
+        es: 'Romper',
+        image:
+          'Una nutria aviadora rompe un vaso cristalino con sus manitas y lo ve transformarse en cascada de arena dorada.',
+      },
+      {
+        base: 'choose',
+        past: 'chose',
+        participle: 'chosen',
+        es: 'Elegir',
+        image:
+          'Una mano gigante luminosa desciende del cielo y elige a la nutria aviadora señalándola directamente mientras dice "TÚ" con letras brillantes.',
+      },
+      {
+        base: 'drive',
+        past: 'drove',
+        participle: 'driven',
+        es: 'Conducir',
+        image:
+          'Una nutria aviadora observa fascinada cómo un coche futurista transparente se conduce solo con luces inteligentes de colores neón trazando el camino.',
+      },
+      {
+        base: 'eat',
+        past: 'ate',
+        participle: 'eaten',
+        es: 'Comer',
+        image:
+          'Una nutria aviadora mira boquiabierta cómo una hamburguesa gigante se come a sí misma mordiéndose sus propias capas en espiral absurdo.',
+      },
+      {
+        base: 'fall',
+        past: 'fell',
+        participle: 'fallen',
+        es: 'Caer',
+        image:
+          'Una nutria aviadora sostiene una pluma delicada que al soltarla cae como piedra y rompe el suelo creando grietas enormes y explosión de polvo.',
+      },
+      {
+        base: 'fly',
+        past: 'flew',
+        participle: 'flown',
+        es: 'Volar',
+        image:
+          'Una nutria aviadora vuela junto a un escuadrón de pingüinos con propulsores jet en formación militar dejando estelas de colores en el cielo.',
+      },
+      {
+        base: 'forbid',
+        past: 'forbade',
+        participle: 'forbidden',
+        es: 'Prohibir',
+        image:
+          'Una nutria aviadora ve cómo un robot policía gigante prohíbe el paso desplegando cinta amarilla luminosa de "NO PASAR" que rodea toda el área con luces parpadeantes.',
+      },
+      {
+        base: 'forget',
+        past: 'forgot',
+        participle: 'forgotten',
+        es: 'Olvidar',
+        image:
+          'Una nutria aviadora señala confundida hacia una estatua mientras una nube mágica olvida y borra lentamente la cara de la estatua dejándola en blanco.',
+      },
+      {
+        base: 'forgive',
+        past: 'forgave',
+        participle: 'forgiven',
+        es: 'Perdonar',
+        image:
+          'Una nutria aviadora observa emocionada cómo dos tanques de guerra gigantes se perdonan deteniéndose, bajando sus cañones y abrazándose con sus orugas.',
+      },
+      {
+        base: 'freeze',
+        past: 'froze',
+        participle: 'frozen',
+        es: 'Congelar',
+        image:
+          'Una nutria aviadora dispara un lanzallamas modificado que congela todo a su paso lanzando llamas de hielo azul cristalino sobre el río.',
+      },
+      {
+        base: 'give',
+        past: 'gave',
+        participle: 'given',
+        es: 'Dar',
+        image:
+          'Una nutria aviadora recibe con sus manitas extendidas regalos flotantes brillantes que un río de luz dorada le da mientras fluye por el aire.',
+      },
+      {
+        base: 'go',
+        past: 'went',
+        participle: 'gone',
+        es: 'Ir',
+        image:
+          'Una nutria aviadora pilotea un cohete plateado que se va despegando a toda velocidad y desaparece siendo absorbido por un agujero negro giratorio y brillante.',
+      },
     ],
   },
   {
@@ -63,18 +210,102 @@ export const groupsABC = [
     hint: 'Participios en -n y escenas conectadas (grown, known, written...).',
     storyId: 'story2b',
     verbs: [
-      { base: 'grow', past: 'grew', participle: 'grown', es: 'Crecer', image: 'Una planta crece tan rápido que rompe el techo.' },
-      { base: 'hide', past: 'hid', participle: 'hidden', es: 'Esconderse', image: 'Un camaleón cambia de color y desaparece.' },
-      { base: 'know', past: 'knew', participle: 'known', es: 'Saber', image: 'Un libro gigante abre sus páginas y responde preguntas solo.' },
-      { base: 'lie', past: 'lay', participle: 'lain', es: 'Yacer/Tumbarse', image: 'Una estatua se acuesta a dormir una siesta.' },
-      { base: 'ride', past: 'rode', participle: 'ridden', es: 'Montar', image: 'Un vaquero monta un tiranosaurio rex.' },
-      { base: 'rise', past: 'rose', participle: 'risen', es: 'Levantarse', image: 'El sol sale de noche y es azul.' },
-      { base: 'see', past: 'saw', participle: 'seen', es: 'Ver', image: 'Un telescopio con ruedas pasea por la calle y señala cosas con un láser.' },
-      { base: 'show', past: 'showed', participle: 'shown', es: 'Mostrar', image: 'Un pavo real despliega una pantalla de cine en su cola.' },
-      { base: 'tear', past: 'tore', participle: 'torn', es: 'Rasgar', image: 'Un papel se rasga y grita.' },
-      { base: 'wake', past: 'woke', participle: 'woken', es: 'Despertar', image: 'Un reloj despertador te tira un balde de agua.' },
-      { base: 'wear', past: 'wore', participle: 'worn', es: 'Llevar puesto', image: 'Un maniquí se pone 10 abrigos a la vez.' },
-      { base: 'write', past: 'wrote', participle: 'written', es: 'Escribir', image: 'Una pluma escribe sola en el aire con tinta de neón.' },
+      {
+        base: 'grow',
+        past: 'grew',
+        participle: 'grown',
+        es: 'Crecer',
+        image:
+          'Un mono científico mide asombrado con su regla cómo una planta crece tan rápido que rompe el techo con explosión de escombros.',
+      },
+      {
+        base: 'hide',
+        past: 'hid',
+        participle: 'hidden',
+        es: 'Esconderse',
+        image:
+          'Un mono científico observa fascinado con su lupa cómo un camaleón gigante se esconde cambiando de color y desapareciendo completamente.',
+      },
+      {
+        base: 'know',
+        past: 'knew',
+        participle: 'known',
+        es: 'Saber',
+        image:
+          'Un mono científico con gafas hace preguntas y un libro gigante sabe las respuestas abriendo sus páginas solo con letras brillantes.',
+      },
+      {
+        base: 'lie',
+        past: 'lay',
+        participle: 'lain',
+        es: 'Yacer/Tumbarse',
+        image:
+          'Un mono científico descubre sorprendido cómo una estatua de mármol se acuesta a dormir una siesta con ojos cerrados y ronquidos.',
+      },
+      {
+        base: 'ride',
+        past: 'rode',
+        participle: 'ridden',
+        es: 'Montar',
+        image:
+          'Un mono científico monta emocionado sobre un tiranosaurio rex gigante con sombrero de vaquero agarrándose de las riendas.',
+      },
+      {
+        base: 'rise',
+        past: 'rose',
+        participle: 'risen',
+        es: 'Levantarse',
+        image:
+          'Un mono científico señala confundido con su telescopio cómo el sol se levanta de noche y es azul brillante en lugar de amarillo.',
+      },
+      {
+        base: 'see',
+        past: 'saw',
+        participle: 'seen',
+        es: 'Ver',
+        image:
+          'Un mono científico ve maravillado cómo un telescopio gigante con ruedas pasea solo por la calle señalando cosas con láser rojo.',
+      },
+      {
+        base: 'show',
+        past: 'showed',
+        participle: 'shown',
+        es: 'Mostrar',
+        image:
+          'Un mono científico aplaude emocionado mientras un pavo real muestra desplegando una pantalla de cine completa en su cola con película proyectándose.',
+      },
+      {
+        base: 'tear',
+        past: 'tore',
+        participle: 'torn',
+        es: 'Rasgar',
+        image:
+          'Un mono científico salta asustado cuando un papel gigante se rasga y grita con boca abierta lanzando sonido visible.',
+      },
+      {
+        base: 'wake',
+        past: 'woke',
+        participle: 'woken',
+        es: 'Despertar',
+        image:
+          'Un mono científico duerme en su escritorio y un reloj despertador gigante lo despierta tirándole un balde de agua fría encima.',
+      },
+      {
+        base: 'wear',
+        past: 'wore',
+        participle: 'worn',
+        es: 'Llevar puesto',
+        image:
+          'Un mono científico observa divertido cómo un maniquí lleva puesto 10 abrigos a la vez apilados absurdamente uno sobre otro.',
+      },
+      {
+        base: 'write',
+        past: 'wrote',
+        participle: 'written',
+        es: 'Escribir',
+        image:
+          'Un mono científico mira boquiabierto cómo una pluma estilográfica gigante escribe sola en el aire con tinta de neón formando palabras flotantes.',
+      },
     ],
   },
   {
@@ -83,8 +314,22 @@ export const groupsABC = [
     hint: 'Spoke / spoken, stole / stolen: escucha el “o” en el cambio.',
     storyId: 'story3',
     verbs: [
-      { base: 'speak', past: 'spoke', participle: 'spoken', es: 'Hablar', image: 'Un loro da un discurso presidencial.' },
-      { base: 'steal', past: 'stole', participle: 'stolen', es: 'Robar', image: 'Un ladrón invisible se lleva la luna.' },
+      {
+        base: 'speak',
+        past: 'spoke',
+        participle: 'spoken',
+        es: 'Hablar',
+        image:
+          'Un búho sabio observa sorprendido con sus gafas cómo un loro vestido de político da un discurso presidencial dramático desde un podio dorado.',
+      },
+      {
+        base: 'steal',
+        past: 'stole',
+        participle: 'stolen',
+        es: 'Robar',
+        image:
+          'Un búho sabio gira su cabeza 270° siguiendo con desaprobación a un mapache ladrón que roba la luna con una red gigante.',
+      },
     ],
   },
   {
@@ -93,9 +338,30 @@ export const groupsABC = [
     hint: 'Ow → ew → own (throw–threw–thrown).',
     storyId: 'story3',
     verbs: [
-      { base: 'throw', past: 'threw', participle: 'thrown', es: 'Lanzar', image: 'Un brazo mecánico lanza pelotas de béisbol al espacio.' },
-      { base: 'grow', past: 'grew', participle: 'grown', es: 'Crecer', image: 'Una planta crece tan rápido que rompe el techo.' },
-      { base: 'know', past: 'knew', participle: 'known', es: 'Saber', image: 'Un libro gigante abre sus páginas y responde preguntas solo.' },
+      {
+        base: 'throw',
+        past: 'threw',
+        participle: 'thrown',
+        es: 'Lanzar',
+        image:
+          'Un búho sabio toma notas asombrado en su libreta mientras un brazo mecánico gigante lanza pelotas de béisbol directamente al espacio con explosión de estrellas.',
+      },
+      {
+        base: 'grow',
+        past: 'grew',
+        participle: 'grown',
+        es: 'Crecer',
+        image:
+          'Un búho sabio mide con su regla extensible y expresión fascinada cómo una planta crece tan rápido que rompe el techo con explosión de escombros.',
+      },
+      {
+        base: 'know',
+        past: 'knew',
+        participle: 'known',
+        es: 'Saber',
+        image:
+          'Un búho sabio con sus gafas ajustadas lee concentrado un libro flotante gigante que abre sus páginas solo y responde preguntas brillando.',
+      },
     ],
   },
   {
@@ -104,8 +370,22 @@ export const groupsABC = [
     hint: 'Ake → ook → aken (take–took–taken).',
     storyId: 'story3',
     verbs: [
-      { base: 'shake', past: 'shook', participle: 'shaken', es: 'Agitar', image: 'Una licuadora gigante agita un edificio entero.' },
-      { base: 'take', past: 'took', participle: 'taken', es: 'Tomar', image: 'Una garra de máquina de peluches toma un coche.' },
+      {
+        base: 'shake',
+        past: 'shook',
+        participle: 'shaken',
+        es: 'Agitar',
+        image:
+          'Un búho sabio sostiene su birrete con una garra mientras observa aterrado cómo una licuadora gigante agita un edificio entero con tremenda vibración.',
+      },
+      {
+        base: 'take',
+        past: 'took',
+        participle: 'taken',
+        es: 'Tomar',
+        image:
+          'Un búho sabio mira por su telescopio con curiosidad extrema mientras una garra mecánica de arcade gigante toma un coche completo del estacionamiento.',
+      },
     ],
   },
 ];
@@ -770,17 +1050,19 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
         )}
 
         {stage === 'palace' && palaceList[palaceView] && (
-          <div className="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-2xl">
+          <div className="bg-slate-800 rounded-2xl p-2 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-amber-200">{palaceTitle}</h2>
               <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
             </div>
 
-            <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700">
+            <div className="bg-slate-900/50 p-2 md:p-6 rounded-xl border border-slate-700">
               <div className="text-xl font-black text-amber-300 mb-2">
                 {palaceList[palaceView].base} — {palaceList[palaceView].past} — {palaceList[palaceView].participle}
               </div>
               <div className="text-slate-200 font-semibold mb-3">{palaceList[palaceView].es}</div>
+
+              <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
 
               {!palaceImageError ? (
                 <img
@@ -792,14 +1074,33 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                   }
                   alt={palaceList[palaceView].base}
                   loading="lazy"
+                  onClick={() => {
+                    if (!speechAvailable) return;
+                    speakEnglishSequence(
+                      [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
+                      { gapMs: 350 }
+                    );
+                  }}
+                  onKeyDown={(e) => {
+                    if (!speechAvailable) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      speakEnglishSequence(
+                        [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
+                        { gapMs: 350 }
+                      );
+                    }
+                  }}
+                  role={speechAvailable ? 'button' : undefined}
+                  tabIndex={speechAvailable ? 0 : undefined}
                   onError={() => {
                     if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
                     else setPalaceImageError(true);
                   }}
-                  className="w-full h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-4"
+                  className={`w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-3 md:mb-4 ${speechAvailable ? 'cursor-pointer' : ''}`}
                 />
               ) : (
-                <div className="w-full h-[62svh] md:h-[420px] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-4">
+                <div className="w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-3 md:mb-4">
                   No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
                 </div>
               )}
