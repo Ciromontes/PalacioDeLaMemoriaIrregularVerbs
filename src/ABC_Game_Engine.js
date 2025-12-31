@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   Brain,
@@ -727,6 +727,9 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   const [palaceImageError, setPalaceImageError] = useState(false);
   const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
 
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+  const touchStartXRef = useRef(null);
+
   const selectedGroup = useMemo(() => groupsABC.find((g) => g.id === selectedGroupId) ?? null, [selectedGroupId]);
 
   const speechAvailable = isSpeechSupported();
@@ -737,10 +740,35 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setIsCoarsePointer(Boolean(mq.matches));
+    update();
+
+    if (typeof mq.addEventListener === 'function') mq.addEventListener('change', update);
+    else if (typeof mq.addListener === 'function') mq.addListener(update);
+
+    return () => {
+      if (typeof mq.removeEventListener === 'function') mq.removeEventListener('change', update);
+      else if (typeof mq.removeListener === 'function') mq.removeListener(update);
+    };
+  }, []);
+
+  useEffect(() => {
     if (stage !== 'palace') return;
     setPalaceImageError(false);
     setPalaceImageVariant('primary');
   }, [stage, palaceView, palaceTitle]);
+
+  const goPalacePrev = () => {
+    stopSpeech();
+    setPalaceView((v) => Math.max(0, v - 1));
+  };
+
+  const goPalaceNext = () => {
+    stopSpeech();
+    setPalaceView((v) => Math.min(Math.max(0, palaceList.length - 1), v + 1));
+  };
 
   const resetRoundState = () => {
     stopSpeech();
@@ -1056,6 +1084,14 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
               <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
             </div>
 
+            {isCoarsePointer && (
+              <div className="mb-3 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-200 flex items-center gap-2">
+                <span className="font-bold">Desliza</span>
+                <span className="text-slate-400">para ver la siguiente</span>
+                <ChevronLeft className="w-5 h-5" />
+              </div>
+            )}
+
             <div className="bg-slate-900/50 p-2 md:p-6 rounded-xl border border-slate-700">
               <div className="text-xl font-black text-amber-300 mb-2">
                 {palaceList[palaceView].base} — {palaceList[palaceView].past} — {palaceList[palaceView].participle}
@@ -1064,68 +1100,96 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
               <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
 
-              {!palaceImageError ? (
-                <img
-                  key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
-                  src={
-                    palaceImageVariant === 'primary'
-                      ? getABCPalaceImageUrl(palaceList[palaceView].base)
-                      : getABCPalaceImageFallbackUrl(palaceList[palaceView].base)
-                  }
-                  alt={palaceList[palaceView].base}
-                  loading="lazy"
-                  onClick={() => {
-                    if (!speechAvailable) return;
-                    speakEnglishSequence(
-                      [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
-                      { gapMs: 350 }
-                    );
-                  }}
-                  onKeyDown={(e) => {
-                    if (!speechAvailable) return;
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
+              <div
+                className="relative w-full"
+                onTouchStart={(e) => {
+                  const x = e.touches?.[0]?.clientX;
+                  touchStartXRef.current = typeof x === 'number' ? x : null;
+                }}
+                onTouchEnd={(e) => {
+                  const startX = touchStartXRef.current;
+                  touchStartXRef.current = null;
+                  if (typeof startX !== 'number') return;
+
+                  const endX = e.changedTouches?.[0]?.clientX;
+                  if (typeof endX !== 'number') return;
+
+                  const delta = endX - startX;
+                  const threshold = 50;
+                  if (Math.abs(delta) < threshold) return;
+                  if (delta < 0) goPalaceNext();
+                  else goPalacePrev();
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={goPalacePrev}
+                  disabled={palaceView === 0}
+                  aria-label="Anterior"
+                  className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-4 rounded-full hover:bg-amber-600 transition z-10 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft />
+                </button>
+
+                {!palaceImageError ? (
+                  <img
+                    key={`${palaceList[palaceView].base}-${palaceImageVariant}`}
+                    src={
+                      palaceImageVariant === 'primary'
+                        ? getABCPalaceImageUrl(palaceList[palaceView].base)
+                        : getABCPalaceImageFallbackUrl(palaceList[palaceView].base)
+                    }
+                    alt={palaceList[palaceView].base}
+                    loading="lazy"
+                    onClick={() => {
+                      if (!speechAvailable) return;
                       speakEnglishSequence(
                         [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
                         { gapMs: 350 }
                       );
-                    }
-                  }}
-                  role={speechAvailable ? 'button' : undefined}
-                  tabIndex={speechAvailable ? 0 : undefined}
-                  onError={() => {
-                    if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
-                    else setPalaceImageError(true);
-                  }}
-                  className={`w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-3 md:mb-4 ${speechAvailable ? 'cursor-pointer' : ''}`}
-                />
-              ) : (
-                <div className="w-full h-[92svh] md:h-[80vh] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-3 md:mb-4">
-                  No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
-                </div>
-              )}
+                    }}
+                    onKeyDown={(e) => {
+                      if (!speechAvailable) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        speakEnglishSequence(
+                          [palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle],
+                          { gapMs: 350 }
+                        );
+                      }
+                    }}
+                    role={speechAvailable ? 'button' : undefined}
+                    tabIndex={speechAvailable ? 0 : undefined}
+                    onError={() => {
+                      if (palaceImageVariant === 'primary') setPalaceImageVariant('fallback');
+                      else setPalaceImageError(true);
+                    }}
+                    className={`w-full h-[96svh] md:h-[80vh] rounded-2xl border border-slate-700 shadow-xl bg-slate-950/30 object-contain mb-3 md:mb-4 ${speechAvailable ? 'cursor-pointer' : ''}`}
+                  />
+                ) : (
+                  <div className="w-full h-[96svh] md:h-[80vh] rounded-2xl border border-slate-700 bg-slate-950/30 flex items-center justify-center text-slate-300 mb-3 md:mb-4">
+                    No se pudo cargar la imagen para <span className="font-mono ml-2">{palaceList[palaceView].base}</span>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={goPalaceNext}
+                  disabled={palaceView === palaceList.length - 1}
+                  aria-label="Siguiente"
+                  className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 bg-slate-700/80 p-4 rounded-full hover:bg-amber-600 transition z-10 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight />
+                </button>
+              </div>
 
               <div className="text-slate-300">{palaceList[palaceView].image}</div>
             </div>
 
-            <div className="flex items-center justify-between mt-6">
-              <button
-                onClick={() => setPalaceView((v) => Math.max(0, v - 1))}
-                disabled={palaceView === 0}
-                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
-              >
-                <ChevronLeft size={18} /> Anterior
-              </button>
+            <div className="flex items-center justify-center mt-4">
               <div className="text-slate-300 text-sm font-mono">
                 {palaceView + 1} / {palaceList.length}
               </div>
-              <button
-                onClick={() => setPalaceView((v) => Math.min(palaceList.length - 1, v + 1))}
-                disabled={palaceView === palaceList.length - 1}
-                className="bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-600 px-4 py-2 rounded-lg font-bold flex items-center gap-2"
-              >
-                Siguiente <ChevronRight size={18} />
-              </button>
             </div>
 
             <div className="mt-6">
