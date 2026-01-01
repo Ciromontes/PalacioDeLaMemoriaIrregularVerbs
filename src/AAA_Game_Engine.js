@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Check, X, RefreshCw, Sparkles, ChevronRight, ChevronLeft, Eye, Brain, Trophy, Lightbulb, ArrowLeft } from 'lucide-react';
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishTriplet, stopSpeech, warmUpVoices } from './speech';
+import { formatIPA } from './ipa';
 
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
 const verbsAAA = [
@@ -631,6 +632,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
 
               <h3 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
+              <div className="text-slate-400 -mt-1 mb-2 font-mono text-sm">{formatIPA(verbsAAA[palaceView].en)}</div>
               <p className="text-lg md:text-xl text-blue-300 mb-4 md:mb-6 font-serif italic">"{verbsAAA[palaceView].es}"</p>
 
               <div className="w-full max-w-4xl mb-4 md:mb-6">

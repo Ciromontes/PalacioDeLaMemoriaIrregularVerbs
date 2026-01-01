@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Brain, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, RefreshCw, Sparkles, Trophy, X } from 'lucide-react';
+import { formatIPATriplet } from './ipa';
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 
@@ -543,6 +544,9 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
               <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{verbsABA[palaceView].base.toUpperCase()}</h3>
               <p className="text-xl text-green-200 mb-2 font-serif italic">"{verbsABA[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{verbsABA[palaceView].base} - {verbsABA[palaceView].past} - {verbsABA[palaceView].participle}</p>
+              <p className="text-slate-500 -mt-4 mb-6 font-mono text-sm">
+                {formatIPATriplet([verbsABA[palaceView].base, verbsABA[palaceView].past, verbsABA[palaceView].participle])}
+              </p>
 
               <div className="w-full max-w-5xl mb-4">
                 <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>

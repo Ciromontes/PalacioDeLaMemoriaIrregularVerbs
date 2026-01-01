@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
+import { formatIPATriplet } from './ipa';
 
 // PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
 // Regla: Las 3 formas son distintas.
@@ -1095,6 +1096,9 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
             <div className="bg-slate-900/50 p-2 md:p-6 rounded-xl border border-slate-700">
               <div className="text-xl font-black text-amber-300 mb-2">
                 {palaceList[palaceView].base} — {palaceList[palaceView].past} — {palaceList[palaceView].participle}
+              </div>
+              <div className="text-slate-500 -mt-1 mb-2 font-mono text-sm">
+                {formatIPATriplet([palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle])}
               </div>
               <div className="text-slate-200 font-semibold mb-3">{palaceList[palaceView].es}</div>
 

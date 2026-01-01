@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
+import { formatIPATriplet } from './ipa';
 
 // PISO 3: LA OFICINA DE LOS GEMELOS (Patrón ABB)
 // Regla: El Pasado y el Participio son idénticos.
@@ -940,6 +941,9 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
               <h3 className="text-5xl font-black text-white mb-2 tracking-wider">{palaceList[palaceView].base.toUpperCase()}</h3>
               <p className="text-xl text-purple-200 mb-2 font-serif italic">"{palaceList[palaceView].es}"</p>
               <p className="text-slate-300 mb-6 font-mono">{palaceList[palaceView].base} - {palaceList[palaceView].past} - {palaceList[palaceView].participle}</p>
+              <p className="text-slate-500 -mt-4 mb-6 font-mono text-sm">
+                {formatIPATriplet([palaceList[palaceView].base, palaceList[palaceView].past, palaceList[palaceView].participle])}
+              </p>
 
               <div className="w-full max-w-5xl mb-3 md:mb-4">
                 <div className="text-slate-300 text-sm mb-2">Toca la imagen para escuchar: base → pasado → participio.</div>
