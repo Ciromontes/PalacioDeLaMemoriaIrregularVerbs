@@ -3,6 +3,7 @@ import { Check, X, RefreshCw, Sparkles, ChevronRight, ChevronLeft, Eye, Brain, T
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishTriplet, stopSpeech, warmUpVoices } from './speech';
 import { formatIPA } from './ipa';
+import { spanishMeaningsFor } from './meanings';
 
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
 const verbsAAA = [
@@ -828,6 +829,29 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 >
                   Verificar
                 </button>
+              </div>
+            )}
+
+            {waitingForNext && (
+              <div className="mt-6 bg-slate-900/50 p-5 rounded-xl border border-slate-700 text-left">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!speechAvailable) return;
+                    speakEnglishTriplet(questions[currentQuestion].en);
+                  }}
+                  className={`w-full text-left rounded-lg ${speechAvailable ? 'hover:bg-slate-800/70 transition cursor-pointer' : ''}`}
+                >
+                  <div className="text-slate-300 text-sm mb-2">Toca para escuchar: base → pasado → participio.</div>
+                  <div className="text-xl font-black text-white">
+                    {questions[currentQuestion].en} - {questions[currentQuestion].en} - {questions[currentQuestion].en}
+                  </div>
+                  <div className="text-slate-400 font-mono text-sm">{formatIPA(questions[currentQuestion].en)}</div>
+                </button>
+
+                <div className="mt-3 text-slate-200 text-sm">
+                  Significados: <span className="text-slate-300">{spanishMeaningsFor(questions[currentQuestion].en, questions[currentQuestion].es).join(' / ')}</span>
+                </div>
               </div>
             )}
           </div>

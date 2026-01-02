@@ -15,6 +15,7 @@ import {
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 import { formatIPATriplet } from './ipa';
+import { spanishMeaningsFor } from './meanings';
 
 // PISO 3: LA OFICINA DE LOS GEMELOS (Patrón ABB)
 // Regla: El Pasado y el Participio son idénticos.
@@ -1115,7 +1116,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
             <h2 className="text-sm font-bold text-indigo-200 tracking-widest uppercase mb-6">PRODUCCIÓN</h2>
             <div className="mb-6">
               <p className="text-3xl font-bold text-white mb-2">{questions[currentQuestion].es}</p>
-              <p className="text-slate-500 text-sm">Escribe la forma base (A). Pista: {questions[currentQuestion].base} - {questions[currentQuestion].past} - {questions[currentQuestion].participle}</p>
+              <p className="text-slate-500 text-sm">Escribe la forma base (A).</p>
             </div>
 
             <input
@@ -1141,6 +1142,38 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
                 >
                   Verificar
                 </button>
+              </div>
+            )}
+
+            {waitingForNext && (
+              <div className="mt-6 bg-slate-900/50 p-5 rounded-xl border border-slate-700 text-left">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!speechAvailable) return;
+                    speakEnglishSequence(
+                      [questions[currentQuestion].base, questions[currentQuestion].past, questions[currentQuestion].participle],
+                      { gapMs: 350 }
+                    );
+                  }}
+                  className={`w-full text-left rounded-lg ${speechAvailable ? 'hover:bg-slate-800/70 transition cursor-pointer' : ''}`}
+                >
+                  <div className="text-slate-300 text-sm mb-2">Toca para escuchar: base → pasado → participio.</div>
+                  <div className="text-xl font-black text-white">
+                    {questions[currentQuestion].base} - {questions[currentQuestion].past} - {questions[currentQuestion].participle}
+                  </div>
+                  <div className="text-slate-400 font-mono text-sm">
+                    {formatIPATriplet([
+                      questions[currentQuestion].base,
+                      questions[currentQuestion].past,
+                      questions[currentQuestion].participle,
+                    ])}
+                  </div>
+                </button>
+
+                <div className="mt-3 text-slate-200 text-sm">
+                  Significados: <span className="text-slate-300">{spanishMeaningsFor(questions[currentQuestion].base, questions[currentQuestion].es).join(' / ')}</span>
+                </div>
               </div>
             )}
           </div>

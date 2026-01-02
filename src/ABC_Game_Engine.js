@@ -15,6 +15,7 @@ import {
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 import { formatIPATriplet } from './ipa';
+import { spanishMeaningsFor } from './meanings';
 
 // PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
 // Regla: Las 3 formas son distintas.
@@ -1386,10 +1387,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
 
             <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-700 mb-6">
               <p className="text-slate-300 mb-2">Escribe la forma base (presente):</p>
-              <div className="text-2xl font-black text-amber-300">
-                {questions[currentQuestion].past} — {questions[currentQuestion].participle}
-              </div>
-              <div className="text-slate-500 mt-2 text-sm">Ayuda: significado: {questions[currentQuestion].es}</div>
+              <div className="text-2xl font-black text-amber-300">{questions[currentQuestion].es}</div>
             </div>
 
             <div className="flex gap-3">
@@ -1423,6 +1421,38 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
             {feedback && (
               <div className="mt-6 bg-slate-900/50 p-4 rounded-xl border border-slate-700 whitespace-pre-wrap text-slate-100">
                 {feedback}
+              </div>
+            )}
+
+            {waitingForNext && (
+              <div className="mt-4 bg-slate-900/50 p-5 rounded-xl border border-slate-700">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!speechAvailable) return;
+                    speakEnglishSequence(
+                      [questions[currentQuestion].base, questions[currentQuestion].past, questions[currentQuestion].participle],
+                      { gapMs: 350 }
+                    );
+                  }}
+                  className={`w-full text-left rounded-lg ${speechAvailable ? 'hover:bg-slate-800/70 transition cursor-pointer' : ''}`}
+                >
+                  <div className="text-slate-300 text-sm mb-2">Toca para escuchar: base → pasado → participio.</div>
+                  <div className="text-xl font-black text-white">
+                    {questions[currentQuestion].base} - {questions[currentQuestion].past} - {questions[currentQuestion].participle}
+                  </div>
+                  <div className="text-slate-400 font-mono text-sm">
+                    {formatIPATriplet([
+                      questions[currentQuestion].base,
+                      questions[currentQuestion].past,
+                      questions[currentQuestion].participle,
+                    ])}
+                  </div>
+                </button>
+
+                <div className="mt-3 text-slate-200 text-sm">
+                  Significados: <span className="text-slate-300">{spanishMeaningsFor(questions[currentQuestion].base, questions[currentQuestion].es).join(' / ')}</span>
+                </div>
               </div>
             )}
 
