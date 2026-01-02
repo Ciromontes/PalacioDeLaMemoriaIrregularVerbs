@@ -449,12 +449,25 @@ function pointsForHintLevel(hintLevel) {
 }
 
 const intruders = [
-  { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
+  // No-ABC (mezcla de otros pisos para variedad)
+  { base: 'bet', past: 'bet', participle: 'bet', es: 'apostar', pattern: 'AAA' },
   { base: 'cut', past: 'cut', participle: 'cut', es: 'cortar', pattern: 'AAA' },
+  { base: 'let', past: 'let', participle: 'let', es: 'permitir', pattern: 'AAA' },
+  { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
+  { base: 'read', past: 'read', participle: 'read', es: 'leer', pattern: 'AAA' },
+  { base: 'set', past: 'set', participle: 'set', es: 'fijar/colocar', pattern: 'AAA' },
+
   { base: 'come', past: 'came', participle: 'come', es: 'venir', pattern: 'ABA' },
   { base: 'run', past: 'ran', participle: 'run', es: 'correr', pattern: 'ABA' },
+  { base: 'become', past: 'became', participle: 'become', es: 'convertirse', pattern: 'ABA' },
+  { base: 'overcome', past: 'overcame', participle: 'overcome', es: 'superar', pattern: 'ABA' },
+
   { base: 'build', past: 'built', participle: 'built', es: 'construir', pattern: 'ABB' },
   { base: 'meet', past: 'met', participle: 'met', es: 'conocer', pattern: 'ABB' },
+  { base: 'keep', past: 'kept', participle: 'kept', es: 'mantener', pattern: 'ABB' },
+  { base: 'sleep', past: 'slept', participle: 'slept', es: 'dormir', pattern: 'ABB' },
+  { base: 'feel', past: 'felt', participle: 'felt', es: 'sentir', pattern: 'ABB' },
+  { base: 'leave', past: 'left', participle: 'left', es: 'irse/dejar', pattern: 'ABB' },
 ];
 
 function shuffle(array) {
@@ -833,9 +846,18 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
       const rounds = [];
       const roundsCount = Math.max(3, Math.min(6, Math.ceil(selectedGroup.verbs.length / 4)));
       for (let i = 0; i < roundsCount; i++) {
-        const abcCards = selectedGroup.verbs.map((v) => ({ ...v, pattern: 'ABC' }));
-        const picks = shuffle([...abcCards, ...intruders]).slice(0, 6);
-        const intr = picks.filter((v) => v.pattern !== 'ABC').map((v) => v.base);
+        const totalCards = 6;
+        const desiredIntruders = 2;
+
+        const abcCards = shuffle(selectedGroup.verbs).map((v) => ({ ...v, pattern: 'ABC' }));
+        const maxAbc = Math.max(1, totalCards - desiredIntruders);
+        const abcCount = Math.min(maxAbc, abcCards.length);
+        const intruderCount = Math.min(intruders.length, totalCards - abcCount);
+
+        const pickedAbc = abcCards.slice(0, totalCards - intruderCount);
+        const pickedIntruders = shuffle(intruders).slice(0, intruderCount);
+        const picks = shuffle([...pickedAbc, ...pickedIntruders]);
+        const intr = pickedIntruders.map((v) => v.base);
         rounds.push({ verbs: picks, intruders: intr });
       }
       setQuestions(rounds);
@@ -931,7 +953,11 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
       setFeedback('✅ Perfecto. Identificaste los que NO son ABC.');
     } else {
       const missing = correct.filter((x) => !user.includes(x));
-      setFeedback(`❌ Te faltó marcar: ${missing.join(', ')}.`);
+      const extra = user.filter((x) => !correct.includes(x));
+      const parts = [];
+      if (missing.length) parts.push(`Te faltó marcar: ${missing.join(', ')}`);
+      if (extra.length) parts.push(`Marcaste de más: ${extra.join(', ')}`);
+      setFeedback(`❌ No del todo. ${parts.join('. ')}.`.trim());
     }
     setWaitingForNext(true);
   };
@@ -1426,23 +1452,44 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
               <button onClick={() => setStage('group_intro')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
             </div>
 
-            <p className="text-slate-300 mb-4">Marca los verbos que <span className="font-bold">NO</span> pertenecen a este patrón/grupo (NO ABC):</p>
+            <p className="text-slate-300 mb-4">Marca los verbos que <span className="font-bold">NO</span> pertenecen a este patrón/grupo (NO ABC). Si no estás seguro, puedes verificar sin marcar nada.</p>
 
             <div className="grid md:grid-cols-2 gap-4">
               {questions[currentQuestion].verbs.map((v) => {
                 const selected = selectedIntruders.includes(v.base);
+                const isIntruder = questions[currentQuestion].intruders.includes(v.base);
+                const reveal = waitingForNext;
+
+                const baseClass = selected
+                  ? 'bg-red-700/60 border-red-400'
+                  : 'bg-slate-700 hover:bg-slate-600 border-slate-600';
+
+                const revealClass = reveal
+                  ? (selected && isIntruder
+                      ? 'bg-green-900/40 border-green-500'
+                      : selected && !isIntruder
+                      ? 'bg-red-900/40 border-red-500'
+                      : !selected && isIntruder
+                      ? 'bg-amber-900/30 border-amber-500'
+                      : 'bg-slate-800 border-slate-600')
+                  : baseClass;
+
                 return (
                   <button
                     key={v.base}
                     disabled={waitingForNext}
                     onClick={() => toggleIntruder(v.base)}
-                    className={`p-4 rounded-xl text-left transition border ${
-                      selected ? 'bg-red-700/60 border-red-400' : 'bg-slate-700 hover:bg-slate-600 border-slate-600'
-                    }`}
+                    className={`p-4 rounded-xl text-left transition border ${revealClass}`}
                   >
                     <div className="font-black text-white text-lg">{v.base}</div>
                     <div className="text-slate-300 text-sm font-mono">{v.past} — {v.participle}</div>
-                    <div className="text-slate-400 text-xs mt-1">({v.pattern})</div>
+
+                    {waitingForNext && (
+                      <>
+                        <div className="text-slate-200 text-sm mt-2">{v.es}</div>
+                        <div className="text-slate-400 text-xs mt-1">Patrón: {v.pattern}</div>
+                      </>
+                    )}
                   </button>
                 );
               })}

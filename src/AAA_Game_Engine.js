@@ -63,14 +63,48 @@ function getAAAPalaceImageFallbackUrl(verbBase) {
 }
 
 const intruderVerbs = [
-  { en: "sing", es: "cantar", pattern: "Cambia (i-a-u)" },
-  { en: "break", es: "romper", pattern: "Cambia (Break-Broke)" },
-  { en: "spend", es: "gastar", pattern: "Cambia (d -> t)" },
-  { en: "write", es: "escribir", pattern: "Cambia (Write-Wrote)" },
-  { en: "drive", es: "conducir", pattern: "Cambia (Drive-Drove)" },
-  { en: "bring", es: "traer", pattern: "Cambia (GHT)" },
-  { en: "come", es: "venir", pattern: "Va y vuelve (ABA)" },
-  { en: "run", es: "correr", pattern: "Va y vuelve (ABA)" }
+  // Pool grande y variado (de otros pisos) para que no se repitan siempre los mismos.
+  // Nota: aquí solo ponemos verbos NO-AAA.
+  { en: 'come', es: 'venir', pattern: 'ABA' },
+  { en: 'came', es: 'venir', pattern: 'ABA' },
+  { en: 'run', es: 'correr', pattern: 'ABA' },
+  { en: 'ran', es: 'correr', pattern: 'ABA' },
+  { en: 'become', es: 'convertirse', pattern: 'ABA' },
+  { en: 'became', es: 'convertirse', pattern: 'ABA' },
+  { en: 'overcome', es: 'superar', pattern: 'ABA' },
+  { en: 'overcame', es: 'superar', pattern: 'ABA' },
+
+  { en: 'build', es: 'construir', pattern: 'ABB' },
+  { en: 'built', es: 'construir', pattern: 'ABB' },
+  { en: 'keep', es: 'mantener', pattern: 'ABB' },
+  { en: 'kept', es: 'mantener', pattern: 'ABB' },
+  { en: 'leave', es: 'salir/dejar', pattern: 'ABB' },
+  { en: 'left', es: 'salir/dejar', pattern: 'ABB' },
+  { en: 'buy', es: 'comprar', pattern: 'ABB' },
+  { en: 'bought', es: 'comprar', pattern: 'ABB' },
+  { en: 'teach', es: 'enseñar', pattern: 'ABB' },
+  { en: 'taught', es: 'enseñar', pattern: 'ABB' },
+  { en: 'think', es: 'pensar', pattern: 'ABB' },
+  { en: 'thought', es: 'pensar', pattern: 'ABB' },
+
+  { en: 'begin', es: 'empezar', pattern: 'ABC' },
+  { en: 'began', es: 'empezar', pattern: 'ABC' },
+  { en: 'begun', es: 'empezar', pattern: 'ABC' },
+  { en: 'drink', es: 'beber', pattern: 'ABC' },
+  { en: 'drank', es: 'beber', pattern: 'ABC' },
+  { en: 'drunk', es: 'beber', pattern: 'ABC' },
+  { en: 'sing', es: 'cantar', pattern: 'ABC' },
+  { en: 'sang', es: 'cantar', pattern: 'ABC' },
+  { en: 'sung', es: 'cantar', pattern: 'ABC' },
+  { en: 'write', es: 'escribir', pattern: 'ABC' },
+  { en: 'wrote', es: 'escribir', pattern: 'ABC' },
+  { en: 'written', es: 'escribir', pattern: 'ABC' },
+  { en: 'go', es: 'ir', pattern: 'ABC' },
+  { en: 'went', es: 'ir', pattern: 'ABC' },
+  { en: 'gone', es: 'ir', pattern: 'ABC' },
+  { en: 'take', es: 'tomar', pattern: 'ABC' },
+  { en: 'took', es: 'tomar', pattern: 'ABC' },
+  { en: 'taken', es: 'tomar', pattern: 'ABC' },
 ];
 
 function fillBlank(sentence, word) {
@@ -347,10 +381,10 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const generateLevel3Questions = () => {
     const rounds = [];
     for (let i = 0; i < 5; i++) {
-      const aaaVerbs = shuffle(verbsAAA).slice(0, 3);
-      const intruders = shuffle(intruderVerbs).slice(0, 2);
-      const mixed = shuffle([...aaaVerbs, ...intruders]);
-      rounds.push({ verbs: mixed, intruders: intruders.map(v => v.en) });
+      const aaaVerbs = shuffle(verbsAAA).slice(0, 3).map((v) => ({ ...v, pattern: 'AAA' }));
+      const pickedIntruders = shuffle(intruderVerbs).slice(0, 2);
+      const mixed = shuffle([...aaaVerbs, ...pickedIntruders]);
+      rounds.push({ verbs: mixed, intruders: pickedIntruders.map(v => v.en) });
     }
     return rounds;
   };
@@ -803,35 +837,61 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
           <div className="bg-slate-800 rounded-2xl p-8 shadow-2xl border border-slate-700">
             <div className="text-center mb-6">
               <h2 className="text-sm font-bold text-orange-400 tracking-widest uppercase mb-2">SEGURIDAD DEL PALACIO</h2>
-              <p className="text-xl text-white">¡Alerta! Hay intrusos.</p>
-              <p className="text-slate-400 text-sm mt-1">Selecciona los verbos que <span className="text-red-400 font-bold">NO SON AAA</span> (los que cambian).</p>
+              <p className="text-xl text-white">Revisa si hay intrusos.</p>
+              <p className="text-slate-400 text-sm mt-1">Marca los verbos que <span className="text-red-400 font-bold">NO SON AAA</span>. Si no hay intrusos, confirma sin marcar nada.</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-              {questions[currentQuestion].verbs.map((verb, idx) => (
+              {questions[currentQuestion].verbs.map((verb, idx) => {
+                const selected = selectedIntruders.includes(verb.en);
+                const isIntruder = questions[currentQuestion].intruders.includes(verb.en);
+                const reveal = waitingForNext;
+
+                const baseClass = selected
+                  ? 'bg-red-900/50 border-2 border-red-500 text-white'
+                  : 'bg-slate-700 hover:bg-slate-600 border-2 border-transparent';
+
+                const revealClass = reveal
+                  ? (selected && isIntruder
+                      ? 'bg-green-900/40 border-2 border-green-500 text-white'
+                      : selected && !isIntruder
+                      ? 'bg-red-900/40 border-2 border-red-500 text-white'
+                      : !selected && isIntruder
+                      ? 'bg-amber-900/30 border-2 border-amber-500 text-white'
+                      : 'bg-slate-700 border-2 border-slate-600 text-white')
+                  : baseClass;
+
+                return (
                 <button
                   key={idx}
                   onClick={() => toggleIntruder(verb.en)}
                   disabled={waitingForNext}
-                  className={`p-4 rounded-xl transition-all relative overflow-hidden ${
-                    selectedIntruders.includes(verb.en)
-                      ? 'bg-red-900/50 border-2 border-red-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600 border-2 border-transparent'
-                  }`}
+                  className={`p-4 rounded-xl transition-all relative overflow-hidden ${revealClass}`}
                 >
                   <span className="font-bold text-lg block">{verb.en}</span>
-                  <span className="text-xs text-slate-400">{verb.es}</span>
-                  {selectedIntruders.includes(verb.en) && (
+                  {waitingForNext && (
+                    <>
+                      <span className="text-xs text-slate-300 block">{verb.es}</span>
+                      <span className="text-[11px] text-slate-400 font-mono block">Patrón: {verb.pattern}</span>
+                    </>
+                  )}
+                  {selected && !waitingForNext && (
                     <div className="absolute top-2 right-2 text-red-500"><X size={16} /></div>
                   )}
+                  {waitingForNext && (selected && isIntruder) && (
+                    <div className="absolute top-2 right-2 text-green-400"><Check size={16} /></div>
+                  )}
+                  {waitingForNext && (selected && !isIntruder) && (
+                    <div className="absolute top-2 right-2 text-red-400"><X size={16} /></div>
+                  )}
                 </button>
-              ))}
+                );
+              })}
             </div>
 
             {!waitingForNext && (
               <button
                 onClick={checkIntruders}
-                disabled={selectedIntruders.length === 0}
                 className="w-full bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-bold transition disabled:opacity-50"
               >
                 Confirmar Intrusos

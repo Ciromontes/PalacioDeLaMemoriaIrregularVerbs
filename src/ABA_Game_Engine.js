@@ -64,12 +64,30 @@ function pointsForHintLevel(hintLevel) {
 }
 
 const intruders = [
-  // No-ABA (mezcla de AAA/ABB/ABC) para el nivel de intrusos
+  // No-ABA (mezcla de otros pisos) para el nivel de intrusos.
+  // Mantener un pool amplio evita que se repitan siempre los mismos.
+  { base: 'bet', past: 'bet', participle: 'bet', es: 'apostar', pattern: 'AAA' },
+  { base: 'cut', past: 'cut', participle: 'cut', es: 'cortar', pattern: 'AAA' },
+  { base: 'let', past: 'let', participle: 'let', es: 'permitir', pattern: 'AAA' },
   { base: 'put', past: 'put', participle: 'put', es: 'poner', pattern: 'AAA' },
+  { base: 'set', past: 'set', participle: 'set', es: 'fijar/colocar', pattern: 'AAA' },
+
   { base: 'build', past: 'built', participle: 'built', es: 'construir', pattern: 'ABB' },
+  { base: 'keep', past: 'kept', participle: 'kept', es: 'mantener', pattern: 'ABB' },
+  { base: 'leave', past: 'left', participle: 'left', es: 'salir/dejar', pattern: 'ABB' },
+  { base: 'sleep', past: 'slept', participle: 'slept', es: 'dormir', pattern: 'ABB' },
+  { base: 'buy', past: 'bought', participle: 'bought', es: 'comprar', pattern: 'ABB' },
+  { base: 'think', past: 'thought', participle: 'thought', es: 'pensar', pattern: 'ABB' },
+  { base: 'teach', past: 'taught', participle: 'taught', es: 'enseñar', pattern: 'ABB' },
+
   { base: 'go', past: 'went', participle: 'gone', es: 'ir', pattern: 'ABC' },
   { base: 'write', past: 'wrote', participle: 'written', es: 'escribir', pattern: 'ABC' },
-  { base: 'read', past: 'read', participle: 'read', es: 'leer', pattern: 'AAA' },
+  { base: 'begin', past: 'began', participle: 'begun', es: 'empezar', pattern: 'ABC' },
+  { base: 'drink', past: 'drank', participle: 'drunk', es: 'beber', pattern: 'ABC' },
+  { base: 'sing', past: 'sang', participle: 'sung', es: 'cantar', pattern: 'ABC' },
+  { base: 'take', past: 'took', participle: 'taken', es: 'tomar', pattern: 'ABC' },
+  { base: 'give', past: 'gave', participle: 'given', es: 'dar', pattern: 'ABC' },
+  { base: 'know', past: 'knew', participle: 'known', es: 'saber/conocer', pattern: 'ABC' },
 ];
 
 const contextTemplatesABA = {
@@ -229,10 +247,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
   const accuracy = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
 
-  const poolForIntruders = useMemo(() => {
-    const abaAsCards = verbsABA.map(v => ({ ...v, pattern: 'ABA' }));
-    return shuffle([...abaAsCards, ...intruders]);
-  }, []);
+  const abaAsCards = useMemo(() => verbsABA.map(v => ({ ...v, pattern: 'ABA' })), []);
 
   const initLevel = (level) => {
     stopSpeech();
@@ -274,8 +289,12 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
       const rounds = [];
       const roundsCount = 5;
       for (let i = 0; i < roundsCount; i++) {
-        const picks = shuffle(poolForIntruders).slice(0, 5);
-        const intr = picks.filter(v => v.pattern !== 'ABA').map(v => v.base);
+        const abaPicks = shuffle(abaAsCards).slice(0, 3);
+        // Garantiza intrusos: siempre tomamos 2 verbos NO-ABA (otros pisos)
+        const intrPicks = shuffle(intruders).slice(0, 2);
+
+        const picks = shuffle([...abaPicks, ...intrPicks]);
+        const intr = intrPicks.map(v => v.base);
         rounds.push({ verbs: picks, intruders: intr });
       }
       setQuestions(rounds);
@@ -742,35 +761,61 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
             <div className="text-center mb-6">
               <h2 className="text-sm font-bold text-orange-300 tracking-widest uppercase mb-2">CONTROL DE PATRÓN</h2>
               <p className="text-xl text-white">Selecciona los verbos que <span className="text-red-300 font-bold">NO SON ABA</span>.</p>
-              <p className="text-slate-400 text-sm mt-1">En ABA: Base = Participle.</p>
+              <p className="text-slate-400 text-sm mt-1">En ABA: Base = Participle. Si no hay intrusos, confirma sin marcar nada.</p>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-              {questions[currentQuestion].verbs.map((verb, idx) => (
+              {questions[currentQuestion].verbs.map((verb, idx) => {
+                const selected = selectedIntruders.includes(verb.base);
+                const isIntruder = questions[currentQuestion].intruders.includes(verb.base);
+                const reveal = waitingForNext;
+
+                const baseClass = selected
+                  ? 'bg-red-900/50 border-2 border-red-500 text-white'
+                  : 'bg-slate-700 hover:bg-slate-600 border-2 border-transparent';
+
+                const revealClass = reveal
+                  ? (selected && isIntruder
+                      ? 'bg-green-900/40 border-2 border-green-500 text-white'
+                      : selected && !isIntruder
+                      ? 'bg-red-900/40 border-2 border-red-500 text-white'
+                      : !selected && isIntruder
+                      ? 'bg-amber-900/30 border-2 border-amber-500 text-white'
+                      : 'bg-slate-700 border-2 border-slate-600 text-white')
+                  : baseClass;
+
+                return (
                 <button
                   key={idx}
                   onClick={() => toggleIntruder(verb.base)}
                   disabled={waitingForNext}
-                  className={`p-4 rounded-xl transition-all relative overflow-hidden ${
-                    selectedIntruders.includes(verb.base)
-                      ? 'bg-red-900/50 border-2 border-red-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600 border-2 border-transparent'
-                  }`}
+                  className={`p-4 rounded-xl transition-all relative overflow-hidden ${revealClass}`}
                 >
                   <span className="font-bold text-lg block">{verb.base}</span>
-                  <span className="text-xs text-slate-300 font-mono block">{verb.base} - {verb.past} - {verb.participle}</span>
-                  <span className="text-xs text-slate-400">{verb.es}{verb.pattern ? ` (${verb.pattern})` : ''}</span>
-                  {selectedIntruders.includes(verb.base) && (
+                  {waitingForNext && (
+                    <>
+                      <span className="text-xs text-slate-300 font-mono block">{verb.base} - {verb.past} - {verb.participle}</span>
+                      <span className="text-xs text-slate-400">{verb.es}{verb.pattern ? ` (${verb.pattern})` : ''}</span>
+                    </>
+                  )}
+                  {selected && !waitingForNext && (
                     <div className="absolute top-2 right-2 text-red-500"><X size={16} /></div>
                   )}
+                  {waitingForNext && (selected && isIntruder) && (
+                    <div className="absolute top-2 right-2 text-green-400"><Check size={16} /></div>
+                  )}
+                  {waitingForNext && (selected && !isIntruder) && (
+                    <div className="absolute top-2 right-2 text-red-400"><X size={16} /></div>
+                  )}
                 </button>
-              ))}
+                );
+              })}
             </div>
 
             {!waitingForNext && (
               <button
                 onClick={checkIntruders}
-                disabled={selectedIntruders.length === 0}
+                disabled={waitingForNext}
                 className="w-full bg-orange-600 hover:bg-orange-500 p-4 rounded-xl font-bold transition disabled:opacity-50"
               >
                 Confirmar
