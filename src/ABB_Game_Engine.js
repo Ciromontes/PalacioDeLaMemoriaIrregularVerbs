@@ -16,6 +16,7 @@ import {
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 import { formatIPATriplet } from './ipa';
 import { spanishMeaningsFor } from './meanings';
+import { buildLevel2WritingHint } from './hints';
 
 // PISO 3: LA OFICINA DE LOS GEMELOS (Patrón ABB)
 // Regla: El Pasado y el Participio son idénticos.
@@ -469,7 +470,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
   const speechAvailable = isSpeechSupported();
 
   const [userAnswer, setUserAnswer] = useState('');
-  const [showHint, setShowHint] = useState(false);
+  const [hintLevel2, setHintLevel2] = useState(0); // 0 none | 1 first | 2 first+second | 3 first+second+last
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
@@ -555,7 +556,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     setShowFeedbackDetails(false);
     setFeedbackSpeechEn(null);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -636,7 +637,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
     setFeedbackSpeechEn(null);
     setWaitingForNext(false);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -655,7 +656,7 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
       setFeedbackSpeechEn(null);
       setWaitingForNext(false);
       setUserAnswer('');
-      setShowHint(false);
+      setHintLevel2(0);
       setSelectedAnswer(null);
       setSelectedIntruders([]);
       setHintLevel4(0);
@@ -1132,8 +1133,13 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
 
             {!waitingForNext && (
               <div className="flex justify-center gap-4">
-                <button onClick={() => setShowHint(!showHint)} className="text-slate-400 hover:text-white text-sm underline">
-                  {showHint ? `Empieza con: ${questions[currentQuestion].base[0].toUpperCase()}...` : '¿Necesitas una pista?'}
+                <button
+                  type="button"
+                  onClick={() => setHintLevel2((v) => Math.min(3, v + 1))}
+                  disabled={hintLevel2 >= 3}
+                  className="text-slate-400 hover:text-white text-sm underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {hintLevel2 > 0 ? `Pista ${hintLevel2}/3` : 'Pista'}
                 </button>
                 <button
                   onClick={checkLevel2Answer}
@@ -1142,6 +1148,12 @@ export default function ABBGameEngine({ onExit, onViewGallery }) {
                 >
                   Verificar
                 </button>
+              </div>
+            )}
+
+            {!waitingForNext && hintLevel2 > 0 && (
+              <div className="mt-4 text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 inline-block font-mono">
+                {buildLevel2WritingHint(questions[currentQuestion].base, hintLevel2)}
               </div>
             )}
 

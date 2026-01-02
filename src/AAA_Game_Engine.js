@@ -4,6 +4,7 @@ import { Check, X, RefreshCw, Sparkles, ChevronRight, ChevronLeft, Eye, Brain, T
 import { isSpeechSupported, speakEnglishBlock, speakEnglishTriplet, stopSpeech, warmUpVoices } from './speech';
 import { formatIPA } from './ipa';
 import { spanishMeaningsFor } from './meanings';
+import { buildLevel2WritingHint } from './hints';
 
 // --- DATA: LOS 28 VERBOS AAA EXACTAMENTE COMO EN EL PDF ---
 const verbsAAA = [
@@ -314,7 +315,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
-  const [showHint, setShowHint] = useState(false);
+  const [hintLevel2, setHintLevel2] = useState(0); // 0 none | 1 first | 2 first+second | 3 first+second+last
   const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
   const [totalAnswered, setTotalAnswered] = useState(0);
   const [waitingForNext, setWaitingForNext] = useState(false);
@@ -406,7 +407,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
     setWaitingForNext(false);
     setUserAnswer('');
     setSelectedIntruders([]);
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setHintLevel4(0);
 
@@ -444,7 +445,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
     } else {
       setFeedback(`❌ La respuesta es "${q.en}". En el espejo todo se ve igual.`);
     }
-    setShowHint(false);
+    setHintLevel2(0);
     setWaitingForNext(true);
   };
 
@@ -518,7 +519,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
     setWaitingForNext(false);
     setUserAnswer('');
     setSelectedIntruders([]);
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setHintLevel4(0);
 
@@ -539,7 +540,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
       setWaitingForNext(false);
       setUserAnswer('');
       setSelectedIntruders([]);
-      setShowHint(false);
+      setHintLevel2(0);
       setSelectedAnswer(null);
       setHintLevel4(0);
     }
@@ -819,8 +820,13 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
 
             {!waitingForNext && (
               <div className="flex justify-center gap-4">
-                <button onClick={() => setShowHint(!showHint)} className="text-slate-400 hover:text-white text-sm underline">
-                  {showHint ? `Empieza con: ${questions[currentQuestion].en[0].toUpperCase()}...` : "¿Necesitas una pista?"}
+                <button
+                  type="button"
+                  onClick={() => setHintLevel2((v) => Math.min(3, v + 1))}
+                  disabled={hintLevel2 >= 3}
+                  className="text-slate-400 hover:text-white text-sm underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {hintLevel2 > 0 ? `Pista ${hintLevel2}/3` : 'Pista'}
                 </button>
                 <button
                   onClick={checkLevel2Answer}
@@ -829,6 +835,12 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 >
                   Verificar
                 </button>
+              </div>
+            )}
+
+            {!waitingForNext && hintLevel2 > 0 && (
+              <div className="mt-4 text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 inline-block font-mono">
+                {buildLevel2WritingHint(questions[currentQuestion].en, hintLevel2)}
               </div>
             )}
 

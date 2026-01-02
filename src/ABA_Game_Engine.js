@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Brain, Check, ChevronLeft, ChevronRight, Eye, Lightbulb, RefreshCw, Sparkles, Trophy, X } from 'lucide-react';
 import { formatIPATriplet } from './ipa';
 import { spanishMeaningsFor } from './meanings';
+import { buildLevel2WritingHint } from './hints';
 
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 
@@ -235,7 +236,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
   }, []);
 
   const [userAnswer, setUserAnswer] = useState('');
-  const [showHint, setShowHint] = useState(false);
+  const [hintLevel2, setHintLevel2] = useState(0); // 0 none | 1 first | 2 first+second | 3 first+second+last
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [palaceView, setPalaceView] = useState(0);
@@ -264,7 +265,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
     setFeedbackSpeechEn(null);
     setFeedbackSpeechEs(null);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -315,7 +316,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
     setFeedbackSpeechEs(null);
     setWaitingForNext(false);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -335,7 +336,7 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
       setFeedbackSpeechEs(null);
       setWaitingForNext(false);
       setUserAnswer('');
-      setShowHint(false);
+      setHintLevel2(0);
       setSelectedAnswer(null);
       setSelectedIntruders([]);
       setHintLevel4(0);
@@ -742,8 +743,13 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
 
             {!waitingForNext && (
               <div className="flex justify-center gap-4">
-                <button onClick={() => setShowHint(!showHint)} className="text-slate-400 hover:text-white text-sm underline">
-                  {showHint ? `Empieza con: ${questions[currentQuestion].base[0].toUpperCase()}...` : '¿Necesitas una pista?'}
+                <button
+                  type="button"
+                  onClick={() => setHintLevel2((v) => Math.min(3, v + 1))}
+                  disabled={hintLevel2 >= 3}
+                  className="text-slate-400 hover:text-white text-sm underline disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {hintLevel2 > 0 ? `Pista ${hintLevel2}/3` : 'Pista'}
                 </button>
                 <button
                   onClick={checkLevel2Answer}
@@ -752,6 +758,12 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
                 >
                   Verificar
                 </button>
+              </div>
+            )}
+
+            {!waitingForNext && hintLevel2 > 0 && (
+              <div className="mt-4 text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 inline-block font-mono">
+                {buildLevel2WritingHint(questions[currentQuestion].base, hintLevel2)}
               </div>
             )}
 

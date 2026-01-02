@@ -16,6 +16,7 @@ import {
 import { isSpeechSupported, speakEnglishBlock, speakEnglishSequence, stopSpeech, warmUpVoices } from './speech';
 import { formatIPATriplet } from './ipa';
 import { spanishMeaningsFor } from './meanings';
+import { buildLevel2WritingHint } from './hints';
 
 // PISO 4: EL LABORATORIO DE METAMORFOSIS / CAMALEÓN (Patrón ABC)
 // Regla: Las 3 formas son distintas.
@@ -729,7 +730,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
   const [userAnswer, setUserAnswer] = useState('');
-  const [showHint, setShowHint] = useState(false);
+  const [hintLevel2, setHintLevel2] = useState(0); // 0 none | 1 first | 2 first+second | 3 first+second+last
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [selectedIntruders, setSelectedIntruders] = useState([]);
   const [hintLevel4, setHintLevel4] = useState(0); // 0 none | 1 first letter | 2 spaced pattern | 3 tight pattern
@@ -796,7 +797,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
     setFeedbackDetails(null);
     setShowFeedbackDetails(false);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -877,7 +878,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
     setShowFeedbackDetails(false);
     setWaitingForNext(false);
     setUserAnswer('');
-    setShowHint(false);
+    setHintLevel2(0);
     setSelectedAnswer(null);
     setSelectedIntruders([]);
     setHintLevel4(0);
@@ -895,7 +896,7 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
       setShowFeedbackDetails(false);
       setWaitingForNext(false);
       setUserAnswer('');
-      setShowHint(false);
+      setHintLevel2(0);
       setSelectedAnswer(null);
       setSelectedIntruders([]);
       setHintLevel4(0);
@@ -1408,14 +1409,18 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
             </div>
 
             <button
-              onClick={() => setShowHint((v) => !v)}
-              disabled={waitingForNext}
-              className="mt-4 text-sm underline text-slate-300 hover:text-white"
+              type="button"
+              onClick={() => setHintLevel2((v) => Math.min(3, v + 1))}
+              disabled={waitingForNext || hintLevel2 >= 3}
+              className="mt-4 text-sm underline text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {showHint ? 'Ocultar pista' : 'Pista'}
+              {hintLevel2 > 0 ? `Pista ${hintLevel2}/3` : 'Pista'}
             </button>
-            {showHint && (
-              <div className="mt-2 text-slate-200">Primera letra: <span className="font-mono font-bold">{questions[currentQuestion].base[0]}</span></div>
+
+            {!waitingForNext && hintLevel2 > 0 && (
+              <div className="mt-2 text-slate-200 bg-slate-900/60 border border-slate-700 rounded-lg px-4 py-2 inline-block font-mono">
+                {buildLevel2WritingHint(questions[currentQuestion].base, hintLevel2)}
+              </div>
             )}
 
             {feedback && (
