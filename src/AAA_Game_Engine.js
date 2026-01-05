@@ -64,6 +64,12 @@ function getAAAPalaceImageFallbackUrl(verbBase) {
   return `${prefix}img/AAA/${fileName}`;
 }
 
+function getAAAPalaceIntroVideoUrl() {
+  const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
+  const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
+  return `${prefix}videos/AAA.mp4`;
+}
+
 const intruderVerbs = [
   // Pool grande y variado (de otros pisos) para que no se repitan siempre los mismos.
   // Nota: aquí solo ponemos verbos NO-AAA.
@@ -323,6 +329,9 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [palaceImageError, setPalaceImageError] = useState(false);
   const [palaceImageVariant, setPalaceImageVariant] = useState('primary');
+  const [showPalaceIntroVideo, setShowPalaceIntroVideo] = useState(false);
+  const [hasSeenPalaceIntroVideo, setHasSeenPalaceIntroVideo] = useState(false);
+  const [palaceIntroVideoError, setPalaceIntroVideoError] = useState(false);
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const touchStartXRef = useRef(null);
 
@@ -597,7 +606,14 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
             </div>
 
             <button
-              onClick={() => setStage('palace')}
+              onClick={() => {
+                stopSpeech();
+                setPalaceImageError(false);
+                setPalaceImageVariant('primary');
+                setPalaceIntroVideoError(false);
+                if (!hasSeenPalaceIntroVideo) setShowPalaceIntroVideo(true);
+                setStage('palace');
+              }}
               className="group bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 p-6 rounded-2xl transition-all transform hover:scale-[1.02] shadow-xl flex items-center justify-between"
             >
               <div className="flex items-center gap-4">
@@ -652,8 +668,72 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
           <div className="bg-slate-800 rounded-2xl p-4 md:p-8 border border-slate-700 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-emerald-400">Galería Mental</h2>
-              <button onClick={() => setStage('menu')} className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition">Volver</button>
+              <button
+                onClick={() => {
+                  setShowPalaceIntroVideo(false);
+                  setPalaceIntroVideoError(false);
+                  setStage('menu');
+                }}
+                className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition"
+              >
+                Volver
+              </button>
             </div>
+
+            {showPalaceIntroVideo && (
+              <div className="mb-6 bg-slate-900/50 border border-slate-700 rounded-xl p-4 md:p-6">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div>
+                    <div className="text-emerald-200 font-bold">Entrada al Palacio AAA</div>
+                    <div className="text-slate-400 text-sm">Video breve (solo Piso 1). Puedes saltarlo.</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPalaceIntroVideo(false);
+                      setHasSeenPalaceIntroVideo(true);
+                    }}
+                    className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
+                  >
+                    Saltar
+                  </button>
+                </div>
+
+                {!palaceIntroVideoError ? (
+                  <video
+                    key={getAAAPalaceIntroVideoUrl()}
+                    className="w-full rounded-xl border border-slate-700 bg-black"
+                    src={getAAAPalaceIntroVideoUrl()}
+                    controls
+                    autoPlay
+                    muted
+                    playsInline
+                    onEnded={() => {
+                      setShowPalaceIntroVideo(false);
+                      setHasSeenPalaceIntroVideo(true);
+                    }}
+                    onError={() => setPalaceIntroVideoError(true)}
+                  />
+                ) : (
+                  <div className="text-slate-200">
+                    <div className="mb-2">No se pudo cargar el video AAA.</div>
+                    <div className="text-slate-400 text-sm">
+                      Coloca el archivo <span className="font-mono">AAA.mp4</span> en <span className="font-mono">public/videos/AAA.mp4</span>.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPalaceIntroVideo(false);
+                        setHasSeenPalaceIntroVideo(true);
+                      }}
+                      className="mt-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
+                    >
+                      Continuar
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {isCoarsePointer && (
               <div className="mb-4 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-200 flex items-center gap-2">
@@ -664,7 +744,8 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
               </div>
             )}
 
-            <div className="bg-slate-900/50 p-4 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            {!showPalaceIntroVideo && (
+              <div className="bg-slate-900/50 p-4 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
 
               <h3 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
@@ -760,7 +841,8 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                   👁️ {verbsAAA[palaceView].image}
                 </p>
               </div>
-            </div>
+              </div>
+            )}
           </div>
         )}
 
