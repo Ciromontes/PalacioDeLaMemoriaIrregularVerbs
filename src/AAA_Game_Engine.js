@@ -332,8 +332,10 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   const [showPalaceIntroVideo, setShowPalaceIntroVideo] = useState(false);
   const [hasSeenPalaceIntroVideo, setHasSeenPalaceIntroVideo] = useState(false);
   const [palaceIntroVideoError, setPalaceIntroVideoError] = useState(false);
+  const [palaceIntroNeedsTap, setPalaceIntroNeedsTap] = useState(false);
   const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const touchStartXRef = useRef(null);
+  const palaceIntroVideoRef = useRef(null);
 
   const speechAvailable = isSpeechSupported();
 
@@ -372,6 +374,37 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
     setPalaceImageError(false);
     setPalaceImageVariant('primary');
     setPalaceView((prev) => (prev + 1) % verbsAAA.length);
+  };
+
+  const tryPlayPalaceIntro = () => {
+    const v = palaceIntroVideoRef.current;
+    if (!v) return;
+    try {
+      v.muted = false;
+      v.volume = 1;
+      const p = v.play();
+      if (p && typeof p.catch === 'function') {
+        p.catch(() => setPalaceIntroNeedsTap(true));
+      }
+    } catch {
+      setPalaceIntroNeedsTap(true);
+    }
+  };
+
+  const closePalaceIntro = (markAsSeen) => {
+    const v = palaceIntroVideoRef.current;
+    if (v) {
+      try {
+        v.pause();
+        v.currentTime = 0;
+      } catch {
+        // ignore
+      }
+    }
+    setShowPalaceIntroVideo(false);
+    setPalaceIntroNeedsTap(false);
+    setPalaceIntroVideoError(false);
+    if (markAsSeen) setHasSeenPalaceIntroVideo(true);
   };
 
   const shuffle = (array) => [...array].sort(() => Math.random() - 0.5);
@@ -560,6 +593,66 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-4 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto">
+        {/* Full-screen intro video overlay (AAA only). */}
+        <div
+          className={`fixed inset-0 z-50 bg-black transition-opacity duration-200 ${
+            showPalaceIntroVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          aria-hidden={!showPalaceIntroVideo}
+          onClick={() => {
+            if (!showPalaceIntroVideo || palaceIntroVideoError) return;
+            tryPlayPalaceIntro();
+          }}
+        >
+          {!palaceIntroVideoError ? (
+            <video
+              ref={palaceIntroVideoRef}
+              className="w-full h-full object-contain"
+              src={getAAAPalaceIntroVideoUrl()}
+              preload="auto"
+              playsInline
+              onEnded={() => closePalaceIntro(true)}
+              onError={() => setPalaceIntroVideoError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center p-6">
+              <div className="max-w-md text-center">
+                <div className="text-white font-bold mb-2">No se pudo cargar el video AAA</div>
+                <div className="text-slate-300 text-sm">
+                  Asegúrate de tener <span className="font-mono">public/videos/AAA.mp4</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closePalaceIntro(true);
+                  }}
+                  className="mt-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
+                >
+                  Continuar
+                </button>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              closePalaceIntro(true);
+            }}
+            className="absolute top-4 right-4 bg-slate-900/70 hover:bg-slate-800/80 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
+          >
+            Saltar
+          </button>
+
+          {palaceIntroNeedsTap && !palaceIntroVideoError && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-slate-900/70 border border-slate-700 px-4 py-2 rounded-lg text-sm text-slate-200">
+              Toca el video para reproducir con sonido
+            </div>
+          )}
+        </div>
+
         {typeof onExit === 'function' && (
           <div className="mb-4">
             <button
@@ -611,7 +704,12 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 setPalaceImageError(false);
                 setPalaceImageVariant('primary');
                 setPalaceIntroVideoError(false);
-                if (!hasSeenPalaceIntroVideo) setShowPalaceIntroVideo(true);
+                setPalaceIntroNeedsTap(false);
+                if (!hasSeenPalaceIntroVideo) {
+                  setShowPalaceIntroVideo(true);
+                  // Attempt to start immediately with sound as this click counts as a user gesture.
+                  tryPlayPalaceIntro();
+                }
                 setStage('palace');
               }}
               className="group bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 p-6 rounded-2xl transition-all transform hover:scale-[1.02] shadow-xl flex items-center justify-between"
@@ -670,8 +768,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
               <h2 className="text-2xl font-bold text-emerald-400">Galería Mental</h2>
               <button
                 onClick={() => {
-                  setShowPalaceIntroVideo(false);
-                  setPalaceIntroVideoError(false);
+                  closePalaceIntro(false);
                   setStage('menu');
                 }}
                 className="text-sm bg-slate-900 px-3 py-1 rounded hover:bg-slate-700 transition"
@@ -679,61 +776,6 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 Volver
               </button>
             </div>
-
-            {showPalaceIntroVideo && (
-              <div className="mb-6 bg-slate-900/50 border border-slate-700 rounded-xl p-4 md:p-6">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <div>
-                    <div className="text-emerald-200 font-bold">Entrada al Palacio AAA</div>
-                    <div className="text-slate-400 text-sm">Video breve (solo Piso 1). Puedes saltarlo.</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowPalaceIntroVideo(false);
-                      setHasSeenPalaceIntroVideo(true);
-                    }}
-                    className="bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
-                  >
-                    Saltar
-                  </button>
-                </div>
-
-                {!palaceIntroVideoError ? (
-                  <video
-                    key={getAAAPalaceIntroVideoUrl()}
-                    className="w-full rounded-xl border border-slate-700 bg-black"
-                    src={getAAAPalaceIntroVideoUrl()}
-                    controls
-                    autoPlay
-                    muted
-                    playsInline
-                    onEnded={() => {
-                      setShowPalaceIntroVideo(false);
-                      setHasSeenPalaceIntroVideo(true);
-                    }}
-                    onError={() => setPalaceIntroVideoError(true)}
-                  />
-                ) : (
-                  <div className="text-slate-200">
-                    <div className="mb-2">No se pudo cargar el video AAA.</div>
-                    <div className="text-slate-400 text-sm">
-                      Coloca el archivo <span className="font-mono">AAA.mp4</span> en <span className="font-mono">public/videos/AAA.mp4</span>.
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowPalaceIntroVideo(false);
-                        setHasSeenPalaceIntroVideo(true);
-                      }}
-                      className="mt-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded-lg text-sm font-bold"
-                    >
-                      Continuar
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
 
             {isCoarsePointer && (
               <div className="mb-4 bg-slate-900/50 border border-slate-700 rounded-xl p-3 text-slate-200 flex items-center gap-2">
@@ -744,8 +786,7 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
               </div>
             )}
 
-            {!showPalaceIntroVideo && (
-              <div className="bg-slate-900/50 p-4 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
+            <div className="bg-slate-900/50 p-4 md:p-8 rounded-xl text-center mb-6 min-h-[200px] flex flex-col justify-center items-center relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
 
               <h3 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-wider">{verbsAAA[palaceView].en.toUpperCase()}</h3>
@@ -842,7 +883,6 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 </p>
               </div>
               </div>
-            )}
           </div>
         )}
 
