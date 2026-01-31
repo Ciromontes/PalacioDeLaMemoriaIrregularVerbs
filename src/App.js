@@ -5,8 +5,12 @@ import {
   ChevronRight,
   Lightbulb,
   ArrowLeft,
-  Lock
+  Lock,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
+
+import { QRCodeCanvas } from 'qrcode.react';
 
 import AAAGameEngine from './AAA_Game_Engine';
 import ABAGameEngine from './ABA_Game_Engine';
@@ -257,6 +261,39 @@ const App = () => {
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [galleryReturnScene, setGalleryReturnScene] = useState('MAP');
 
+  const NEQUI_NUMBER = '3102374172';
+  const PAYPAL_EMAIL = 'ciromontes25@hotmail.com';
+
+  const copyToClipboard = async (text) => {
+    const value = String(text ?? '');
+    if (!value) return false;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch {
+      // fall back below
+    }
+
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-1000px';
+      textarea.style.left = '-1000px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      return false;
+    }
+  };
+
   const openGalleryForFloor = (floorId, returnScene = 'MAP') => {
     setSelectedFloor(floorId);
     setGalleryReturnScene(returnScene);
@@ -269,6 +306,12 @@ const App = () => {
       <p className="text-xl mb-8 max-w-2xl text-slate-300 italic">
         "Donde la gramática no se estudia, se recorre. Transforma los verbos en imágenes y nunca los olvidarás."
       </p>
+
+      <InviteCoffeeCard
+        nequiNumber={NEQUI_NUMBER}
+        paypalEmail={PAYPAL_EMAIL}
+        onCopy={copyToClipboard}
+      />
 
       <div className="flex flex-col gap-4 w-full max-w-md">
         <button
@@ -294,6 +337,123 @@ const App = () => {
       </div>
     </div>
   );
+
+  const InviteCoffeeCard = ({ nequiNumber, paypalEmail, onCopy }) => {
+    const [channel, setChannel] = useState('NEQUI');
+    const [copied, setCopied] = useState('');
+
+    const handleCopy = async (label, value) => {
+      const ok = await onCopy(value);
+      setCopied(ok ? `${label} copiado ✅` : `No se pudo copiar. Copia manualmente: ${value}`);
+      window.setTimeout(() => setCopied(''), 2600);
+    };
+
+    const nequiQrValue = `Nequi ${nequiNumber}`;
+    const paypalSendUrl = `https://www.paypal.com/sendmoney`;
+
+    return (
+      <div className="w-full max-w-md mb-8">
+        <div className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div className="text-left">
+              <div className="text-lg font-black text-amber-300">Invítanos un café</div>
+              <div className="text-sm text-slate-300">
+                Si este palacio te ayuda, puedes apoyarnos con una donación.
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setChannel('NEQUI')}
+                className={`px-3 py-2 rounded-xl text-sm font-bold border transition-all ${
+                  channel === 'NEQUI'
+                    ? 'bg-amber-500 text-slate-950 border-amber-300'
+                    : 'bg-slate-900/40 text-slate-200 border-slate-700 hover:border-slate-500'
+                }`}
+              >
+                Nequi
+              </button>
+              <button
+                type="button"
+                onClick={() => setChannel('PAYPAL')}
+                className={`px-3 py-2 rounded-xl text-sm font-bold border transition-all ${
+                  channel === 'PAYPAL'
+                    ? 'bg-amber-500 text-slate-950 border-amber-300'
+                    : 'bg-slate-900/40 text-slate-200 border-slate-700 hover:border-slate-500'
+                }`}
+              >
+                PayPal
+              </button>
+            </div>
+          </div>
+
+          {channel === 'NEQUI' && (
+            <div className="mt-4 grid gap-4">
+              <div className="bg-slate-900/40 border border-slate-700 rounded-xl p-4 flex items-center justify-between gap-3">
+                <div className="text-left">
+                  <div className="text-xs uppercase tracking-widest text-slate-400">Nequi</div>
+                  <div className="text-xl font-black text-white">{nequiNumber}</div>
+                  <div className="text-xs text-slate-400">Puedes copiar el número o escanear el QR.</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('Número Nequi', nequiNumber)}
+                  className="shrink-0 bg-amber-600 hover:bg-amber-500 text-slate-950 font-black px-4 py-3 rounded-xl flex items-center gap-2"
+                >
+                  <Copy size={18} /> Copiar
+                </button>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 mx-auto">
+                <QRCodeCanvas value={nequiQrValue} size={164} includeMargin />
+              </div>
+              <div className="text-xs text-slate-400">
+                Nota: el QR contiene el texto “{nequiQrValue}”. Si tu app no lo abre directo, te mostrará el número para copiar.
+              </div>
+            </div>
+          )}
+
+          {channel === 'PAYPAL' && (
+            <div className="mt-4 grid gap-4">
+              <div className="bg-slate-900/40 border border-slate-700 rounded-xl p-4 flex items-center justify-between gap-3">
+                <div className="text-left">
+                  <div className="text-xs uppercase tracking-widest text-slate-400">PayPal</div>
+                  <div className="text-base md:text-lg font-black text-white break-all">{paypalEmail}</div>
+                  <div className="text-xs text-slate-400">Copia el correo y envía tu aporte por PayPal.</div>
+                </div>
+                <div className="shrink-0 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('Correo PayPal', paypalEmail)}
+                    className="bg-amber-600 hover:bg-amber-500 text-slate-950 font-black px-4 py-3 rounded-xl flex items-center gap-2 justify-center"
+                  >
+                    <Copy size={18} /> Copiar
+                  </button>
+                  <a
+                    href={paypalSendUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-slate-200 hover:bg-white text-slate-950 font-black px-4 py-3 rounded-xl flex items-center gap-2 justify-center"
+                  >
+                    <ExternalLink size={18} /> Abrir PayPal
+                  </a>
+                </div>
+              </div>
+              <div className="text-xs text-slate-400">
+                Dentro de PayPal, pega este correo como destinatario: <span className="font-bold text-slate-200">{paypalEmail}</span>
+              </div>
+            </div>
+          )}
+
+          {copied && (
+            <div className="mt-4 text-sm font-bold text-emerald-200 bg-emerald-900/30 border border-emerald-700 rounded-xl px-4 py-3 text-left">
+              {copied}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const AboutRoom = () => (
     <div className="min-h-screen bg-orange-50 p-6 flex flex-col items-center">
