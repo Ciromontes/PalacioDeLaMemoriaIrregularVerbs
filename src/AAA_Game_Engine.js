@@ -310,7 +310,7 @@ function pointsForHintLevel(hintLevel) {
   return 0.4;
 }
 
-export default function AAA_Game_Engine({ onExit, onViewGallery }) {
+export default function AAA_Game_Engine({ onExit, onViewGallery, onOpenDonation }) {
   const [stage, setStage] = useState('menu');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -1293,6 +1293,17 @@ export default function AAA_Game_Engine({ onExit, onViewGallery }) {
                 <RefreshCw size={20} /> Intentar de nuevo
               </button>
             </div>
+            
+            {onOpenDonation && (
+              <div className="mt-8 pt-8 border-t border-slate-700/50">
+                 <button
+                    onClick={onOpenDonation}
+                    className="text-amber-400 hover:text-amber-300 font-bold underline decoration-amber-400/30 underline-offset-4 hover:decoration-amber-300/60 transition"
+                  >
+                    ☕ Invítanos un café si te gustó
+                  </button>
+              </div>
+            )}
           </div>
         )}
       </div>

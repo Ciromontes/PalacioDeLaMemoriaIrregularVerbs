@@ -196,7 +196,7 @@ function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
 
-export default function ABAGameEngine({ onExit, onViewGallery }) {
+export default function ABAGameEngine({ onExit, onViewGallery, onOpenDonation }) {
   const [stage, setStage] = useState('menu'); // menu | palace | level1 | level2 | level3 | level4 | results
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -1079,6 +1079,17 @@ export default function ABAGameEngine({ onExit, onViewGallery }) {
                 <RefreshCw size={20} /> Practicar Contexto
               </button>
             </div>
+
+            {onOpenDonation && (
+              <div className="mt-8 pt-8 border-t border-slate-700/50">
+                <button
+                  onClick={onOpenDonation}
+                  className="text-amber-400 hover:text-amber-300 font-bold underline decoration-amber-400/30 underline-offset-4 hover:decoration-amber-300/60 transition"
+                >
+                  ☕ Invítanos un café si te gustó
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

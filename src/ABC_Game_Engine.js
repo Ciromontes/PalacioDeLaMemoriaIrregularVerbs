@@ -716,7 +716,7 @@ function buildContextQuestionsForGroup(group) {
   });
 }
 
-export default function ABCGameEngine({ onExit, onViewGallery }) {
+export default function ABCGameEngine({ onExit, onViewGallery, onOpenDonation }) {
   const [stage, setStage] = useState('menu');
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
@@ -1772,6 +1772,17 @@ export default function ABCGameEngine({ onExit, onViewGallery }) {
                 <RefreshCw size={20} /> Elegir otro grupo
               </button>
             </div>
+
+            {onOpenDonation && (
+              <div className="mt-8 pt-8 border-t border-slate-700/50">
+                 <button
+                    onClick={onOpenDonation}
+                    className="text-amber-400 hover:text-amber-300 font-bold underline decoration-amber-400/30 underline-offset-4 hover:decoration-amber-300/60 transition"
+                  >
+                    ☕ Invítanos un café si te gustó
+                  </button>
+              </div>
+            )}
           </div>
         )}
       </div>

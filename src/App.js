@@ -7,10 +7,10 @@ import {
   ArrowLeft,
   Lock,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Coffee,
+  X
 } from 'lucide-react';
-
-import { QRCodeCanvas } from 'qrcode.react';
 
 import AAAGameEngine from './AAA_Game_Engine';
 import ABAGameEngine from './ABA_Game_Engine';
@@ -260,6 +260,7 @@ const App = () => {
   const [scene, setScene] = useState('MAIN_MENU');
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [galleryReturnScene, setGalleryReturnScene] = useState('MAP');
+  const [showDonation, setShowDonation] = useState(false);
 
   const NEQUI_NUMBER = '3102374172';
   const PAYPAL_EMAIL = 'ciromontes25@hotmail.com';
@@ -307,12 +308,6 @@ const App = () => {
         "Donde la gramática no se estudia, se recorre. Transforma los verbos en imágenes y nunca los olvidarás."
       </p>
 
-      <InviteCoffeeCard
-        nequiNumber={NEQUI_NUMBER}
-        paypalEmail={PAYPAL_EMAIL}
-        onCopy={copyToClipboard}
-      />
-
       <div className="flex flex-col gap-4 w-full max-w-md">
         <button
           onClick={() => setScene('MAP')}
@@ -329,16 +324,47 @@ const App = () => {
         </button>
 
         <button
-          onClick={() => setScene('TIPS')}
-          className="bg-slate-700 hover:bg-slate-600 transition-all p-4 rounded-xl font-bold flex items-center justify-center gap-2"
+        onClick={() => setScene('TIPS')}
+        className="bg-slate-700 hover:bg-slate-600 transition-all p-4 rounded-xl font-bold flex items-center justify-center gap-2"
+      >
+        <Lightbulb className="text-amber-400" /> Cofre de Consejos
+      </button>
+    </div>
+
+    <div className="my-8 w-full max-w-md">
+       <button
+          onClick={() => setShowDonation(true)}
+          className="w-full bg-slate-800/80 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition-all text-amber-300 font-bold flex items-center justify-center gap-2"
         >
-          <Lightbulb className="text-amber-400" /> Cofre de Consejos
+          <Coffee size={20} /> Invítanos un café
         </button>
+    </div>
+  </div>
+);
+
+const DonationModal = ({ isOpen, onClose, nequiNumber, paypalEmail, onCopy }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <button 
+          onClick={onClose}
+          className="absolute -top-3 -right-3 w-8 h-8 bg-slate-200 text-slate-900 rounded-full flex items-center justify-center hover:bg-white font-bold text-xl shadow-lg z-10"
+        >
+          <X size={18} />
+        </button>
+        <InviteCoffeeCard 
+          nequiNumber={nequiNumber}
+          paypalEmail={paypalEmail}
+          onCopy={onCopy}
+          compact
+        />
       </div>
     </div>
   );
+};
 
-  const InviteCoffeeCard = ({ nequiNumber, paypalEmail, onCopy }) => {
+  const InviteCoffeeCard = ({ nequiNumber, paypalEmail, onCopy, compact = false }) => {
     const [channel, setChannel] = useState('NEQUI');
     const [copied, setCopied] = useState('');
 
@@ -352,8 +378,7 @@ const App = () => {
     const paypalSendUrl = `https://www.paypal.com/sendmoney`;
 
     return (
-      <div className="w-full max-w-md mb-8">
-        <div className="bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-xl">
+      <div className={`w-full ${compact ? '' : 'max-w-md'} bg-slate-800/70 border border-slate-700 rounded-2xl p-5 shadow-xl`}>
           <div className="flex items-start justify-between gap-4">
             <div className="text-left">
               <div className="text-lg font-black text-amber-300">Invítanos un café</div>
@@ -404,8 +429,12 @@ const App = () => {
                 </button>
               </div>
 
-              <div className="bg-white rounded-xl p-4 mx-auto">
-                <QRCodeCanvas value={nequiQrValue} size={164} includeMargin />
+              <div className="bg-white rounded-xl p-4 mx-auto max-w-[200px]">
+                <img
+                  src={`${process.env.PUBLIC_URL}/img/Neki.jpeg`}
+                  alt="QR Nequi"
+                  className="w-full h-auto object-contain block"
+                />
               </div>
               <div className="text-xs text-slate-400">
                 Nota: el QR contiene el texto “{nequiQrValue}”. Si tu app no lo abre directo, te mostrará el número para copiar.
@@ -890,18 +919,21 @@ const App = () => {
         <AAAGameEngine
           onExit={() => setScene('MAP')}
           onViewGallery={() => openGalleryForFloor(1, 'GAME_AAA')}
+          onOpenDonation={() => setShowDonation(true)}
         />
       )}
       {scene === 'GAME_ABA' && (
         <ABAGameEngine
           onExit={() => setScene('MAP')}
           onViewGallery={() => openGalleryForFloor(2, 'GAME_ABA')}
+          onOpenDonation={() => setShowDonation(true)}
         />
       )}
       {scene === 'GAME_ABB' && (
         <ABBGameEngine
           onExit={() => setScene('MAP')}
           onViewGallery={() => openGalleryForFloor(3, 'GAME_ABB')}
+          onOpenDonation={() => setShowDonation(true)}
         />
       )}
 
@@ -909,8 +941,17 @@ const App = () => {
         <ABCGameEngine
           onExit={() => setScene('MAP')}
           onViewGallery={() => openGalleryForFloor(4, 'GAME_ABC')}
+          onOpenDonation={() => setShowDonation(true)}
         />
       )}
+      
+      <DonationModal
+        isOpen={showDonation}
+        onClose={() => setShowDonation(false)}
+        nequiNumber={NEQUI_NUMBER}
+        paypalEmail={PAYPAL_EMAIL}
+        onCopy={copyToClipboard}
+      />
     </div>
   );
 };
