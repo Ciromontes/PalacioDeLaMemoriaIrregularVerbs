@@ -480,7 +480,6 @@ const DonationModal = ({ isOpen, onClose, nequiNumber, paypalEmail, onCopy }) =>
             </div>
           )}
         </div>
-      </div>
     );
   };
 
