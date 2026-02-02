@@ -262,6 +262,10 @@ const App = () => {
   const [galleryReturnScene, setGalleryReturnScene] = useState('MAP');
   const [showDonation, setShowDonation] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [scene, selectedFloor]);
+
   const NEQUI_NUMBER = '3102374172';
   const PAYPAL_EMAIL = 'ciromontes25@hotmail.com';
 

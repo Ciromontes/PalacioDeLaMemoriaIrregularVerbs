@@ -720,6 +720,10 @@ export default function ABCGameEngine({ onExit, onViewGallery, onOpenDonation })
   const [stage, setStage] = useState('menu');
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [stage]);
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [points, setPoints] = useState(0);

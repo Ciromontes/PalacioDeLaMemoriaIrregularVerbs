@@ -337,6 +337,10 @@ export default function AAA_Game_Engine({ onExit, onViewGallery, onOpenDonation 
   const touchStartXRef = useRef(null);
   const palaceIntroVideoRef = useRef(null);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [stage, currentQuestion]);
+
   const speechAvailable = isSpeechSupported();
 
   useEffect(() => {

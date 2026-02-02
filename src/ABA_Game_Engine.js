@@ -207,6 +207,10 @@ export default function ABAGameEngine({ onExit, onViewGallery, onOpenDonation })
   const [feedbackDetails, setFeedbackDetails] = useState('');
   const [showFeedbackDetails, setShowFeedbackDetails] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [stage]);
+
   const [feedbackSpeechEn, setFeedbackSpeechEn] = useState(null);
   const [feedbackSpeechEs, setFeedbackSpeechEs] = useState(null);
   const speechAvailable = isSpeechSupported();
