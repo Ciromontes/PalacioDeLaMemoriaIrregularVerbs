@@ -42,6 +42,10 @@ function getAAAPalaceImageUrl(verbBase) {
   const base = String(verbBase ?? '').trim().toLowerCase();
   if (!base) return '';
 
+  // Cache-busting for specific assets when they are regenerated but keep the same filename.
+  // Only apply to the one image we updated to avoid changing unrelated behavior.
+  const revision = base === 'broadcast' ? '92fd33da490b' : '';
+
   const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
   // If PUBLIC_URL is empty, prefer relative paths so hosting under a subpath still works.
   const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
@@ -49,19 +53,23 @@ function getAAAPalaceImageUrl(verbBase) {
   // Files can be case-sensitive in production (Linux). We'll try an uppercase default.
   // Special-case forecast because older assets used lowercase.
   const fileName = base === 'forecast' ? 'forecast.webp' : `${base.toUpperCase()}.webp`;
-  return `${prefix}img/AAA/${fileName}`;
+  const url = `${prefix}img/AAA/${fileName}`;
+  return revision ? `${url}?v=${revision}` : url;
 }
 
 function getAAAPalaceImageFallbackUrl(verbBase) {
   const base = String(verbBase ?? '').trim().toLowerCase();
   if (!base) return '';
 
+  const revision = base === 'broadcast' ? '92fd33da490b' : '';
+
   const publicBase = String(process.env.PUBLIC_URL ?? '').trim();
   const prefix = publicBase ? `${publicBase.replace(/\/$/, '')}/` : '';
 
   // Secondary attempt: alternate casing.
   const fileName = base === 'forecast' ? 'FORECAST.webp' : `${base}.webp`;
-  return `${prefix}img/AAA/${fileName}`;
+  const url = `${prefix}img/AAA/${fileName}`;
+  return revision ? `${url}?v=${revision}` : url;
 }
 
 function getAAAPalaceIntroVideoUrl() {
